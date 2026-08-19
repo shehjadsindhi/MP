@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  password     String
+  role         String    @default("USER") // USER or ADMIN
+  phone        String?
+  address      String?
+  city         String?
+  postalCode   String?
+  country      String?   @default("United States")
+  savedPersona String?   @default("Everyday User")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  orders       Order[]
+  cartItems    CartItem[]
+  wishlist     WishlistItem[]
+  interactions AIInteraction[]
+}
+
+model Product {
+  id             String    @id @default(uuid())
+  slug           String    @unique
+  name           String
+  category       String    // Smartphones, Tablets, Watches, Audio, Accessories
+  price          Float
+  originalPrice  Float
+  discount       Int       @default(0)
+  rating         Float     @default(4.8)
+  reviewCount    Int       @default(120)
+  isFeatured     Boolean   @default(false)
+  badge          String?
+  description    String
+  image          String
+  galleryJson    String    @default("[]") // Array of image URLs
+  colorsJson     String    @default("[]") // [{ name, hex, inStock }]
+  storageJson    String    @default("[]") // [{ size, priceOffset }]
+  specsJson      String    @default("{}") // Key-value specifications
+  aiFeaturesJson String    @default("[]") // Array of AI feature slugs
+  stock          Int       @default(50)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  orderItems     OrderItem[]
+  cartItems      CartItem[]
+  wishlistItems  WishlistItem[]
+}
+
+model CartItem {
+  id              String   @id @default(uuid())
+  userId          String?
+  sessionToken    String?
+  productId       String
+  quantity        Int      @default(1)
+  selectedColor   String?
+  selectedStorage String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model WishlistItem {
+  id           String   @id @default(uuid())
+  userId       String?
+  sessionToken String?
+  productId    String
+  createdAt    DateTime @default(now())
+
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  userId          String?
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  shippingAddress String
+  city            String?
+  postalCode      String?
+  country         String?     @default("United States")
+  paymentMethod   String      @default("Demo Payment")
+  paymentStatus   String      @default("Paid") // Paid, Pending, Refunded
+  orderStatus     String      @default("Processing") // Pending, Processing, Shipped, Delivered, Cancelled
+  subtotal        Float
+  discount        Float       @default(0)
+  shipping        Float       @default(0)
+  tax             Float       @default(0)
+  total           Float
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id              String   @id @default(uuid())
+  orderId         String
+  productId       String?
+  productName     String
+  productImage    String?
+  selectedColor   String?
+  selectedStorage String?
+  unitPrice       Float
+  quantity        Int
+  totalPrice      Float
+
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model AIFeature {
+  id                  String   @id @default(uuid())
+  slug                String   @unique
+  name                String
+  category            String   // Productivity, Creativity, Communication, Search & Vision
+  icon                String   // Lucide icon name or fontawesome class
+  badge               String?  // On-Device, Quantum NPU, Most Popular
+  shortDesc           String
+  fullDesc            String
+  demoTab             String   // photo, translation, writing, notes, search
+  supportedDevicesJson String  @default("[]")
+  benefitsJson        String   @default("[]")
+  howItWorksJson      String   @default("[]")
+  faqsJson            String   @default("[]")
+  isFeatured          Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Article {
+  id         String   @id @default(uuid())
+  slug       String   @unique
+  title      String
+  category   String   // AI Guides, AI Tips, Device Guides, Tutorials, News
+  author     String   @default("Galaxy AI Lab")
+  readTime   String   @default("5 min read")
+  excerpt    String
+  content    String
+  image      String
+  tagsJson   String   @default("[]")
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Offer {
+  id               String   @id @default(uuid())
+  title            String
+  description      String
+  code             String   @unique
+  discountPercent  Int?     @default(0)
+  discountAmount   Float?   @default(0)
+  minSpend         Float    @default(0)
+  validUntil       DateTime
+  eligibleCategory String   @default("All")
+  badge            String?  @default("Limited Time")
+  image            String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+}
+
+model AIInteraction {
+  id         String   @id @default(uuid())
+  userId     String?
+  demoType   String   // photo, translation, writing, notes, search, assistant
+  inputData  String
+  outputData String
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

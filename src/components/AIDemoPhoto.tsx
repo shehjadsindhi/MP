@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Wand2, Sliders, Eraser, Image as ImageIcon, Upload, CheckCircle2, Loader2 } from "lucide-react";
+import { Sparkles, Wand2, Sliders, Eraser, Upload, Loader2, RotateCcw, Target, Layers, Eye } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
 const SAMPLE_IMAGES = [
@@ -16,6 +16,22 @@ export default function AIDemoPhoto() {
   const [action, setAction] = useState<string>("enhanceImage");
   const [sliderPos, setSliderPos] = useState<number>(50);
   const [processing, setProcessing] = useState(false);
+
+  // Manual Adjustments
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+  const [sharpness, setSharpness] = useState(100);
+
+  // Interactive Target Object Box for Eraser
+  const [targetBox, setTargetBox] = useState<{ x: number; y: number; w: number; h: number }>({
+    x: 65,
+    y: 20,
+    w: 22,
+    h: 28,
+  });
+  const [isSelectingTarget, setIsSelectingTarget] = useState(false);
+
   const [result, setResult] = useState<any>({
     action: "AI Remaster & HDR",
     status: "success",
@@ -24,7 +40,6 @@ export default function AIDemoPhoto() {
       "Applying multi-frame noise reduction...",
       "Dynamic range expanded with deep blacks and vibrant highlights.",
     ],
-    filterCss: "contrast(115%) saturate(125%) brightness(108%)",
     details: "Dynamic range remastered with 24-bit studio color depth.",
     enhancedMetrics: { sharpness: "+34%", dynamicRange: "+45%", reflectionReduction: "82%" },
   });
@@ -43,7 +58,7 @@ export default function AIDemoPhoto() {
       if (res.ok) {
         const data = await res.json();
         setResult(data);
-        showToast(`Galaxy AI Photo Action: ${data.action} completed!`, "ai");
+        showToast(`Galaxy AI Photo Action: ${data.action} applied!`, "ai");
       }
     } catch (e) {
       showToast("Error processing photo action", "error");
@@ -66,6 +81,52 @@ export default function AIDemoPhoto() {
     }
   };
 
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isSelectingTarget) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = ((e.clientX - rect.left) / rect.width) * 100;
+    const clickY = ((e.clientY - rect.top) / rect.height) * 100;
+
+    setTargetBox({
+      x: Math.max(0, Math.min(80, clickX - 10)),
+      y: Math.max(0, Math.min(80, clickY - 10)),
+      w: 20,
+      h: 24,
+    });
+    setIsSelectingTarget(false);
+    showToast("Target object erased with Generative Fill!", "ai");
+    handleProcess("removeObject");
+  };
+
+  const resetManualAdjustments = () => {
+    setBrightness(100);
+    setContrast(100);
+    setSaturation(100);
+    setSharpness(100);
+    showToast("Manual adjustments reset.", "info");
+  };
+
+  // Base filter per action
+  const getActionFilter = () => {
+    switch (action) {
+      case "enhanceImage":
+        return "contrast(135%) saturate(140%) brightness(112%) drop-shadow(0 0 20px rgba(0,240,255,0.35))";
+      case "removeObject":
+        return "contrast(115%) saturate(120%) brightness(105%)";
+      case "eraseReflections":
+        return "contrast(125%) saturate(125%) brightness(108%)";
+      case "generateBackground":
+        return "contrast(120%) saturate(130%) brightness(110%) drop-shadow(0 0 30px rgba(99,102,241,0.5))";
+      default:
+        return "none";
+    }
+  };
+
+  // Combine action filter with user manual adjustment sliders
+  const computedEnhancedFilter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) ${
+    sharpness > 100 ? `contrast(${100 + (sharpness - 100) * 0.4}%)` : ""
+  } ${getActionFilter()}`;
+
   return (
     <div className="space-y-8">
       {/* Demo Mode Notice */}
@@ -73,11 +134,11 @@ export default function AIDemoPhoto() {
         <div className="flex items-center gap-2.5 text-cyan-300">
           <Sparkles className="w-4 h-4 text-galaxy-cyan animate-pulse flex-shrink-0" />
           <span>
-            <strong>Interactive AI Studio (Demo Mode):</strong> Real-time on-device simulation of Galaxy Generative Edit & Remaster filters.
+            <strong>Interactive AI Generative Canvas:</strong> Drag split slider to compare <em>Original Raw Shot</em> vs <em>Galaxy AI Enhanced</em>.
           </span>
         </div>
         <span className="bg-cyan-500/20 text-cyan-300 px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-bold border border-cyan-400/30">
-          NPU: Ready
+          NPU: Active
         </span>
       </div>
 
@@ -85,38 +146,104 @@ export default function AIDemoPhoto() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Interactive Canvas with Split Slider */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="relative rounded-3xl bg-galaxy-900 border border-slate-700/80 overflow-hidden shadow-2xl h-[400px] sm:h-[460px] flex items-center justify-center select-none">
-            {/* Original Image (Left Side) */}
-            <div className="absolute inset-0 flex items-center justify-center p-6 bg-galaxy-950">
+          <div
+            onClick={handleCanvasClick}
+            className={`relative rounded-3xl bg-galaxy-950 border border-slate-700/80 overflow-hidden shadow-2xl h-[400px] sm:h-[460px] flex items-center justify-center select-none ${
+              isSelectingTarget ? "cursor-crosshair ring-2 ring-galaxy-cyan" : ""
+            }`}
+          >
+            {/* ------------------------------------------------------------- */}
+            {/* LAYER 1: Original Shot (Base Left Side)                       */}
+            {/* ------------------------------------------------------------- */}
+            <div className="absolute inset-0 flex items-center justify-center p-6 bg-slate-950">
               <img
                 src={selectedImage}
-                alt="Original"
-                className="max-h-full max-w-full object-contain filter grayscale-[20%]"
+                alt="Original Raw"
+                className="max-h-full max-w-full object-contain filter grayscale-[35%] brightness-[85%] contrast-[90%]"
               />
-              <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-bold text-gray-300 uppercase tracking-wider border border-white/10">
-                Original Shot
+
+              {/* Simulated Glare Lines on Original Shot for Erase Reflection Demo */}
+              {action === "eraseReflections" && (
+                <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/20 to-transparent transform -rotate-12 translate-x-4 blur-[1px]" />
+              )}
+
+              {/* Simulated Photobomber Object Box on Original Shot */}
+              {action === "removeObject" && (
+                <div
+                  className="absolute border-2 border-dashed border-rose-500 bg-rose-500/20 rounded-lg pointer-events-none flex items-center justify-center z-10"
+                  style={{
+                    left: `${targetBox.x}%`,
+                    top: `${targetBox.y}%`,
+                    width: `${targetBox.w}%`,
+                    height: `${targetBox.h}%`,
+                  }}
+                >
+                  <span className="text-[9px] font-mono text-rose-300 font-bold bg-black/80 px-1 py-0.5 rounded">
+                    Unwanted Object
+                  </span>
+                </div>
+              )}
+
+              <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-bold text-gray-300 uppercase tracking-wider border border-white/10 z-10">
+                Original Shot (Raw)
               </span>
             </div>
 
-            {/* Processed Image (Right Side Overlay Clipped by Slider) */}
+            {/* ------------------------------------------------------------- */}
+            {/* LAYER 2: AI Enhanced Image (Right Side Overlay Clipped)        */}
+            {/* ------------------------------------------------------------- */}
             <div
-              className="absolute inset-0 flex items-center justify-center p-6 bg-galaxy-950 overflow-hidden"
+              className={`absolute inset-0 flex items-center justify-center p-6 overflow-hidden transition-colors ${
+                action === "generateBackground"
+                  ? "bg-gradient-to-tr from-cyan-950 via-galaxy-900 to-indigo-950"
+                  : "bg-galaxy-950"
+              }`}
               style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
             >
+              {/* Studio Backdrop Glow for Generative Background */}
+              {action === "generateBackground" && (
+                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-500/25 via-indigo-500/10 to-transparent blur-2xl" />
+              )}
+
               <img
                 src={selectedImage}
-                alt="AI Enhanced"
-                className="max-h-full max-w-full object-contain"
-                style={{ filter: result?.filterCss || "none" }}
+                alt="Galaxy AI Enhanced"
+                className="max-h-full max-w-full object-contain relative z-10 transition-all"
+                style={{ filter: computedEnhancedFilter }}
               />
-              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-cyan-950/80 backdrop-blur-md text-[10px] font-bold text-galaxy-cyan uppercase tracking-wider border border-cyan-500/40">
-                Galaxy AI: {result?.action || "Remastered"}
+
+              {/* Object Eraser Patch: Photobomber Object visually removed on AI side */}
+              {action === "removeObject" && (
+                <div
+                  className="absolute rounded-lg pointer-events-none z-20 flex items-center justify-center bg-cyan-950/90 border border-galaxy-cyan/60 backdrop-blur-md shadow-galaxy-cyan"
+                  style={{
+                    left: `${targetBox.x}%`,
+                    top: `${targetBox.y}%`,
+                    width: `${targetBox.w}%`,
+                    height: `${targetBox.h}%`,
+                  }}
+                >
+                  <span className="text-[9px] font-mono text-galaxy-cyan font-bold flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 animate-spin" /> Erased
+                  </span>
+                </div>
+              )}
+
+              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-cyan-950/90 backdrop-blur-md text-[10px] font-bold text-galaxy-cyan uppercase tracking-wider border border-cyan-500/40 z-20 flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3 text-galaxy-cyan" /> Galaxy AI: {result?.action || "Remastered"}
               </span>
             </div>
+
+            {/* Target Select Prompt Banner */}
+            {isSelectingTarget && (
+              <div className="absolute top-14 left-1/2 -translate-x-1/2 bg-galaxy-950/95 text-galaxy-cyan border border-galaxy-cyan px-4 py-2 rounded-full text-xs font-bold shadow-2xl z-40 animate-bounce flex items-center gap-2">
+                <Target className="w-4 h-4 animate-spin" /> Tap image area to reposition Object Eraser
+              </div>
+            )}
 
             {/* Split Divider Handle */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-galaxy-cyan shadow-galaxy-cyan z-20 cursor-ew-resize flex items-center justify-center"
+              className="absolute top-0 bottom-0 w-0.5 bg-galaxy-cyan shadow-galaxy-cyan z-30 cursor-ew-resize flex items-center justify-center"
               style={{ left: `${sliderPos}%` }}
             >
               <div className="w-8 h-8 rounded-full bg-galaxy-cyan text-galaxy-950 font-bold flex items-center justify-center text-xs shadow-lg">
@@ -124,23 +251,23 @@ export default function AIDemoPhoto() {
               </div>
             </div>
 
-            {/* Invisible Range Input for Split Slider */}
+            {/* Range Input for Split Slider */}
             <input
               type="range"
               min="0"
               max="100"
               value={sliderPos}
               onChange={(e) => setSliderPos(Number(e.target.value))}
-              className="absolute inset-0 opacity-0 cursor-ew-resize z-30 w-full h-full"
+              className="absolute inset-0 opacity-0 cursor-ew-resize z-40 w-full h-full"
               aria-label="Before/After Split Comparison Slider"
             />
 
             {/* Processing Spinner Overlay */}
             {processing && (
-              <div className="absolute inset-0 bg-black/75 backdrop-blur-sm z-40 flex flex-col items-center justify-center gap-3">
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-3">
                 <Loader2 className="w-10 h-10 text-galaxy-cyan animate-spin" />
                 <span className="text-sm font-bold text-white tracking-wide">
-                  Processing with Quantum NPU...
+                  Synthesizing with Quantum NPU...
                 </span>
               </div>
             )}
@@ -148,8 +275,85 @@ export default function AIDemoPhoto() {
 
           {/* Slider Instruction */}
           <div className="flex items-center justify-between text-xs text-gray-400 px-2">
-            <span>&larr; Drag slider left to reveal AI Enhancement</span>
-            <span>Drag slider right for Original &rarr;</span>
+            <span>&larr; Drag slider left to reveal Original Raw Shot</span>
+            <span>Drag slider right for Galaxy AI Enhancement &rarr;</span>
+          </div>
+
+          {/* Manual Fine-Tuning Sliders */}
+          <div className="rounded-2xl bg-galaxy-900/90 border border-slate-800 p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider text-galaxy-cyan flex items-center gap-2">
+                <Sliders className="w-4 h-4" /> Live Manual Adjustments
+              </h4>
+              <button
+                onClick={resetManualAdjustments}
+                className="text-[11px] text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
+              >
+                <RotateCcw className="w-3 h-3" /> Reset
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <div className="flex justify-between text-gray-300 font-medium mb-1">
+                  <span>Brightness</span>
+                  <span className="font-mono text-galaxy-cyan">{brightness}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="50"
+                  max="160"
+                  value={brightness}
+                  onChange={(e) => setBrightness(Number(e.target.value))}
+                  className="w-full accent-galaxy-cyan bg-galaxy-950 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-gray-300 font-medium mb-1">
+                  <span>Contrast</span>
+                  <span className="font-mono text-galaxy-cyan">{contrast}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="50"
+                  max="160"
+                  value={contrast}
+                  onChange={(e) => setContrast(Number(e.target.value))}
+                  className="w-full accent-galaxy-cyan bg-galaxy-950 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-gray-300 font-medium mb-1">
+                  <span>Saturation</span>
+                  <span className="font-mono text-galaxy-cyan">{saturation}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="50"
+                  max="160"
+                  value={saturation}
+                  onChange={(e) => setSaturation(Number(e.target.value))}
+                  className="w-full accent-galaxy-cyan bg-galaxy-950 rounded-lg cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-gray-300 font-medium mb-1">
+                  <span>Sharpness</span>
+                  <span className="font-mono text-galaxy-cyan">{sharpness}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="50"
+                  max="160"
+                  value={sharpness}
+                  onChange={(e) => setSharpness(Number(e.target.value))}
+                  className="w-full accent-galaxy-cyan bg-galaxy-950 rounded-lg cursor-pointer"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -158,22 +362,27 @@ export default function AIDemoPhoto() {
           {/* Action Buttons */}
           <div className="rounded-2xl bg-galaxy-900/90 border border-slate-800 p-5 space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider text-galaxy-cyan">
-              Select AI Action
+              Select AI Feature
             </h4>
 
             <div className="grid grid-cols-1 gap-2">
               {[
-                { id: "enhanceImage", label: "AI Remaster & HDR", icon: Wand2, desc: "Enhance dynamic range and 24-bit depth" },
-                { id: "removeObject", label: "Object Eraser", icon: Eraser, desc: "Generative removal with background fill" },
-                { id: "eraseReflections", label: "Erase Reflections", icon: Sliders, desc: "Remove glass reflections and glares" },
-                { id: "generateBackground", label: "Generative Studio Background", icon: Sparkles, desc: "Synthesize realistic studio depth" },
+                { id: "enhanceImage", label: "AI Remaster & HDR", icon: Wand2, desc: "Dramatic color depth and vibrant HDR pop" },
+                { id: "removeObject", label: "Object Eraser", icon: Eraser, desc: "Erase unwanted object with generative fill" },
+                { id: "eraseReflections", label: "Erase Reflections", icon: Eye, desc: "Strip window glare and polarization reflections" },
+                { id: "generateBackground", label: "Generative Studio Background", icon: Layers, desc: "Synthesize vibrant ambient studio bokeh" },
               ].map((btn) => {
                 const Icon = btn.icon;
                 const isActive = action === btn.id;
                 return (
                   <button
                     key={btn.id}
-                    onClick={() => handleProcess(btn.id)}
+                    onClick={() => {
+                      if (btn.id === "removeObject") {
+                        setIsSelectingTarget(true);
+                      }
+                      handleProcess(btn.id);
+                    }}
                     disabled={processing}
                     className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
                       isActive
@@ -184,9 +393,16 @@ export default function AIDemoPhoto() {
                     <div className={`p-2 rounded-lg ${isActive ? "bg-cyan-500 text-galaxy-950" : "bg-slate-800 text-gray-400"}`}>
                       <Icon className="w-4 h-4" />
                     </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">{btn.label}</div>
-                      <div className="text-[11px] text-gray-400 leading-tight">{btn.desc}</div>
+                    <div className="flex-1">
+                      <div className="text-xs font-bold text-white flex items-center justify-between">
+                        <span>{btn.label}</span>
+                        {btn.id === "removeObject" && (
+                          <span className="text-[9px] bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono">
+                            Tap Canvas
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-gray-400 leading-tight mt-0.5">{btn.desc}</div>
                     </div>
                   </button>
                 );

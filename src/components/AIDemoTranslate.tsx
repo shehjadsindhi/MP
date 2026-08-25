@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Languages, Volume2, Copy, Check, Sparkles, ArrowRightLeft, Loader2 } from "lucide-react";
+import { Languages, Volume2, Copy, Check, Sparkles, ArrowRightLeft, Loader2, History, Mic, Square } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { BCP47_LANG_MAP } from "@/lib/mockAI";
 
 const LANGUAGES = [
   "English",
@@ -23,6 +24,15 @@ const PRESETS = [
   "Where is the nearest subway station?",
 ];
 
+interface TranscriptEntry {
+  id: string;
+  sourceLang: string;
+  targetLang: string;
+  sourceText: string;
+  translatedText: string;
+  timestamp: string;
+}
+
 export default function AIDemoTranslate() {
   const [sourceLang, setSourceLang] = useState("English");
   const [targetLang, setTargetLang] = useState("Korean");
@@ -31,21 +41,36 @@ export default function AIDemoTranslate() {
   const [loading, setLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isRecordingMic, setIsRecordingMic] = useState(false);
   const [engineInfo, setEngineInfo] = useState("Galaxy Quantum NPU (On-Device)");
+  const [transcriptLog, setTranscriptLog] = useState<TranscriptEntry[]>([
+    {
+      id: "log-1",
+      sourceLang: "English",
+      targetLang: "Korean",
+      sourceText: "Hello, how can I help you today?",
+      translatedText: "안녕하세요, 오늘 어떻게 도와드릴까요?",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    },
+  ]);
 
   const { showToast } = useToast();
 
-  const handleTranslate = async () => {
-    if (!inputText.trim()) return;
+  const handleTranslate = async (overrideText?: string, overrideSource?: string, overrideTarget?: string) => {
+    const textToTranslate = overrideText !== undefined ? overrideText : inputText;
+    const src = overrideSource || sourceLang;
+    const tgt = overrideTarget || targetLang;
+
+    if (!textToTranslate.trim()) return;
     setLoading(true);
     try {
       const res = await fetch("/api/ai/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: inputText,
-          sourceLang,
-          targetLang,
+          text: textToTranslate,
+          sourceLang: src,
+          targetLang: tgt,
         }),
       });
 
@@ -53,7 +78,17 @@ export default function AIDemoTranslate() {
         const data = await res.json();
         setOutputText(data.translatedText);
         setEngineInfo(data.engine);
-        showToast("Translated in real time on-device!", "ai");
+
+        const entry: TranscriptEntry = {
+          id: Math.random().toString(),
+          sourceLang: src,
+          targetLang: tgt,
+          sourceText: textToTranslate,
+          translatedText: data.translatedText,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+        setTranscriptLog((prev) => [entry, ...prev.slice(0, 4)]);
+        showToast(`Live Translated to ${tgt}!`, "ai");
       }
     } catch (e) {
       showToast("Translation error", "error");
@@ -62,11 +97,32 @@ export default function AIDemoTranslate() {
     }
   };
 
+  const handleMicSim = () => {
+    if (isRecordingMic) return;
+    setIsRecordingMic(true);
+    showToast("Listening... Speak into microphone.", "info");
+
+    setTimeout(() => {
+      setIsRecordingMic(false);
+      const spokenText = "Can you recommend a great local restaurant nearby?";
+      setInputText(spokenText);
+      handleTranslate(spokenText, sourceLang, targetLang);
+      showToast("Voice captured & translated live!", "ai");
+    }, 2500);
+  };
+
   const handleSwap = () => {
-    setSourceLang(targetLang);
-    setTargetLang(sourceLang);
-    setInputText(outputText);
-    setOutputText(inputText);
+    const newSrc = targetLang;
+    const newTgt = sourceLang;
+    const newIn = outputText;
+    const newOut = inputText;
+
+    setSourceLang(newSrc);
+    setTargetLang(newTgt);
+    setInputText(newIn);
+    setOutputText(newOut);
+
+    handleTranslate(newIn, newSrc, newTgt);
   };
 
   const handleCopy = () => {
@@ -78,8 +134,11 @@ export default function AIDemoTranslate() {
 
   const handleSpeak = () => {
     if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
       setIsPlayingAudio(true);
       const utterance = new SpeechSynthesisUtterance(outputText);
+      const bcpCode = BCP47_LANG_MAP[targetLang] || "en-US";
+      utterance.lang = bcpCode;
       utterance.onend = () => setIsPlayingAudio(false);
       utterance.onerror = () => setIsPlayingAudio(false);
       window.speechSynthesis.speak(utterance);
@@ -95,7 +154,7 @@ export default function AIDemoTranslate() {
         <div className="flex items-center gap-2.5 text-cyan-300">
           <Languages className="w-4 h-4 text-galaxy-cyan flex-shrink-0" />
           <span>
-            <strong>Live Translate Demo:</strong> Two-way real-time voice and text translations with on-device NPU privacy.
+            <strong>Live Translate Demo:</strong> Two-way real-time voice and text translations with native BCP-47 speech synthesis and automatic sync.
           </span>
         </div>
         <span className="bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-bold border border-emerald-400/30">
@@ -109,7 +168,11 @@ export default function AIDemoTranslate() {
           <span className="text-xs text-gray-400 font-semibold">From:</span>
           <select
             value={sourceLang}
-            onChange={(e) => setSourceLang(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSourceLang(val);
+              handleTranslate(inputText, val, targetLang);
+            }}
             className="bg-galaxy-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-galaxy-cyan"
           >
             {LANGUAGES.map((lang) => (
@@ -132,7 +195,11 @@ export default function AIDemoTranslate() {
           <span className="text-xs text-gray-400 font-semibold">To:</span>
           <select
             value={targetLang}
-            onChange={(e) => setTargetLang(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setTargetLang(val);
+              handleTranslate(inputText, sourceLang, val);
+            }}
             className="bg-galaxy-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-galaxy-cyan"
           >
             {LANGUAGES.map((lang) => (
@@ -144,18 +211,36 @@ export default function AIDemoTranslate() {
         </div>
       </div>
 
-      {/* Presets */}
-      <div className="flex items-center gap-2 flex-wrap text-xs">
-        <span className="text-gray-400 font-medium">Quick Phrases:</span>
-        {PRESETS.map((phrase, i) => (
-          <button
-            key={i}
-            onClick={() => setInputText(phrase)}
-            className="px-3 py-1 rounded-lg bg-galaxy-900 hover:bg-slate-800 border border-slate-800 text-gray-300 transition-colors"
-          >
-            &ldquo;{phrase.slice(0, 24)}...&rdquo;
-          </button>
-        ))}
+      {/* Presets & Live Mic Simulator */}
+      <div className="flex items-center justify-between gap-4 flex-wrap text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-gray-400 font-medium">Quick Phrases:</span>
+          {PRESETS.map((phrase, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setInputText(phrase);
+                handleTranslate(phrase, sourceLang, targetLang);
+              }}
+              className="px-3 py-1 rounded-lg bg-galaxy-900 hover:bg-slate-800 border border-slate-800 text-gray-300 transition-colors"
+            >
+              &ldquo;{phrase.slice(0, 24)}...&rdquo;
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={handleMicSim}
+          disabled={isRecordingMic}
+          className={`px-4 py-2 rounded-xl border font-bold text-xs flex items-center gap-2 transition-all ${
+            isRecordingMic
+              ? "bg-rose-950 text-rose-300 border-rose-500 animate-pulse"
+              : "bg-cyan-950 hover:bg-cyan-900 text-galaxy-cyan border-cyan-500/40"
+          }`}
+        >
+          <Mic className={`w-4 h-4 ${isRecordingMic ? "animate-spin text-rose-400" : ""}`} />
+          <span>{isRecordingMic ? "Listening Spoken Audio..." : "Simulate Live Voice Input"}</span>
+        </button>
       </div>
 
       {/* Two Panes: Input & Translated Output */}
@@ -178,7 +263,7 @@ export default function AIDemoTranslate() {
 
           <div className="flex justify-end">
             <button
-              onClick={handleTranslate}
+              onClick={() => handleTranslate()}
               disabled={loading || !inputText.trim()}
               className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2 shadow-galaxy-cyan"
             >
@@ -210,17 +295,15 @@ export default function AIDemoTranslate() {
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleSpeak}
-                className={`p-2 rounded-xl border border-slate-700 text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 text-xs ${
-                  isPlayingAudio ? "bg-cyan-500/20 text-galaxy-cyan border-cyan-500/40 animate-pulse" : "bg-galaxy-950 hover:bg-slate-800"
-                }`}
-                title="Play Audio Pronunciation"
-              >
-                <Volume2 className="w-4 h-4" /> Listen
-              </button>
-            </div>
+            <button
+              onClick={handleSpeak}
+              className={`p-2 rounded-xl border border-slate-700 text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 text-xs ${
+                isPlayingAudio ? "bg-cyan-500/20 text-galaxy-cyan border-cyan-500/40 animate-pulse" : "bg-galaxy-950 hover:bg-slate-800"
+              }`}
+              title="Play Native Voice Pronunciation"
+            >
+              <Volume2 className="w-4 h-4" /> Speak ({BCP47_LANG_MAP[targetLang] || "Native"})
+            </button>
 
             <button
               onClick={handleCopy}
@@ -232,6 +315,26 @@ export default function AIDemoTranslate() {
           </div>
         </div>
       </div>
+
+      {/* Live Conversation Transcript Log */}
+      {transcriptLog.length > 0 && (
+        <div className="rounded-2xl bg-galaxy-900 border border-slate-800 p-5 space-y-3">
+          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+            <History className="w-4 h-4 text-galaxy-cyan" /> Conversation Log & Session Transcript
+          </h4>
+          <div className="space-y-2">
+            {transcriptLog.map((log) => (
+              <div key={log.id} className="p-3 rounded-xl bg-galaxy-950 border border-slate-800/80 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-[10px] text-gray-500 font-mono">[{log.timestamp}] {log.sourceLang} &rarr; {log.targetLang}</span>
+                  <div className="text-gray-300 mt-0.5">&ldquo;{log.sourceText}&rdquo;</div>
+                  <div className="text-galaxy-cyan font-semibold mt-0.5">{log.translatedText}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

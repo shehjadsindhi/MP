@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rewriteText } from "@/lib/mockAI";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,6 +10,17 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await rewriteText(text, tone || "Professional");
+
+    try {
+      await prisma.aIInteraction.create({
+        data: {
+          demoType: "writing",
+          inputData: JSON.stringify({ text, tone }),
+          outputData: JSON.stringify(result),
+        },
+      });
+    } catch (e) {}
+
     return NextResponse.json(result);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Writing assist error" }, { status: 500 });

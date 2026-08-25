@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Search, Sparkles, Smartphone, ArrowRight, ExternalLink, HelpCircle, Loader2 } from "lucide-react";
+import { Search, Sparkles, Smartphone, ArrowRight, HelpCircle, Loader2, MousePointerClick } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 
@@ -12,9 +12,16 @@ const PRESET_QUERIES = [
   "How does Knox Vault protect on-device AI translations?",
 ];
 
+const INTERACTIVE_HOTSPOTS = [
+  { id: "camera", label: "200MP Camera Lens", query: "What Galaxy phone has the best 200MP camera and zoom?", x: 18, y: 15, w: 28, h: 32 },
+  { id: "spen", label: "S-Pen & Note Assist", query: "Which device is ideal for college students and note taking?", x: 62, y: 35, w: 25, h: 45 },
+  { id: "titanium", label: "Titanium Frame & Knox", query: "How does Knox Vault protect on-device AI translations?", x: 10, y: 55, w: 35, h: 30 },
+];
+
 export default function AIDemoSearch() {
   const [query, setQuery] = useState(PRESET_QUERIES[0]);
   const [loading, setLoading] = useState(false);
+  const [selectedHotspot, setSelectedHotspot] = useState<string | null>("camera");
   const [result, setResult] = useState<any>({
     query: PRESET_QUERIES[0],
     aiOverview:
@@ -64,6 +71,12 @@ export default function AIDemoSearch() {
     }
   };
 
+  const handleCircleSelect = (spot: typeof INTERACTIVE_HOTSPOTS[0]) => {
+    setSelectedHotspot(spot.id);
+    setQuery(spot.query);
+    handleSearch(spot.query);
+  };
+
   return (
     <div className="space-y-8">
       {/* Notice */}
@@ -71,12 +84,67 @@ export default function AIDemoSearch() {
         <div className="flex items-center gap-2.5 text-cyan-300">
           <Search className="w-4 h-4 text-galaxy-cyan flex-shrink-0" />
           <span>
-            <strong>Circle to Search Demo:</strong> Multimodal search with Google AI Overviews and intelligent hardware recommendations.
+            <strong>Circle to Search Demo:</strong> Tap any highlighted element below to simulate drawing an S-Pen or finger circle on screen!
           </span>
         </div>
         <span className="bg-cyan-500/20 text-cyan-300 px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase font-bold border border-cyan-400/30">
           Google AI Powered
         </span>
+      </div>
+
+      {/* Interactive Marquee Circle Viewport Simulator */}
+      <div className="rounded-3xl bg-galaxy-900 border border-slate-800 p-6 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-bold text-white uppercase tracking-wider text-galaxy-cyan flex items-center gap-2">
+            <MousePointerClick className="w-4 h-4" /> Interactive Marquee Circle Viewport
+          </h4>
+          <span className="text-[11px] text-gray-400">Click any element below to Circle & Search</span>
+        </div>
+
+        {/* Viewport Frame */}
+        <div className="relative rounded-2xl bg-galaxy-950 border border-cyan-500/30 overflow-hidden h-[300px] flex items-center justify-center select-none group">
+          {/* Background simulated device showcase image */}
+          <img
+            src="/images/nova_ultra.jpg"
+            alt="Galaxy Device Viewport"
+            className="h-full object-contain filter contrast-105"
+          />
+
+          {/* Marquee Hotspots */}
+          {INTERACTIVE_HOTSPOTS.map((spot) => {
+            const isSelected = selectedHotspot === spot.id;
+            return (
+              <div
+                key={spot.id}
+                onClick={() => handleCircleSelect(spot)}
+                style={{
+                  left: `${spot.x}%`,
+                  top: `${spot.y}%`,
+                  width: `${spot.w}%`,
+                  height: `${spot.h}%`,
+                }}
+                className={`absolute rounded-full border-2 cursor-pointer transition-all duration-300 flex items-center justify-center ${
+                  isSelected
+                    ? "border-galaxy-cyan bg-cyan-500/30 shadow-galaxy-cyan ring-4 ring-cyan-400/30 scale-110"
+                    : "border-cyan-400/50 bg-cyan-950/30 hover:border-galaxy-cyan hover:bg-cyan-500/20"
+                }`}
+              >
+                {/* Glowing Circle Gesture Pulse */}
+                <div className="absolute inset-0 rounded-full border-2 border-galaxy-cyan animate-ping opacity-40 pointer-events-none" />
+                <span className="bg-black/90 text-galaxy-cyan px-2 py-0.5 rounded text-[10px] font-mono font-bold shadow-md border border-cyan-500/40">
+                  {spot.label}
+                </span>
+              </div>
+            );
+          })}
+
+          {loading && (
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-40 flex flex-col items-center justify-center gap-2">
+              <Loader2 className="w-8 h-8 text-galaxy-cyan animate-spin" />
+              <span className="text-xs font-bold text-white">Circle to Search analyzing gesture selection...</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Query Bar */}
@@ -108,7 +176,7 @@ export default function AIDemoSearch() {
 
         {/* Preset Chips */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar text-xs">
-          <span className="text-gray-400 font-medium text-[11px]">Suggestions:</span>
+          <span className="text-gray-400 font-medium text-[11px]">Presets:</span>
           {PRESET_QUERIES.map((p, idx) => (
             <button
               key={idx}

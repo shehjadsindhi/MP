@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { translateText } from "@/lib/mockAI";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,6 +10,17 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await translateText(text, sourceLang, targetLang);
+
+    try {
+      await prisma.aIInteraction.create({
+        data: {
+          demoType: "translation",
+          inputData: JSON.stringify({ text, sourceLang, targetLang }),
+          outputData: JSON.stringify(result),
+        },
+      });
+    } catch (e) {}
+
     return NextResponse.json(result);
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Translation error" }, { status: 500 });

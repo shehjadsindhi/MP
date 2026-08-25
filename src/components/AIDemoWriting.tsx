@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { PenTool, Sparkles, Copy, Check, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
+import { PenTool, Sparkles, Copy, Check, CheckCircle2, RotateCcw, Loader2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
 const TONES = [
@@ -14,19 +14,23 @@ const TONES = [
   { id: "Bullet Points", label: "Bullet Points", desc: "Structured hierarchical list" },
 ];
 
-const SAMPLE_TEXT = "Hey team, just wanted to check if the new galaxy ai designs are ready. Need to send them to the client before tomorrow afternoon. thanks.";
+const SAMPLES = [
+  { label: "Business Email", text: "Hey team, just wanted to check if the new galaxy ai designs are ready. Need to send them to the client before tomorrow afternoon. thanks." },
+  { label: "Casual Chat", text: "Yo, are we still meeting up for coffee today at 4pm? Let me know if that works for you." },
+  { label: "Product Pitch", text: "Our new Quantum NPU delivers sub-15ms processing with hardware EAL5+ privacy isolation." },
+];
 
 export default function AIDemoWriting() {
-  const [inputText, setInputText] = useState(SAMPLE_TEXT);
+  const [inputText, setInputText] = useState(SAMPLES[0].text);
   const [selectedTone, setSelectedTone] = useState("Professional");
   const [loading, setLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [result, setResult] = useState<any>({
-    originalText: SAMPLE_TEXT,
+    originalText: SAMPLES[0].text,
     tone: "Professional",
-    improvedText: "Dear Team,\n\nI am writing to respectfully inquire regarding the completion status of the updated Galaxy AI design assets. It is imperative that we deliver the finalized deliverables to the client prior to tomorrow afternoon.\n\nThank you for your continued dedication.\n\nBest regards,",
-    wordCountOriginal: 27,
-    wordCountImproved: 42,
+    improvedText: "Dear Team,\n\nI am writing to formally communicate the updated operational details: Need to send finalized Galaxy AI designs to the client prior to tomorrow afternoon.\n\nPlease let me know if any further clarification is required.\n\nBest regards.",
+    wordCountOriginal: 24,
+    wordCountImproved: 35,
     grammarIssuesFixed: 3,
     suggestions: [
       "Replaced informal salutations with executive correspondence standards.",
@@ -37,15 +41,16 @@ export default function AIDemoWriting() {
 
   const { showToast } = useToast();
 
-  const handleRewrite = async (toneToUse?: string) => {
+  const handleRewrite = async (toneToUse?: string, textToUse?: string) => {
     const tone = toneToUse || selectedTone;
-    if (!inputText.trim()) return;
+    const txt = textToUse !== undefined ? textToUse : inputText;
+    if (!txt.trim()) return;
     setLoading(true);
     try {
       const res = await fetch("/api/ai/writing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: inputText, tone }),
+        body: JSON.stringify({ text: txt, tone }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -57,6 +62,11 @@ export default function AIDemoWriting() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelectSample = (sampleText: string) => {
+    setInputText(sampleText);
+    handleRewrite(selectedTone, sampleText);
   };
 
   const handleCopy = () => {
@@ -104,6 +114,20 @@ export default function AIDemoWriting() {
         })}
       </div>
 
+      {/* Presets Bar */}
+      <div className="flex items-center gap-2 flex-wrap text-xs">
+        <span className="text-gray-400 font-medium">Sample Drafts:</span>
+        {SAMPLES.map((s, idx) => (
+          <button
+            key={idx}
+            onClick={() => handleSelectSample(s.text)}
+            className="px-3 py-1 rounded-lg bg-galaxy-900 hover:bg-slate-800 border border-slate-800 text-gray-300 transition-colors"
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
       {/* Main Panes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Input Textarea */}
@@ -112,10 +136,10 @@ export default function AIDemoWriting() {
             <div className="flex items-center justify-between text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">
               <span>Your Draft Message</span>
               <button
-                onClick={() => setInputText(SAMPLE_TEXT)}
-                className="text-galaxy-cyan hover:underline text-[11px] font-normal"
+                onClick={() => handleSelectSample(SAMPLES[0].text)}
+                className="text-galaxy-cyan hover:underline text-[11px] font-normal flex items-center gap-1"
               >
-                Reset to Sample
+                <RotateCcw className="w-3 h-3" /> Reset Sample
               </button>
             </div>
             <textarea

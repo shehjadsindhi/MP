@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, MessageSquare, X, Send, Bot, User, ArrowRight, Loader2, Maximize2, Minimize2 } from "lucide-react";
+import { Sparkles, X, Send, Bot, ArrowRight, Loader2 } from "lucide-react";
 
 interface Message {
   id: string;
@@ -18,7 +18,7 @@ export default function AIAssistant() {
       id: "welcome",
       role: "assistant",
       content:
-        "👋 Hi there! I'm your **Galaxy AI Assistant**. Ask me anything about Galaxy smartphones, interactive AI demos, on-device Knox privacy, or device comparisons!",
+        "👋 Hi there! I'm your **Galaxy AI Assistant**. Ask me anything about Galaxy smartphones, Knox privacy, camera zoom, interactive AI demos, or student discounts!",
       suggestedLinks: [
         { label: "📸 Best for Photography", url: "/devices/galaxy-s25-ultra" },
         { label: "🎓 Best for Students", url: "/devices/galaxy-tab-s10-ultra" },
@@ -192,7 +192,7 @@ export default function AIAssistant() {
 
           {/* Quick starter chips */}
           <div className="px-3 py-2 bg-galaxy-950/80 border-t border-slate-800 flex gap-1.5 overflow-x-auto no-scrollbar text-[11px]">
-            {["Which phone for photo?", "Student setup?", "Live Translate offline?", "Offers?"].map((chip, i) => (
+            {["Best phone for photo?", "Knox Security?", "Student deals?", "Live Translate offline?"].map((chip, i) => (
               <button
                 key={i}
                 onClick={() => handleSend(chip)}

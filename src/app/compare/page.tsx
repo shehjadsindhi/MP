@@ -1,5 +1,5 @@
 import React from "react";
-import { prisma } from "@/lib/prisma";
+import { safeGetProducts } from "@/lib/db";
 import CompareClient from "./CompareClient";
 
 export const metadata = {
@@ -8,9 +8,7 @@ export const metadata = {
 };
 
 export default async function ComparePage() {
-  const allProducts = await prisma.product.findMany({
-    orderBy: { price: "desc" },
-  });
+  const allProducts = await safeGetProducts({ sort: "price-desc" });
 
   return <CompareClient allProducts={allProducts} />;
 }

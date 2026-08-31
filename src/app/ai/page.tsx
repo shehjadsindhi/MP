@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Sparkles, ArrowRight, Cpu, Shield, Zap, Layers, Smartphone, Tablet, Watch, Headphones, Search, Languages, Wand2, PenTool } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { safeGetAIFeatures } from "@/lib/db";
 
 export const metadata = {
   title: "Galaxy AI Hub — Next-Gen Intelligence Ecosystem",
@@ -9,9 +9,7 @@ export const metadata = {
 };
 
 export default async function AIPage() {
-  const features = await prisma.aIFeature.findMany({
-    orderBy: { createdAt: "asc" },
-  });
+  const features = await safeGetAIFeatures();
 
   return (
     <div className="space-y-24 py-12 pb-24">

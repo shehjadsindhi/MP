@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 
+import { safeGetOffers } from "@/lib/db";
+
 export async function GET(req: NextRequest) {
   try {
-    const offers = await prisma.offer.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
-    });
+    const offers = await safeGetOffers();
     return NextResponse.json({ offers });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch offers" }, { status: 500 });
+    const offers = await safeGetOffers();
+    return NextResponse.json({ offers });
   }
 }
 

@@ -2,13 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, User, Sparkles, BookOpen, ArrowRight, Share2, ShieldCheck } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { safeGetArticleBySlug, safeGetArticles } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
-  });
+  const article = await safeGetArticleBySlug(params.slug);
   if (!article) return { title: "Article Not Found — Galaxy AI Hub" };
   return {
     title: `${article.title} — Galaxy AI Hub`,
@@ -21,21 +19,14 @@ export default async function ArticleDetailPage({
 }: {
   params: { slug: string };
 }) {
-  const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
-  });
+  const article = await safeGetArticleBySlug(params.slug);
 
   if (!article) {
     notFound();
   }
 
-  const relatedArticles = await prisma.article.findMany({
-    where: {
-      category: article.category,
-      NOT: { id: article.id },
-    },
-    take: 2,
-  });
+  const categoryArticles = await safeGetArticles(article.category);
+  const relatedArticles = categoryArticles.filter((a) => a.id !== article.id).slice(0, 2);
 
   let tags: string[] = [];
   try {

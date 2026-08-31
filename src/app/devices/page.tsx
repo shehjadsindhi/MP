@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Smartphone } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { safeGetProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import DeviceSortSelect from "@/components/DeviceSortSelect";
 
@@ -18,35 +18,15 @@ export default async function DevicesPage({
   const selectedCategory = searchParams?.category || "All";
   const selectedSort = searchParams?.sort || "featured";
   const searchQuery = searchParams?.search || "";
-  const minPrice = searchParams?.minPrice;
-  const maxPrice = searchParams?.maxPrice;
+  const minPrice = searchParams?.minPrice ? parseFloat(searchParams.minPrice) : undefined;
+  const maxPrice = searchParams?.maxPrice ? parseFloat(searchParams.maxPrice) : undefined;
 
-  const where: any = {};
-  if (selectedCategory && selectedCategory !== "All") {
-    where.category = selectedCategory;
-  }
-  if (searchQuery) {
-    where.OR = [
-      { name: { contains: searchQuery } },
-      { description: { contains: searchQuery } },
-      { category: { contains: searchQuery } },
-    ];
-  }
-  if (minPrice || maxPrice) {
-    where.price = {};
-    if (minPrice) where.price.gte = parseFloat(minPrice);
-    if (maxPrice) where.price.lte = parseFloat(maxPrice);
-  }
-
-  let orderBy: any = { isFeatured: "desc" };
-  if (selectedSort === "price-asc") orderBy = { price: "asc" };
-  if (selectedSort === "price-desc") orderBy = { price: "desc" };
-  if (selectedSort === "rating") orderBy = { rating: "desc" };
-  if (selectedSort === "discount") orderBy = { discount: "desc" };
-
-  const products = await prisma.product.findMany({
-    where,
-    orderBy,
+  const products = await safeGetProducts({
+    category: selectedCategory,
+    sort: selectedSort,
+    search: searchQuery,
+    minPrice,
+    maxPrice,
   });
 
   const categories = ["All", "Smartphones", "Tablets", "Watches", "Audio", "Accessories"];

@@ -20,7 +20,7 @@ import {
   MessageSquare,
   Palette
 } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { safeGetAIFeatureByIdOrSlug, safeGetAIFeatures } from "@/lib/db";
 
 const ICONS: Record<string, any> = {
   "circle-to-search": Search,
@@ -35,9 +35,7 @@ const ICONS: Record<string, any> = {
 };
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
-  const feature = await prisma.aIFeature.findFirst({
-    where: { OR: [{ id: params.id }, { slug: params.id }] },
-  });
+  const feature = await safeGetAIFeatureByIdOrSlug(params.id);
   if (!feature) return { title: "Feature Not Found — Galaxy AI Hub" };
   return {
     title: `${feature.name} — Galaxy AI Feature Deep Dive`,
@@ -50,21 +48,14 @@ export default async function AIFeatureDetailPage({
 }: {
   params: { id: string };
 }) {
-  const feature = await prisma.aIFeature.findFirst({
-    where: { OR: [{ id: params.id }, { slug: params.id }] },
-  });
+  const feature = await safeGetAIFeatureByIdOrSlug(params.id);
 
   if (!feature) {
     notFound();
   }
 
-  const relatedFeatures = await prisma.aIFeature.findMany({
-    where: {
-      category: feature.category,
-      NOT: { id: feature.id },
-    },
-    take: 3,
-  });
+  const allCategoryFeatures = await safeGetAIFeatures(feature.category);
+  const relatedFeatures = allCategoryFeatures.filter((f) => f.id !== feature.id).slice(0, 3);
 
   let supportedDevices: string[] = [];
   let benefits: string[] = [];

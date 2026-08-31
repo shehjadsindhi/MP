@@ -1,12 +1,10 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { safeGetProductByIdOrSlug, safeGetProducts } from "@/lib/db";
 import DeviceDetailClient from "./DeviceDetailClient";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
-  const product = await prisma.product.findFirst({
-    where: { OR: [{ id: params.id }, { slug: params.id }] },
-  });
+  const product = await safeGetProductByIdOrSlug(params.id);
   if (!product) return { title: "Device Not Found — Galaxy AI Hub" };
   return {
     title: `${product.name} — Galaxy AI Hub`,
@@ -19,21 +17,14 @@ export default async function ProductDetailPage({
 }: {
   params: { id: string };
 }) {
-  const product = await prisma.product.findFirst({
-    where: { OR: [{ id: params.id }, { slug: params.id }] },
-  });
+  const product = await safeGetProductByIdOrSlug(params.id);
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = await prisma.product.findMany({
-    where: {
-      category: product.category,
-      NOT: { id: product.id },
-    },
-    take: 4,
-  });
+  const allProducts = await safeGetProducts({ category: product.category });
+  const relatedProducts = allProducts.filter((p) => p.id !== product.id).slice(0, 4);
 
   return <DeviceDetailClient product={product} relatedProducts={relatedProducts} />;
 }

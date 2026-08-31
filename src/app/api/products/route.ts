@@ -2,54 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 
+import { safeGetProducts } from "@/lib/db";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const category = searchParams.get("category");
-    const search = searchParams.get("search");
-    const sort = searchParams.get("sort");
-    const minPrice = searchParams.get("minPrice");
-    const maxPrice = searchParams.get("maxPrice");
-    const featured = searchParams.get("featured");
+    const category = searchParams.get("category") || undefined;
+    const search = searchParams.get("search") || undefined;
+    const sort = searchParams.get("sort") || undefined;
+    const minPrice = searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined;
+    const maxPrice = searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined;
+    const featured = searchParams.get("featured") === "true";
 
-    const where: any = {};
-
-    if (category && category !== "All") {
-      where.category = category;
-    }
-
-    if (featured === "true") {
-      where.isFeatured = true;
-    }
-
-    if (search) {
-      where.OR = [
-        { name: { contains: search } },
-        { description: { contains: search } },
-        { category: { contains: search } },
-      ];
-    }
-
-    if (minPrice || maxPrice) {
-      where.price = {};
-      if (minPrice) where.price.gte = parseFloat(minPrice);
-      if (maxPrice) where.price.lte = parseFloat(maxPrice);
-    }
-
-    let orderBy: any = { createdAt: "desc" };
-    if (sort === "price-asc") orderBy = { price: "asc" };
-    if (sort === "price-desc") orderBy = { price: "desc" };
-    if (sort === "rating") orderBy = { rating: "desc" };
-    if (sort === "discount") orderBy = { discount: "desc" };
-
-    const products = await prisma.product.findMany({
-      where,
-      orderBy,
+    const products = await safeGetProducts({
+      category,
+      search,
+      sort,
+      minPrice,
+      maxPrice,
+      featured,
     });
 
     return NextResponse.json({ products });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    const products = await safeGetProducts();
+    return NextResponse.json({ products });
   }
 }
 

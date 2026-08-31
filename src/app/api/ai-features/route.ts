@@ -2,24 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 
+import { safeGetAIFeatures } from "@/lib/db";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const category = searchParams.get("category");
+    const category = searchParams.get("category") || undefined;
 
-    const where: any = {};
-    if (category && category !== "All") {
-      where.category = category;
-    }
-
-    const features = await prisma.aIFeature.findMany({
-      where,
-      orderBy: { createdAt: "asc" },
-    });
+    const features = await safeGetAIFeatures(category);
 
     return NextResponse.json({ features });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch AI features" }, { status: 500 });
+    const features = await safeGetAIFeatures();
+    return NextResponse.json({ features });
   }
 }
 

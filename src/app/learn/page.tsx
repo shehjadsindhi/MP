@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { BookOpen, Sparkles, ArrowRight, Clock, User, Tag } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { safeGetArticles } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
 export const metadata = {
@@ -16,15 +16,7 @@ export default async function LearnPage({
 }) {
   const selectedCategory = searchParams?.category || "All";
 
-  const where: any = {};
-  if (selectedCategory && selectedCategory !== "All") {
-    where.category = selectedCategory;
-  }
-
-  const articles = await prisma.article.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-  });
+  const articles = await safeGetArticles(selectedCategory);
 
   const categories = ["All", "AI Guides", "AI Tips", "Device Guides", "Tutorials", "News"];
 

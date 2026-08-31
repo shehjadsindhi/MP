@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { safeGetProducts, safeGetAIFeatures, safeGetArticles } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,46 +15,33 @@ export async function GET(req: NextRequest) {
     }
 
     const [products, features, articles] = await Promise.all([
-      prisma.product.findMany({
-        where: {
-          OR: [
-            { name: { contains: q } },
-            { description: { contains: q } },
-            { category: { contains: q } },
-          ],
-        },
-        take: 6,
-      }),
-      prisma.aIFeature.findMany({
-        where: {
-          OR: [
-            { name: { contains: q } },
-            { shortDesc: { contains: q } },
-            { category: { contains: q } },
-          ],
-        },
-        take: 6,
-      }),
-      prisma.article.findMany({
-        where: {
-          OR: [
-            { title: { contains: q } },
-            { excerpt: { contains: q } },
-            { category: { contains: q } },
-          ],
-        },
-        take: 6,
-      }),
+      safeGetProducts({ search: q }),
+      safeGetAIFeatures(),
+      safeGetArticles(),
     ]);
+
+    const matchingFeatures = features.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q.toLowerCase()) ||
+        f.shortDesc.toLowerCase().includes(q.toLowerCase()) ||
+        f.category.toLowerCase().includes(q.toLowerCase())
+    );
+
+    const matchingArticles = articles.filter(
+      (a) =>
+        a.title.toLowerCase().includes(q.toLowerCase()) ||
+        a.excerpt.toLowerCase().includes(q.toLowerCase()) ||
+        a.category.toLowerCase().includes(q.toLowerCase())
+    );
 
     return NextResponse.json({
       query: q,
-      totalCount: products.length + features.length + articles.length,
-      products,
-      features,
-      articles,
+      totalCount: products.length + matchingFeatures.length + matchingArticles.length,
+      products: products.slice(0, 6),
+      features: matchingFeatures.slice(0, 6),
+      articles: matchingArticles.slice(0, 6),
     });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to search" }, { status: 500 });
+    return NextResponse.json({ products: [], features: [], articles: [] });
   }
 }

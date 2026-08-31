@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Sparkles, ArrowRight, Search, Languages, PenTool, Wand2, FileCheck, Mic, Sliders, MessageSquare, Palette } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { safeGetAIFeatures } from "@/lib/db";
 
 const ICONS: Record<string, any> = {
   "circle-to-search": Search,
@@ -27,15 +27,7 @@ export default async function AIFeaturesPage({
 }) {
   const selectedCategory = searchParams?.category || "All";
 
-  const where: any = {};
-  if (selectedCategory && selectedCategory !== "All") {
-    where.category = selectedCategory;
-  }
-
-  const features = await prisma.aIFeature.findMany({
-    where,
-    orderBy: { createdAt: "asc" },
-  });
+  const features = await safeGetAIFeatures(selectedCategory);
 
   const categories = ["All", "Productivity", "Creativity", "Communication", "Search & Vision"];
 

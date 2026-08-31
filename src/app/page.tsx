@@ -21,7 +21,7 @@ import {
   Smartphone,
   Flame
 } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { safeGetProducts, safeGetAIFeatures, safeGetArticles, safeGetOffers } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import PersonaRecommender from "@/components/PersonaRecommender";
 
@@ -41,23 +41,10 @@ export const revalidate = 60; // ISR cache revalidation
 
 export default async function HomePage() {
   const [featuredProducts, aiFeatures, latestArticles, activeOffers] = await Promise.all([
-    prisma.product.findMany({
-      where: { isFeatured: true },
-      take: 4,
-      orderBy: { price: "desc" },
-    }),
-    prisma.aIFeature.findMany({
-      take: 8,
-      orderBy: { createdAt: "asc" },
-    }),
-    prisma.article.findMany({
-      take: 3,
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.offer.findMany({
-      where: { isActive: true },
-      take: 2,
-    }),
+    safeGetProducts({ featured: true }),
+    safeGetAIFeatures(),
+    safeGetArticles(),
+    safeGetOffers(),
   ]);
 
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import { prisma } from "@/lib/prisma";
+import { safeGetOffers } from "@/lib/db";
 import OffersClient from "./OffersClient";
 
 export const metadata = {
@@ -8,10 +8,7 @@ export const metadata = {
 };
 
 export default async function OffersPage() {
-  const offers = await prisma.offer.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const offers = await safeGetOffers();
 
   return <OffersClient offers={offers} />;
 }

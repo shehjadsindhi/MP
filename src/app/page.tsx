@@ -381,43 +381,47 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {latestArticles.map((art) => (
-            <Link
-              key={art.id}
-              href={`/learn/${art.slug}`}
-              className="group rounded-2xl bg-galaxy-900/60 border border-slate-800 hover:border-cyan-500/40 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-950/20"
-            >
-              <div className="h-48 w-full bg-galaxy-850 p-6 flex items-center justify-center overflow-hidden">
-                <img
-                  src={art.image}
-                  alt={art.title}
-                  className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
+          {latestArticles.map((art) => {
+            const authorDisplay = art.author ? art.author.split(",")[0] : "Galaxy AI Research";
+            return (
+              <Link
+                key={art.id || art.slug}
+                href={`/learn/${art.slug}`}
+                className="group rounded-2xl bg-galaxy-900/60 border border-slate-800 hover:border-cyan-500/40 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-950/20"
+              >
+                <div className="h-48 w-full bg-galaxy-850 p-6 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={art.image || "/images/nova_ultra.jpg"}
+                    alt={art.title}
+                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
 
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-galaxy-cyan font-semibold">{art.category}</span>
-                    <span className="text-gray-500">{art.readTime}</span>
+                <div className="p-6 flex-1 flex flex-col justify-between space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-galaxy-cyan font-semibold">{art.category || "Guide"}</span>
+                      <span className="text-gray-500">{art.readTime || "5 min"}</span>
+                    </div>
+                    <h3 className="text-base font-bold text-white group-hover:text-galaxy-cyan transition-colors line-clamp-2">
+                      {art.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                      {art.excerpt}
+                    </p>
                   </div>
-                  <h3 className="text-base font-bold text-white group-hover:text-galaxy-cyan transition-colors line-clamp-2">
-                    {art.title}
-                  </h3>
-                  <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                    {art.excerpt}
-                  </p>
-                </div>
 
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-gray-400">
-                  <span>By {art.author.split(",")[0]}</span>
-                  <span className="text-galaxy-cyan font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    Read <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
+                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-gray-400">
+                    <span>By {authorDisplay}</span>
+                    <span className="text-galaxy-cyan font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      Read <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>

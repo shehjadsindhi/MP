@@ -15,9 +15,7 @@ export default async function LearnPage({
   searchParams?: { category?: string };
 }) {
   const selectedCategory = searchParams?.category || "All";
-
   const articles = await safeGetArticles(selectedCategory);
-
   const categories = ["All", "AI Guides", "AI Tips", "Device Guides", "Tutorials", "News"];
 
   return (
@@ -36,13 +34,13 @@ export default async function LearnPage({
       </div>
 
       {/* Category Pills */}
-      <div className="flex items-center justify-center gap-2 flex-wrap">
+      <div className="flex items-center justify-center gap-2 flex-wrap" role="navigation" aria-label="Article categories">
         {categories.map((cat) => {
           const isSelected = selectedCategory === cat;
           return (
             <Link
               key={cat}
-              href={cat === "All" ? "/learn" : `/learn?category=${cat}`}
+              href={cat === "All" ? "/learn" : `/learn?category=${encodeURIComponent(cat)}`}
               className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                 isSelected
                   ? "bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 shadow-galaxy-cyan font-bold"
@@ -55,54 +53,72 @@ export default async function LearnPage({
         })}
       </div>
 
-      {/* Articles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {articles.map((art) => (
+      {/* Articles Grid / Empty State */}
+      {articles.length === 0 ? (
+        <div className="text-center py-20 bg-galaxy-900/40 rounded-3xl border border-slate-800 space-y-4">
+          <BookOpen className="w-12 h-12 text-gray-500 mx-auto" />
+          <h2 className="text-lg font-bold text-white">No articles found in &quot;{selectedCategory}&quot;</h2>
+          <p className="text-xs text-gray-400">Try selecting another topic or browse all guides.</p>
           <Link
-            key={art.id}
-            href={`/learn/${art.slug}`}
-            className="group rounded-3xl bg-galaxy-900/60 border border-slate-800 hover:border-cyan-500/40 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-cyan-950/20 backdrop-blur-xl"
+            href="/learn"
+            className="inline-block px-5 py-2 rounded-xl bg-galaxy-cyan text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity"
           >
-            <div className="h-52 w-full bg-galaxy-850 p-8 flex items-center justify-center overflow-hidden relative">
-              <img
-                src={art.image}
-                alt={art.title}
-                className="max-h-full max-w-full object-contain filter drop-shadow-xl transform group-hover:scale-105 transition-transform duration-500"
-              />
-              <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-galaxy-cyan uppercase">
-                {art.category}
-              </span>
-            </div>
-
-            <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 text-[11px] text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" /> {art.readTime}
+            View All Guides
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {articles.map((art) => {
+            const authorDisplay = art.author ? art.author.split(",")[0] : "Galaxy AI Research";
+            return (
+              <Link
+                key={art.id || art.slug}
+                href={`/learn/${art.slug}`}
+                className="group rounded-3xl bg-galaxy-900/60 border border-slate-800 hover:border-cyan-500/40 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-cyan-950/20 backdrop-blur-xl"
+              >
+                <div className="h-52 w-full bg-galaxy-850 p-8 flex items-center justify-center overflow-hidden relative">
+                  <img
+                    src={art.image || "/images/nova_ultra.jpg"}
+                    alt={art.title}
+                    className="max-h-full max-w-full object-contain filter drop-shadow-xl transform group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-galaxy-cyan uppercase">
+                    {art.category || "Guide"}
                   </span>
-                  <span>•</span>
-                  <span>{formatDate(art.createdAt)}</span>
                 </div>
 
-                <h2 className="text-lg font-bold text-white group-hover:text-galaxy-cyan transition-colors leading-snug">
-                  {art.title}
-                </h2>
+                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 text-[11px] text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-galaxy-cyan" /> {art.readTime || "5 min read"}
+                      </span>
+                      <span>•</span>
+                      <span>{formatDate(art.createdAt)}</span>
+                    </div>
 
-                <p className="text-xs text-gray-400 line-clamp-3 leading-relaxed">
-                  {art.excerpt}
-                </p>
-              </div>
+                    <h2 className="text-lg font-bold text-white group-hover:text-galaxy-cyan transition-colors leading-snug">
+                      {art.title}
+                    </h2>
 
-              <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-gray-400">
-                <span className="truncate max-w-[180px]">By {art.author.split(",")[0]}</span>
-                <span className="text-galaxy-cyan font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  Read Article <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+                    <p className="text-xs text-gray-400 line-clamp-3 leading-relaxed">
+                      {art.excerpt}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-gray-400">
+                    <span className="truncate max-w-[180px]">By {authorDisplay}</span>
+                    <span className="text-galaxy-cyan font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      Read Article <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

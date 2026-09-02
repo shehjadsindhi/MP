@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -12,7 +12,9 @@ import {
   BookOpen,
   ArrowLeft,
   ShieldCheck,
-  Loader2
+  ShieldAlert,
+  Loader2,
+  LogIn
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -20,22 +22,82 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const [authTimedOut, setAuthTimedOut] = useState(false);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push("/login");
-      } else if (user.role !== "ADMIN") {
-        router.push("/account");
-      }
-    }
-  }, [user, isLoading, router]);
+    const timer = setTimeout(() => {
+      setAuthTimedOut(true);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  if (isLoading || !user || user.role !== "ADMIN") {
+  if (isLoading && !authTimedOut) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-gray-400 gap-3">
         <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
         <p className="text-xs">Verifying Administrator Privileges...</p>
+      </div>
+    );
+  }
+
+  // Guest / Unauthenticated State
+  if (!user) {
+    return (
+      <div className="min-h-[70vh] max-w-md mx-auto px-4 py-20 flex flex-col items-center justify-center text-center space-y-6">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-white">Administrator Access Required</h2>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            You must be authenticated with an authorized administrator account to access the control center.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/login?redirect=/admin"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2"
+          >
+            <LogIn className="w-4 h-4" /> Sign In to Admin
+          </Link>
+          <Link
+            href="/"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 text-gray-300 hover:text-white font-medium text-xs border border-slate-700"
+          >
+            Back to Storefront
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Authenticated Non-Admin User State
+  if (user.role !== "ADMIN") {
+    return (
+      <div className="min-h-[70vh] max-w-md mx-auto px-4 py-20 flex flex-col items-center justify-center text-center space-y-6">
+        <div className="w-16 h-16 rounded-2xl bg-rose-950/60 border border-rose-500/30 flex items-center justify-center text-rose-400">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-white">Access Denied</h2>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            Logged in as <strong className="text-white">{user.name}</strong> ({user.email}). Current role: <span className="text-rose-400 font-bold">{user.role}</span>. Administrator privileges are required to view this section.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/account"
+            className="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-slate-700"
+          >
+            Go to User Account
+          </Link>
+          <Link
+            href="/"
+            className="px-4 py-2.5 rounded-xl bg-galaxy-cyan text-galaxy-950 font-bold text-xs"
+          >
+            Return to Storefront
+          </Link>
+        </div>
       </div>
     );
   }
@@ -77,7 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Admin Horizontal Tab Menu */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800 no-scrollbar">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800 no-scrollbar" role="navigation" aria-label="Admin Navigation">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;

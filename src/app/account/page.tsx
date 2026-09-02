@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   User,
   Package,
@@ -13,25 +12,20 @@ import {
   Settings,
   Clock,
   LogOut,
-  Loader2
+  Loader2,
+  LogIn,
+  UserPlus
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { formatPrice, formatDate } from "@/lib/utils";
 
 export default function AccountDashboardPage() {
-  const router = useRouter();
   const { user, isLoading, logout } = useAuth();
   const { itemCount: wishCount } = useWishlist();
 
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, isLoading, router]);
 
   useEffect(() => {
     if (user) {
@@ -48,13 +42,46 @@ export default function AccountDashboardPage() {
         }
       };
       fetchOrders();
+    } else {
+      setLoadingOrders(false);
     }
   }, [user]);
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center text-gray-400">
         <Loader2 className="w-8 h-8 text-galaxy-cyan animate-spin" />
+      </div>
+    );
+  }
+
+  // Guest State
+  if (!user) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-20 min-h-[65vh] flex flex-col items-center justify-center text-center space-y-6">
+        <div className="w-16 h-16 rounded-2xl bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center text-galaxy-cyan">
+          <User className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Sign In to Your Account</h1>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            Access your order tracking, customized AI recommendations, wishlist, and profile settings.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <Link
+            href="/login?redirect=/account"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          >
+            <LogIn className="w-4 h-4" /> Sign In
+          </Link>
+          <Link
+            href="/register"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-200 hover:text-white font-semibold text-xs border border-slate-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <UserPlus className="w-4 h-4" /> Create Account
+          </Link>
+        </div>
       </div>
     );
   }
@@ -92,6 +119,15 @@ export default function AccountDashboardPage() {
             <Settings className="w-3.5 h-3.5" /> Edit Profile
           </Link>
 
+          {user.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className="px-4 py-2 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/80 text-xs font-semibold text-indigo-300 border border-indigo-700/50 transition-colors flex items-center gap-1.5"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /> Admin Panel
+            </Link>
+          )}
+
           <button
             onClick={logout}
             className="px-4 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-xs font-semibold text-rose-300 border border-rose-800/40 transition-colors flex items-center gap-1.5"
@@ -101,100 +137,135 @@ export default function AccountDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* Account Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="p-6 rounded-2xl bg-galaxy-900/60 border border-slate-800 space-y-1">
-          <div className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
-            <Package className="w-4 h-4 text-galaxy-cyan" /> Total Orders
+        <div className="p-6 rounded-3xl bg-galaxy-900/80 border border-slate-800 space-y-2 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-gray-400 font-semibold">
+            <span>Total Orders</span>
+            <div className="p-2 rounded-xl bg-cyan-950/60 text-galaxy-cyan border border-cyan-800/40">
+              <Package className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl font-extrabold text-white">{orders.length}</div>
+          <div className="text-3xl font-extrabold text-white">{orders.length}</div>
+          <Link
+            href="/account/orders"
+            className="text-[11px] text-galaxy-cyan hover:underline font-semibold flex items-center gap-1"
+          >
+            View all orders &rarr;
+          </Link>
         </div>
 
-        <div className="p-6 rounded-2xl bg-galaxy-900/60 border border-slate-800 space-y-1">
-          <div className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-indigo-400" /> Saved AI Persona
+        <div className="p-6 rounded-3xl bg-galaxy-900/80 border border-slate-800 space-y-2 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-gray-400 font-semibold">
+            <span>Wishlist Items</span>
+            <div className="p-2 rounded-xl bg-rose-950/60 text-rose-400 border border-rose-800/40">
+              <Heart className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-xl font-bold text-cyan-200 truncate">
-            {user.savedPersona || "Everyday User"}
-          </div>
+          <div className="text-3xl font-extrabold text-white">{wishCount}</div>
+          <Link
+            href="/wishlist"
+            className="text-[11px] text-rose-400 hover:underline font-semibold flex items-center gap-1"
+          >
+            View saved devices &rarr;
+          </Link>
         </div>
 
-        <div className="p-6 rounded-2xl bg-galaxy-900/60 border border-slate-800 space-y-1">
-          <div className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
-            <Heart className="w-4 h-4 text-rose-400" /> Wishlist Items
+        <div className="p-6 rounded-3xl bg-galaxy-900/80 border border-slate-800 space-y-2 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-gray-400 font-semibold">
+            <span>Total Expenditure</span>
+            <div className="p-2 rounded-xl bg-emerald-950/60 text-emerald-400 border border-emerald-800/40">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl font-extrabold text-white">{wishCount}</div>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-galaxy-900/60 border border-slate-800 space-y-1">
-          <div className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" /> Total Investment
-          </div>
-          <div className="text-2xl font-extrabold text-galaxy-cyan font-mono">
+          <div className="text-3xl font-extrabold text-white font-mono">
             {formatPrice(totalSpent)}
           </div>
+          <span className="text-[11px] text-gray-500">Across verified orders</span>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-galaxy-900/80 border border-slate-800 space-y-2 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-gray-400 font-semibold">
+            <span>Configured Persona</span>
+            <div className="p-2 rounded-xl bg-indigo-950/60 text-indigo-400 border border-indigo-800/40">
+              <Sparkles className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-xl font-bold text-white truncate">
+            {user.savedPersona || "Everyday User"}
+          </div>
+          <Link
+            href="/account/profile"
+            className="text-[11px] text-indigo-400 hover:underline font-semibold flex items-center gap-1"
+          >
+            Change preferences &rarr;
+          </Link>
         </div>
       </div>
 
       {/* Recent Orders Section */}
-      <div className="rounded-3xl bg-galaxy-900/80 border border-slate-800 p-8 space-y-6 shadow-2xl backdrop-blur-xl">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-          <div>
-            <h3 className="text-xl font-bold text-white">Recent Orders</h3>
-            <p className="text-xs text-gray-400">Track shipments and view past invoices</p>
-          </div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Clock className="w-5 h-5 text-galaxy-cyan" /> Recent Orders
+          </h2>
           <Link
             href="/account/orders"
-            className="text-xs font-bold text-galaxy-cyan hover:underline flex items-center gap-1"
+            className="text-xs text-galaxy-cyan hover:underline font-semibold flex items-center gap-1"
           >
-            View Full History <ArrowRight className="w-3.5 h-3.5" />
+            View Complete History <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
         {loadingOrders ? (
-          <div className="py-8 text-center text-gray-400 text-xs">Loading orders...</div>
+          <div className="py-12 text-center text-gray-400">
+            <Loader2 className="w-6 h-6 text-galaxy-cyan animate-spin mx-auto mb-2" />
+            <p className="text-xs">Loading orders...</p>
+          </div>
         ) : orders.length === 0 ? (
-          <div className="text-center py-10 text-gray-400 space-y-3">
-            <Package className="w-10 h-10 mx-auto text-gray-600" />
-            <p className="text-sm">You haven&apos;t placed any orders yet.</p>
+          <div className="p-10 rounded-3xl bg-galaxy-900/40 border border-slate-800 text-center space-y-3">
+            <Package className="w-10 h-10 text-gray-600 mx-auto" />
+            <h3 className="text-sm font-bold text-white">No orders placed yet</h3>
+            <p className="text-xs text-gray-400">Explore our Galaxy flagship devices and interactive tools.</p>
             <Link
               href="/devices"
               className="inline-block px-5 py-2 rounded-xl bg-galaxy-cyan text-galaxy-950 font-bold text-xs"
             >
-              Explore Flagship Devices
+              Explore Devices
             </Link>
           </div>
         ) : (
-          <div className="divide-y divide-slate-800">
+          <div className="space-y-4">
             {orders.slice(0, 3).map((order) => (
-              <div key={order.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div
+                key={order.id}
+                className="p-6 rounded-2xl bg-galaxy-900/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-sm text-white">{order.orderNumber}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs font-bold text-white">{order.orderNumber}</span>
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         order.orderStatus === "Delivered"
-                          ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                          : order.orderStatus === "Processing"
-                          ? "bg-cyan-950 text-cyan-300 border border-cyan-800"
-                          : "bg-slate-800 text-gray-300"
+                          ? "bg-emerald-950 text-emerald-400 border border-emerald-800"
+                          : "bg-cyan-950 text-cyan-300 border border-cyan-800"
                       }`}
                     >
                       {order.orderStatus}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-400">
-                    Placed on {formatDate(order.createdAt)} • {order.items?.length || 0} items
-                  </div>
+                  <p className="text-xs text-gray-400">
+                    Placed on {formatDate(order.createdAt)} • {order.items?.length || 1} items
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4">
-                  <div className="text-base font-extrabold text-galaxy-cyan font-mono">
+                <div className="flex items-center justify-between sm:justify-end gap-6">
+                  <span className="text-sm font-bold text-white font-mono">
                     {formatPrice(order.total)}
-                  </div>
+                  </span>
                   <Link
                     href="/account/orders"
-                    className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition-colors"
+                    className="text-xs text-galaxy-cyan hover:underline font-semibold"
                   >
                     Details &rarr;
                   </Link>

@@ -68,6 +68,9 @@ export default function ProductCard({ product }: { product: ProductType }) {
     });
   };
 
+  const ratingVal = typeof product.rating === "number" && !isNaN(product.rating) ? product.rating : 4.8;
+  const reviewCountVal = typeof product.reviewCount === "number" && product.reviewCount > 0 ? product.reviewCount : null;
+
   return (
     <div className="group relative rounded-2xl bg-galaxy-900/60 border border-slate-800/80 hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-950/30 transition-all duration-300 flex flex-col overflow-hidden">
       {/* Top Badges & Wishlist */}
@@ -90,6 +93,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
               : "bg-galaxy-950/60 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500"
           }`}
           title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart className={`w-4 h-4 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`} />
         </button>
@@ -101,9 +105,10 @@ export default function ProductCard({ product }: { product: ProductType }) {
         className="relative h-60 w-full p-6 flex items-center justify-center bg-gradient-to-b from-galaxy-850/40 to-transparent overflow-hidden"
       >
         <img
-          src={product.image}
+          src={product.image || "/images/nova_ultra.jpg"}
           alt={product.name}
           className="w-full h-full object-contain filter drop-shadow-xl transform group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
         />
       </Link>
 
@@ -115,8 +120,10 @@ export default function ProductCard({ product }: { product: ProductType }) {
             <span className="text-galaxy-cyan font-medium">{product.category}</span>
             <div className="flex items-center gap-1 text-amber-400 font-semibold">
               <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span>{product.rating.toFixed(1)}</span>
-              <span className="text-gray-500 text-[11px]">({product.reviewCount})</span>
+              <span>{ratingVal.toFixed(1)}</span>
+              {reviewCountVal && (
+                <span className="text-gray-500 text-[11px]">({reviewCountVal})</span>
+              )}
             </div>
           </div>
 
@@ -166,6 +173,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
               onClick={handleAddToCart}
               className="p-2.5 rounded-xl bg-slate-800 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/40 text-gray-200 hover:text-galaxy-cyan transition-all"
               title="Add to Cart"
+              aria-label="Add to Cart"
             >
               <ShoppingBag className="w-4 h-4" />
             </button>

@@ -140,6 +140,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       showToast("Promo Code WELCOME50 applied! $50 off storewide.", "ai");
       return { success: true, message: "$50 off your order!" };
     }
+    if (code === "ECOSYSTEM25") {
+      setPromo({ code, discountPercent: 25, discountAmount: 60 });
+      showToast("Promo Code ECOSYSTEM25 applied! 25% wearables bundle discount.", "ai");
+      return { success: true, message: "25% bundle discount applied!" };
+    }
     showToast("Invalid or expired promo code.", "error");
     return { success: false, message: "Invalid promo code" };
   };

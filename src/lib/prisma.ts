@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 // Ensure DATABASE_URL fallback exists to prevent Prisma Client initialization crash on Vercel
 if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = "file:./dev.db";
+  process.env.DATABASE_URL = "file:./prisma/dev.db";
 }
 
 const globalForPrisma = global as unknown as { prisma?: PrismaClient };

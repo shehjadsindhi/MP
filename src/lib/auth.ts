@@ -34,7 +34,7 @@ export async function comparePassword(password: string, hash: string): Promise<b
 
 export async function getSessionUser() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get("galaxy_auth_token")?.value;
     if (!token) return null;
 

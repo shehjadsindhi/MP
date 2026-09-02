@@ -29,10 +29,10 @@ export async function safeGetProducts(options?: {
         { category: { contains: options.search } },
       ];
     }
-    if (options?.minPrice || options?.maxPrice) {
+    if (options?.minPrice != null || options?.maxPrice != null) {
       where.price = {};
-      if (options.minPrice) where.price.gte = options.minPrice;
-      if (options.maxPrice) where.price.lte = options.maxPrice;
+      if (options.minPrice != null) where.price.gte = options.minPrice;
+      if (options.maxPrice != null) where.price.lte = options.maxPrice;
     }
 
     let orderBy: any = { isFeatured: "desc" };
@@ -66,10 +66,10 @@ export async function safeGetProducts(options?: {
         p.category.toLowerCase().includes(q)
     );
   }
-  if (options?.minPrice) {
+  if (options?.minPrice != null) {
     filtered = filtered.filter((p) => p.price >= options.minPrice!);
   }
-  if (options?.maxPrice) {
+  if (options?.maxPrice != null) {
     filtered = filtered.filter((p) => p.price <= options.maxPrice!);
   }
 

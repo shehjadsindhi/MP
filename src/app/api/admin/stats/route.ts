@@ -58,6 +58,16 @@ export async function GET(req: NextRequest) {
       monthlyStats,
     });
   } catch (error: any) {
+    // Re-verify authorization in error boundary to prevent leaking metrics to unauthenticated users
+    try {
+      const user = await getSessionUser();
+      if (!user || user.role !== "ADMIN") {
+        return NextResponse.json({ error: "Unauthorized. Admin required." }, { status: 403 });
+      }
+    } catch (authErr) {
+      return NextResponse.json({ error: "Unauthorized. Admin required." }, { status: 403 });
+    }
+
     return NextResponse.json({
       metrics: {
         totalRevenue: 265900,
@@ -83,3 +93,4 @@ export async function GET(req: NextRequest) {
     });
   }
 }
+

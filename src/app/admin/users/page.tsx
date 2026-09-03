@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Users, Search, ShieldCheck, User, Loader2 } from "lucide-react";
+import { Users, Search, ShieldCheck, User, Loader2, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 
@@ -44,9 +44,34 @@ export default function AdminUsersPage() {
         setUsers((prev) =>
           prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
         );
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Failed to update role", "error");
       }
     } catch (e) {
       showToast("Failed to update user role", "error");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete the user account for ${userName}?`)) return;
+
+    setUpdatingId(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast("User account deleted successfully", "success");
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+      } else {
+        showToast(data.error || "Failed to delete user", "error");
+      }
+    } catch (e) {
+      showToast("Failed to delete user account", "error");
     } finally {
       setUpdatingId(null);
     }
@@ -127,17 +152,27 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="p-4 pr-6 text-right">
-                      <button
-                        onClick={() => handleRoleToggle(u.id, u.role)}
-                        disabled={updatingId === u.id}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-                          u.role === "ADMIN"
-                            ? "bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800"
-                            : "bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-700"
-                        }`}
-                      >
-                        {u.role === "ADMIN" ? "Demote to User" : "Promote to Admin"}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleRoleToggle(u.id, u.role)}
+                          disabled={updatingId === u.id}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                            u.role === "ADMIN"
+                              ? "bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800"
+                              : "bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-700"
+                          }`}
+                        >
+                          {u.role === "ADMIN" ? "Demote to User" : "Promote to Admin"}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u.id, u.name)}
+                          disabled={updatingId === u.id}
+                          className="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 text-gray-400 hover:text-rose-400 transition-colors"
+                          title="Delete User Account"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -149,3 +184,4 @@ export default function AdminUsersPage() {
     </div>
   );
 }
+

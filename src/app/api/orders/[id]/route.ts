@@ -7,7 +7,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const sessionUser = await getSessionUser();
     const { id } = params;
+
     const order = await prisma.order.findFirst({
       where: {
         OR: [{ id }, { orderNumber: id }],
@@ -17,6 +19,18 @@ export async function GET(
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // Require authentication and verify user ownership or admin privileges
+    if (!sessionUser) {
+      return NextResponse.json({ error: "Unauthorized. Please log in to view order details." }, { status: 401 });
+    }
+
+    const isOwner = order.userId === sessionUser.id || order.customerEmail === sessionUser.email;
+    const isAdmin = sessionUser.role === "ADMIN";
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "Forbidden. You do not have permission to view this order." }, { status: 403 });
     }
 
     return NextResponse.json({ order });

@@ -56,24 +56,61 @@ export default function AdminContentPage() {
     setModalOpen(true);
   };
 
+  const openEditModal = (article: any) => {
+    setEditingArticle(article);
+    setForm({
+      title: article.title || "",
+      category: article.category || "AI Guides",
+      author: article.author || "Galaxy AI Lab",
+      readTime: article.readTime || "5 min read",
+      excerpt: article.excerpt || "",
+      content: article.content || "",
+      image: article.image || "/images/nova_ultra.jpg",
+    });
+    setModalOpen(true);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/articles", {
-        method: "POST",
+      const url = editingArticle ? `/api/articles/${editingArticle.id}` : "/api/articles";
+      const method = editingArticle ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       if (res.ok) {
-        showToast("Article published successfully!", "success");
+        showToast(editingArticle ? "Article updated successfully!" : "Article published successfully!", "success");
         setModalOpen(false);
         fetchArticles();
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Failed to save article", "error");
       }
     } catch (e) {
-      showToast("Failed to publish article", "error");
+      showToast("Failed to save article", "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteArticle = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete the article "${title}"?`)) return;
+
+    try {
+      const res = await fetch(`/api/articles/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast("Article deleted successfully", "success");
+        setArticles((prev) => prev.filter((a) => a.id !== id));
+      } else {
+        showToast(data.error || "Failed to delete article", "error");
+      }
+    } catch (e) {
+      showToast("Failed to delete article", "error");
     }
   };
 
@@ -139,13 +176,30 @@ export default function AdminContentPage() {
                     <td className="p-4 text-gray-400">{art.readTime}</td>
                     <td className="p-4 text-gray-400">{formatDate(art.createdAt)}</td>
                     <td className="p-4 pr-6 text-right">
-                      <a
-                        href={`/learn/${art.slug}`}
-                        target="_blank"
-                        className="text-xs font-bold text-indigo-400 hover:underline"
-                      >
-                        View Live &rarr;
-                      </a>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openEditModal(art)}
+                          className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-300 hover:text-white transition-colors"
+                          title="Edit Article"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteArticle(art.id, art.title)}
+                          className="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 text-gray-400 hover:text-rose-400 transition-colors"
+                          title="Delete Article"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <a
+                          href={`/learn/${art.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-bold text-indigo-400 hover:underline ml-1"
+                        >
+                          Live &rarr;
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 ))}

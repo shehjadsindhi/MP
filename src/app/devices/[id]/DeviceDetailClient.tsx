@@ -17,14 +17,38 @@ import {
   Minus,
   ArrowRight,
   ArrowLeft,
-  Share2
+  Share2,
+  Layers,
+  MessageSquare,
+  Package,
+  ThumbsUp,
+  X,
+  Check,
+  Shield
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
 
-export default function DeviceDetailClient({ product, relatedProducts }: { product: any; relatedProducts: any[] }) {
+interface ReviewItem {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  title: string;
+  comment: string;
+  verified: boolean;
+  helpfulCount: number;
+}
+
+export default function DeviceDetailClient({
+  product,
+  relatedProducts,
+}: {
+  product: any;
+  relatedProducts: any[];
+}) {
   const router = useRouter();
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -49,12 +73,57 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
 
   const [activeImage, setActiveImage] = useState(gallery[0] || product.image);
   const [selectedColor, setSelectedColor] = useState(colors[0]?.name || "Default");
-  const [selectedStorage, setSelectedStorage] = useState(storageOptions[0] || { size: "Standard", priceOffset: 0 });
+  const [selectedStorage, setSelectedStorage] = useState(
+    storageOptions[0] || { size: "Standard", priceOffset: 0 }
+  );
   const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState<"overview" | "specs" | "ai" | "reviews" | "box">("overview");
+
+  // Review Modal State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [newReview, setNewReview] = useState({ name: "", rating: 5, title: "", comment: "" });
+
+  // Compare Modal State
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+
+  // Mock Reviews List
+  const [reviewsList, setReviewsList] = useState<ReviewItem[]>([
+    {
+      id: "rev-1",
+      author: "Alex Morgan",
+      rating: 5,
+      date: "2 days ago",
+      title: "Mindblowing NPU & Circle to Search!",
+      comment:
+        "The build quality with Titanium is unreal. Live Translate during phone calls with clients overseas worked flawlessly without any delay. Highly recommended!",
+      verified: true,
+      helpfulCount: 24,
+    },
+    {
+      id: "rev-2",
+      author: "Samantha Reed",
+      rating: 5,
+      date: "1 week ago",
+      title: "Generative Edit is magic",
+      comment:
+        "I was able to erase photobombers from my vacation photos in seconds. Battery life easily lasts 1.5 days of heavy use.",
+      verified: true,
+      helpfulCount: 18,
+    },
+    {
+      id: "rev-3",
+      author: "Dr. Ryan Vance",
+      rating: 4,
+      date: "2 weeks ago",
+      title: "Outstanding performance & Knox Security",
+      comment:
+        "Display brightness of 2600 nits under direct sunlight is incredible. Note Assist makes meeting notes effortless.",
+      verified: true,
+      helpfulCount: 12,
+    },
+  ]);
 
   const isLiked = isInWishlist(product.id);
-
-  // Compute live price with selected storage offset
   const livePrice = product.price + (selectedStorage?.priceOffset || 0);
 
   const handleAddToCart = () => {
@@ -69,6 +138,7 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
       selectedStorage: selectedStorage.size,
       quantity,
     });
+    showToast(`${product.name} added to cart!`, "success");
   };
 
   const handleBuyNow = () => {
@@ -101,9 +171,40 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
     }
   };
 
+  const handleAddReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.name || !newReview.comment) {
+      showToast("Please complete all required review fields.", "error");
+      return;
+    }
+
+    const created: ReviewItem = {
+      id: `rev-${Date.now()}`,
+      author: newReview.name,
+      rating: newReview.rating,
+      date: "Just now",
+      title: newReview.title || "Great Galaxy Device!",
+      comment: newReview.comment,
+      verified: true,
+      helpfulCount: 0,
+    };
+
+    setReviewsList([created, ...reviewsList]);
+    setIsReviewModalOpen(false);
+    setNewReview({ name: "", rating: 5, title: "", comment: "" });
+    showToast("Thank you! Your product review has been published.", "success");
+  };
+
+  const handleHelpfulClick = (reviewId: string) => {
+    setReviewsList((prev) =>
+      prev.map((r) => (r.id === reviewId ? { ...r, helpfulCount: r.helpfulCount + 1 } : r))
+    );
+    showToast("Feedback recorded!", "info");
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16 pb-24">
-      {/* Breadcrumbs */}
+      {/* Breadcrumbs & Actions Header */}
       <div className="flex items-center justify-between text-xs text-gray-400">
         <div className="flex items-center gap-2">
           <Link href="/devices" className="hover:text-white flex items-center gap-1">
@@ -117,12 +218,20 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
           </span>
         </div>
 
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors"
-        >
-          <Share2 className="w-3.5 h-3.5" /> Share
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsCompareModalOpen(true)}
+            className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
+          >
+            <Layers className="w-3.5 h-3.5" /> Compare Model
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors"
+          >
+            <Share2 className="w-3.5 h-3.5" /> Share
+          </button>
+        </div>
       </div>
 
       {/* Main Product Showcase Section */}
@@ -151,10 +260,16 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
                   key={idx}
                   onClick={() => setActiveImage(imgUrl)}
                   className={`w-20 h-20 rounded-2xl p-2 bg-galaxy-900 border transition-all flex-shrink-0 flex items-center justify-center ${
-                    activeImage === imgUrl ? "border-galaxy-cyan shadow-galaxy-cyan scale-105" : "border-slate-800 hover:border-slate-600"
+                    activeImage === imgUrl
+                      ? "border-galaxy-cyan shadow-galaxy-cyan scale-105"
+                      : "border-slate-800 hover:border-slate-600"
                   }`}
                 >
-                  <img src={imgUrl} alt={`Thumbnail ${idx + 1}`} className="max-h-full max-w-full object-contain" />
+                  <img
+                    src={imgUrl}
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="max-h-full max-w-full object-contain"
+                  />
                 </button>
               ))}
             </div>
@@ -204,7 +319,7 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
           {colors.length > 0 && (
             <div className="space-y-2.5">
               <div className="flex justify-between text-xs">
-                <span className="text-gray-400 font-semibold">Finish / Color:</span>
+                <span className="text-gray-400 font-semibold font-mono">Finish / Color:</span>
                 <strong className="text-white">{selectedColor}</strong>
               </div>
               <div className="flex items-center gap-3">
@@ -212,13 +327,16 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
                   <button
                     key={i}
                     onClick={() => setSelectedColor(c.name)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs transition-all ${
                       selectedColor === c.name
                         ? "border-galaxy-cyan bg-cyan-950/40 text-cyan-200 shadow-galaxy-cyan font-bold"
                         : "border-slate-800 hover:border-slate-600 bg-galaxy-900 text-gray-300"
                     }`}
                   >
-                    <span className="w-3.5 h-3.5 rounded-full border border-slate-700" style={{ backgroundColor: c.hex }} />
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-slate-700 shadow-sm"
+                      style={{ backgroundColor: c.hex }}
+                    />
                     <span>{c.name}</span>
                   </button>
                 ))}
@@ -230,7 +348,7 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
           {storageOptions.length > 0 && (
             <div className="space-y-2.5">
               <div className="flex justify-between text-xs">
-                <span className="text-gray-400 font-semibold">Storage Capacity:</span>
+                <span className="text-gray-400 font-semibold font-mono">Storage Capacity:</span>
                 <strong className="text-white">{selectedStorage?.size}</strong>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -326,64 +444,305 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
         </div>
       </div>
 
-      {/* Specifications & AI Features Tabs Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Hardware Specifications */}
-        <div className="lg:col-span-7 rounded-3xl bg-galaxy-900/60 border border-slate-800 p-8 space-y-6">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-galaxy-cyan" /> Technical Specifications
-          </h3>
+      {/* Interactive Feature Tabs Header */}
+      <div className="space-y-8">
+        <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-800 pb-3 no-scrollbar">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              activeTab === "overview"
+                ? "bg-galaxy-cyan text-galaxy-950 shadow-galaxy-cyan"
+                : "bg-galaxy-900 text-gray-400 hover:text-white border border-slate-800"
+            }`}
+          >
+            <Sparkles className="w-4 h-4" /> Overview & Highlights
+          </button>
 
-          <div className="divide-y divide-slate-800">
-            {Object.entries(specs).map(([key, val], idx) => (
-              <div key={idx} className="py-3 flex flex-col sm:flex-row sm:justify-between text-xs gap-1">
-                <span className="font-semibold text-gray-400">{key}</span>
-                <span className="text-white text-right font-medium max-w-sm">{val}</span>
-              </div>
-            ))}
-          </div>
+          <button
+            onClick={() => setActiveTab("specs")}
+            className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              activeTab === "specs"
+                ? "bg-galaxy-cyan text-galaxy-950 shadow-galaxy-cyan"
+                : "bg-galaxy-900 text-gray-400 hover:text-white border border-slate-800"
+            }`}
+          >
+            <Cpu className="w-4 h-4" /> Technical Specifications
+          </button>
+
+          <button
+            onClick={() => setActiveTab("ai")}
+            className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              activeTab === "ai"
+                ? "bg-galaxy-cyan text-galaxy-950 shadow-galaxy-cyan"
+                : "bg-galaxy-900 text-gray-400 hover:text-white border border-slate-800"
+            }`}
+          >
+            <Sparkles className="w-4 h-4" /> Galaxy AI Suite ({aiFeatures.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("reviews")}
+            className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              activeTab === "reviews"
+                ? "bg-galaxy-cyan text-galaxy-950 shadow-galaxy-cyan"
+                : "bg-galaxy-900 text-gray-400 hover:text-white border border-slate-800"
+            }`}
+          >
+            <Star className="w-4 h-4" /> Reviews & Ratings ({reviewsList.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab("box")}
+            className={`px-5 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+              activeTab === "box"
+                ? "bg-galaxy-cyan text-galaxy-950 shadow-galaxy-cyan"
+                : "bg-galaxy-900 text-gray-400 hover:text-white border border-slate-800"
+            }`}
+          >
+            <Package className="w-4 h-4" /> What&apos;s In The Box
+          </button>
         </div>
 
-        {/* Supported AI Features */}
-        <div className="lg:col-span-5 rounded-3xl bg-galaxy-900/60 border border-cyan-500/30 p-8 space-y-6">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-galaxy-cyan" /> Integrated Galaxy AI Suite
-          </h3>
-
-          <div className="space-y-2.5">
-            {aiFeatures.map((slug, idx) => (
-              <Link
-                key={idx}
-                href={`/ai/features/${slug}`}
-                className="flex items-center justify-between p-3 rounded-xl bg-galaxy-950 border border-slate-800 hover:border-cyan-500/40 transition-all group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-lg bg-cyan-950 text-galaxy-cyan flex items-center justify-center text-xs">
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="text-xs font-semibold text-white group-hover:text-galaxy-cyan capitalize">
-                    {slug.replace(/-/g, " ")}
-                  </span>
+        {/* Tab 1: Overview & Highlights */}
+        {activeTab === "overview" && (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 rounded-3xl bg-galaxy-900/60 border border-slate-800 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-950/80 border border-cyan-500/40 text-galaxy-cyan flex items-center justify-center">
+                  <Cpu className="w-5 h-5" />
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-white" />
-              </Link>
-            ))}
+                <h3 className="text-lg font-bold text-white">Quantum NPU Intelligence</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Dedicated on-device Neural Processing Unit processes generative translation, writing assist, and image reconstruction with sub-15ms latency and total privacy.
+                </p>
+              </div>
 
-            <div className="pt-4">
-              <Link
-                href="/ai/demos"
-                className="block w-full py-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-galaxy-cyan text-xs font-bold text-center transition-colors"
-              >
-                Test AI Suite in Live Demo Lab &rarr;
-              </Link>
+              <div className="p-6 rounded-3xl bg-galaxy-900/60 border border-slate-800 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-950/80 border border-indigo-500/40 text-indigo-400 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Samsung Knox Vault Protection</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Hardware-isolated enclave certified EAL5+ guarantees biometric credentials, private keys, and on-device AI embeddings remain tamper-proof.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-galaxy-900/60 border border-slate-800 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-950/80 border border-amber-500/40 text-amber-400 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Titanium Craftsmanship</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Precision engineered Grade 4 Titanium shield with Corning Gorilla Armor glass delivering 4x scratch resistance and anti-reflective display clarity.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Tab 2: Technical Specifications */}
+        {activeTab === "specs" && (
+          <div className="rounded-3xl bg-galaxy-900/60 border border-slate-800 p-8 space-y-6 animate-in fade-in duration-300">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <Cpu className="w-5 h-5 text-galaxy-cyan" /> Complete Hardware & Performance Specifications
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 divide-y md:divide-y-0 divide-slate-800">
+              {Object.entries(specs).map(([key, val], idx) => (
+                <div key={idx} className="py-3 flex justify-between text-xs border-b border-slate-800/80">
+                  <span className="font-semibold text-gray-400">{key}</span>
+                  <span className="text-white text-right font-semibold max-w-xs">{val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Galaxy AI Suite */}
+        {activeTab === "ai" && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-galaxy-cyan" /> Integrated Galaxy AI Suite
+              </h3>
+              <Link
+                href="/ai/demos"
+                className="px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-galaxy-cyan text-xs font-bold transition-colors"
+              >
+                Launch AI Demo Lab &rarr;
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {aiFeatures.map((slug, idx) => (
+                <Link
+                  key={idx}
+                  href={`/ai/features/${slug}`}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-galaxy-950 border border-slate-800 hover:border-cyan-500/40 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-cyan-950 text-galaxy-cyan flex items-center justify-center text-xs">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-white group-hover:text-galaxy-cyan capitalize block">
+                        {slug.replace(/-/g, " ")}
+                      </span>
+                      <span className="text-[11px] text-gray-400 block mt-0.5">
+                        Native hardware acceleration enabled
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-transform group-hover:translate-x-1" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Customer Reviews */}
+        {activeTab === "reviews" && (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            {/* Rating Summary Bar */}
+            <div className="p-8 rounded-3xl bg-galaxy-900/60 border border-slate-800 grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+              <div className="md:col-span-4 text-center md:text-left space-y-2">
+                <div className="text-5xl font-extrabold text-white">{product.rating.toFixed(1)}</div>
+                <div className="flex items-center justify-center md:justify-start gap-1 text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <div className="text-xs text-gray-400">Based on verified customer reviews</div>
+              </div>
+
+              <div className="md:col-span-5 space-y-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-8 text-gray-400 font-semibold">5 ★</span>
+                  <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-400 rounded-full" style={{ width: "85%" }} />
+                  </div>
+                  <span className="w-8 text-right text-gray-400">85%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-8 text-gray-400 font-semibold">4 ★</span>
+                  <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-400 rounded-full" style={{ width: "12%" }} />
+                  </div>
+                  <span className="w-8 text-right text-gray-400">12%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-8 text-gray-400 font-semibold">3 ★</span>
+                  <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-400 rounded-full" style={{ width: "3%" }} />
+                  </div>
+                  <span className="w-8 text-right text-gray-400">3%</span>
+                </div>
+              </div>
+
+              <div className="md:col-span-3 text-center md:text-right">
+                <button
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="px-6 py-3 rounded-2xl bg-galaxy-cyan text-galaxy-950 font-extrabold text-xs hover:opacity-90 shadow-galaxy-cyan transition-opacity"
+                >
+                  Write a Review
+                </button>
+              </div>
+            </div>
+
+            {/* Reviews List */}
+            <div className="space-y-4">
+              {reviewsList.map((rev) => (
+                <div key={rev.id} className="p-6 rounded-2xl bg-galaxy-950 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-cyan-950 text-galaxy-cyan font-bold flex items-center justify-center text-xs border border-cyan-500/30">
+                        {rev.author.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>{rev.author}</span>
+                          {rev.verified && (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
+                              Verified Purchase
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-gray-400">{rev.date}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-0.5 text-amber-400">
+                      {[...Array(rev.rating)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                      ))}
+                    </div>
+                  </div>
+
+                  <h4 className="text-sm font-bold text-white">{rev.title}</h4>
+                  <p className="text-xs text-gray-300 leading-relaxed">{rev.comment}</p>
+
+                  <div className="pt-2 flex items-center justify-between text-xs text-gray-400">
+                    <button
+                      onClick={() => handleHelpfulClick(rev.id)}
+                      className="flex items-center gap-1.5 hover:text-white transition-colors"
+                    >
+                      <ThumbsUp className="w-3.5 h-3.5 text-galaxy-cyan" />
+                      <span>Helpful ({rev.helpfulCount})</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: What's in the box */}
+        {activeTab === "box" && (
+          <div className="rounded-3xl bg-galaxy-900/60 border border-slate-800 p-8 space-y-6 animate-in fade-in duration-300">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <Package className="w-5 h-5 text-galaxy-cyan" /> Standard Box Contents & Protection
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-galaxy-950 border border-slate-800 flex items-center gap-3">
+                <Check className="w-5 h-5 text-galaxy-cyan" />
+                <div>
+                  <div className="text-xs font-bold text-white">{product.name}</div>
+                  <div className="text-[10px] text-gray-400">Flagship Hardware Unit</div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-galaxy-950 border border-slate-800 flex items-center gap-3">
+                <Check className="w-5 h-5 text-galaxy-cyan" />
+                <div>
+                  <div className="text-xs font-bold text-white">Braided USB-C to USB-C Cable</div>
+                  <div className="text-[10px] text-gray-400">3A Super-Speed Fast Charging</div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-galaxy-950 border border-slate-800 flex items-center gap-3">
+                <Check className="w-5 h-5 text-galaxy-cyan" />
+                <div>
+                  <div className="text-xs font-bold text-white">SIM Tray Ejector Pin</div>
+                  <div className="text-[10px] text-gray-400">Stainless Steel Tool</div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-galaxy-950 border border-slate-800 flex items-center gap-3">
+                <Check className="w-5 h-5 text-galaxy-cyan" />
+                <div>
+                  <div className="text-xs font-bold text-white">Quick Start & Warranty Card</div>
+                  <div className="text-[10px] text-gray-400">2-Year Galaxy Care Pass</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Related Products Carousel / Grid */}
+      {/* Related Products Section */}
       {relatedProducts.length > 0 && (
-        <div className="space-y-6">
+        <div className="space-y-6 pt-6 border-t border-slate-800">
           <h3 className="text-2xl font-bold text-white">Compare Similar Galaxy Devices</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((rel) => (
@@ -408,6 +767,176 @@ export default function DeviceDetailClient({ product, relatedProducts }: { produ
                 </Link>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Write a Review Modal */}
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-galaxy-950 border border-slate-800 rounded-3xl p-6 space-y-6 relative shadow-2xl">
+            <button
+              onClick={() => setIsReviewModalOpen(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <h3 className="text-xl font-bold text-white">Write a Customer Review</h3>
+              <p className="text-xs text-gray-400 mt-1">Share your experience with {product.name}</p>
+            </div>
+
+            <form onSubmit={handleAddReview} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">Rating</label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setNewReview({ ...newReview, rating: star })}
+                      className="p-1 hover:scale-110 transition-transform"
+                    >
+                      <Star
+                        className={`w-6 h-6 ${
+                          star <= newReview.rating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-gray-600"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">Your Name</label>
+                <input
+                  type="text"
+                  required
+                  value={newReview.name}
+                  onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
+                  placeholder="e.g. Alex Smith"
+                  className="w-full px-4 py-2.5 rounded-xl bg-galaxy-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-galaxy-cyan"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">Review Headline</label>
+                <input
+                  type="text"
+                  value={newReview.title}
+                  onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
+                  placeholder="e.g. Best Galaxy AI phone ever!"
+                  className="w-full px-4 py-2.5 rounded-xl bg-galaxy-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-galaxy-cyan"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">Comments</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={newReview.comment}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  placeholder="Tell us what you liked about performance, camera, or AI features..."
+                  className="w-full px-4 py-2.5 rounded-xl bg-galaxy-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-galaxy-cyan"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsReviewModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-white hover:bg-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 rounded-xl bg-galaxy-cyan text-galaxy-950 text-xs font-bold shadow-galaxy-cyan hover:opacity-90"
+                >
+                  Submit Review
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Compare Models Modal */}
+      {isCompareModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-4xl bg-galaxy-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 relative shadow-2xl max-h-[85vh] overflow-y-auto custom-scrollbar">
+            <button
+              onClick={() => setIsCompareModalOpen(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Layers className="w-5 h-5 text-galaxy-cyan" /> Model Comparison Matrix
+              </h3>
+              <p className="text-xs text-gray-400 mt-1">
+                Side-by-side comparison of {product.name} with related devices
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800">
+                    <th className="p-3 text-gray-400 font-semibold">Feature</th>
+                    <th className="p-3 text-galaxy-cyan font-bold">{product.name}</th>
+                    {relatedProducts.slice(0, 2).map((rel) => (
+                      <th key={rel.id} className="p-3 text-white font-bold">{rel.name}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 text-gray-300">
+                  <tr>
+                    <td className="p-3 font-semibold text-gray-400">Price</td>
+                    <td className="p-3 text-white font-bold">{formatPrice(product.price)}</td>
+                    {relatedProducts.slice(0, 2).map((rel) => (
+                      <td key={rel.id} className="p-3">{formatPrice(rel.price)}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-semibold text-gray-400">Category</td>
+                    <td className="p-3 text-white">{product.category}</td>
+                    {relatedProducts.slice(0, 2).map((rel) => (
+                      <td key={rel.id} className="p-3">{rel.category}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-semibold text-gray-400">Rating</td>
+                    <td className="p-3 text-amber-400 font-bold">★ {product.rating.toFixed(1)}</td>
+                    {relatedProducts.slice(0, 2).map((rel) => (
+                      <td key={rel.id} className="p-3 text-amber-400">★ {rel.rating.toFixed(1)}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-semibold text-gray-400">Badge</td>
+                    <td className="p-3 text-galaxy-cyan font-semibold">{product.badge || "Standard"}</td>
+                    {relatedProducts.slice(0, 2).map((rel) => (
+                      <td key={rel.id} className="p-3">{rel.badge || "Standard"}</td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setIsCompareModalOpen(false)}
+                className="px-6 py-2.5 rounded-xl bg-galaxy-cyan text-galaxy-950 font-bold text-xs shadow-galaxy-cyan"
+              >
+                Close Comparison
+              </button>
+            </div>
           </div>
         </div>
       )}

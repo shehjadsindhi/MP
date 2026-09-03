@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { Heart, ShoppingBag, Star, Sparkles, ArrowRight } from "lucide-react";
+import { Heart, ShoppingBag, Star, Sparkles, ArrowRight, Eye } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import ProductQuickViewModal from "./ProductQuickViewModal";
 
 export interface ProductType {
   id: string;
@@ -20,6 +21,7 @@ export interface ProductType {
   badge?: string | null;
   description: string;
   image: string;
+  galleryJson?: string;
   colorsJson?: string;
   storageJson?: string;
   specsJson?: string;
@@ -30,6 +32,7 @@ export interface ProductType {
 export default function ProductCard({ product }: { product: ProductType }) {
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
   const isLiked = isInWishlist(product.id);
 
@@ -68,124 +71,149 @@ export default function ProductCard({ product }: { product: ProductType }) {
     });
   };
 
+  const handleOpenQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsQuickViewOpen(true);
+  };
+
   const ratingVal = typeof product.rating === "number" && !isNaN(product.rating) ? product.rating : 4.8;
   const reviewCountVal = typeof product.reviewCount === "number" && product.reviewCount > 0 ? product.reviewCount : null;
 
   return (
-    <div className="group relative rounded-2xl bg-galaxy-900/60 border border-slate-800/80 hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-950/30 transition-all duration-300 flex flex-col overflow-hidden">
-      {/* Top Badges & Wishlist */}
-      <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
-        {product.badge ? (
-          <span className="pointer-events-auto px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-galaxy-cyan font-bold text-[10px] uppercase tracking-wider backdrop-blur-md">
-            {product.badge}
-          </span>
-        ) : product.discount > 0 ? (
-          <span className="pointer-events-auto px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-400 font-bold text-[10px]">
-            {product.discount}% OFF
-          </span>
-        ) : <div />}
+    <>
+      <div className="group relative rounded-2xl bg-galaxy-900/60 border border-slate-800/80 hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-950/30 transition-all duration-300 flex flex-col overflow-hidden">
+        {/* Top Badges & Actions */}
+        <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
+          {product.badge ? (
+            <span className="pointer-events-auto px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-galaxy-cyan font-bold text-[10px] uppercase tracking-wider backdrop-blur-md">
+              {product.badge}
+            </span>
+          ) : product.discount > 0 ? (
+            <span className="pointer-events-auto px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-400 font-bold text-[10px]">
+              {product.discount}% OFF
+            </span>
+          ) : <div />}
 
-        <button
-          onClick={handleToggleWish}
-          className={`pointer-events-auto p-2 rounded-xl backdrop-blur-md transition-all ${
-            isLiked
-              ? "bg-rose-500/20 border border-rose-500/40 text-rose-400"
-              : "bg-galaxy-950/60 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500"
-          }`}
-          title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
-          aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          <Heart className={`w-4 h-4 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`} />
-        </button>
-      </div>
-
-      {/* Image Container */}
-      <Link
-        href={`/devices/${product.slug}`}
-        className="relative h-60 w-full p-6 flex items-center justify-center bg-gradient-to-b from-galaxy-850/40 to-transparent overflow-hidden"
-      >
-        <img
-          src={product.image || "/images/nova_ultra.jpg"}
-          alt={product.name}
-          className="w-full h-full object-contain filter drop-shadow-xl transform group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-        />
-      </Link>
-
-      {/* Content */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-        <div>
-          {/* Category & Rating */}
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-1.5">
-            <span className="text-galaxy-cyan font-medium">{product.category}</span>
-            <div className="flex items-center gap-1 text-amber-400 font-semibold">
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span>{ratingVal.toFixed(1)}</span>
-              {reviewCountVal && (
-                <span className="text-gray-500 text-[11px]">({reviewCountVal})</span>
-              )}
-            </div>
+          <div className="pointer-events-auto flex items-center gap-1.5">
+            <button
+              onClick={handleOpenQuickView}
+              className="p-2 rounded-xl bg-galaxy-950/60 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500 backdrop-blur-md transition-all"
+              title="Quick Detail View"
+              aria-label="Quick View"
+            >
+              <Eye className="w-4 h-4 text-galaxy-cyan" />
+            </button>
+            <button
+              onClick={handleToggleWish}
+              className={`p-2 rounded-xl backdrop-blur-md transition-all ${
+                isLiked
+                  ? "bg-rose-500/20 border border-rose-500/40 text-rose-400"
+                  : "bg-galaxy-950/60 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500"
+              }`}
+              title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+              aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`} />
+            </button>
           </div>
-
-          {/* Product Name */}
-          <Link href={`/devices/${product.slug}`} className="block">
-            <h3 className="text-base font-bold text-white group-hover:text-galaxy-cyan transition-colors line-clamp-1">
-              {product.name}
-            </h3>
-          </Link>
-
-          {/* Description snippet */}
-          <p className="text-xs text-gray-400 line-clamp-2 mt-1.5 leading-relaxed">
-            {product.description}
-          </p>
-
-          {/* Color Swatches */}
-          {colors.length > 0 && (
-            <div className="flex items-center gap-1.5 mt-3">
-              <span className="text-[10px] text-gray-500 mr-1">Colors:</span>
-              {colors.slice(0, 4).map((c, i) => (
-                <span
-                  key={i}
-                  className="w-3 h-3 rounded-full border border-slate-700 shadow-sm"
-                  style={{ backgroundColor: c.hex }}
-                  title={c.name}
-                />
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Pricing & CTA */}
-        <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+        {/* Image Container */}
+        <Link
+          href={`/devices/${product.slug}`}
+          className="relative h-60 w-full p-6 flex items-center justify-center bg-gradient-to-b from-galaxy-850/40 to-transparent overflow-hidden"
+        >
+          <img
+            src={product.image || "/images/nova_ultra.jpg"}
+            alt={product.name}
+            className="w-full h-full object-contain filter drop-shadow-xl transform group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+        </Link>
+
+        {/* Content */}
+        <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
           <div>
-            <div className="text-lg font-extrabold text-white">
-              {formatPrice(product.price)}
+            {/* Category & Rating */}
+            <div className="flex items-center justify-between text-xs text-gray-400 mb-1.5">
+              <span className="text-galaxy-cyan font-medium">{product.category}</span>
+              <div className="flex items-center gap-1 text-amber-400 font-semibold">
+                <Star className="w-3.5 h-3.5 fill-amber-400" />
+                <span>{ratingVal.toFixed(1)}</span>
+                {reviewCountVal && (
+                  <span className="text-gray-500 text-[11px]">({reviewCountVal})</span>
+                )}
+              </div>
             </div>
-            {product.originalPrice > product.price && (
-              <div className="text-xs text-gray-500 line-through">
-                {formatPrice(product.originalPrice)}
+
+            {/* Product Name */}
+            <Link href={`/devices/${product.slug}`} className="block">
+              <h3 className="text-base font-bold text-white group-hover:text-galaxy-cyan transition-colors line-clamp-1">
+                {product.name}
+              </h3>
+            </Link>
+
+            {/* Description snippet */}
+            <p className="text-xs text-gray-400 line-clamp-2 mt-1.5 leading-relaxed">
+              {product.description}
+            </p>
+
+            {/* Color Swatches */}
+            {colors.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-3">
+                <span className="text-[10px] text-gray-500 mr-1">Colors:</span>
+                {colors.slice(0, 4).map((c, i) => (
+                  <span
+                    key={i}
+                    className="w-3 h-3 rounded-full border border-slate-700 shadow-sm"
+                    style={{ backgroundColor: c.hex }}
+                    title={c.name}
+                  />
+                ))}
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleAddToCart}
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/40 text-gray-200 hover:text-galaxy-cyan transition-all"
-              title="Add to Cart"
-              aria-label="Add to Cart"
-            >
-              <ShoppingBag className="w-4 h-4" />
-            </button>
-            <Link
-              href={`/devices/${product.slug}`}
-              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-1 shadow-sm"
-            >
-              Buy <ArrowRight className="w-3 h-3" />
-            </Link>
+          {/* Pricing & CTA */}
+          <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <div>
+              <div className="text-lg font-extrabold text-white">
+                {formatPrice(product.price)}
+              </div>
+              {product.originalPrice > product.price && (
+                <div className="text-xs text-gray-500 line-through">
+                  {formatPrice(product.originalPrice)}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleAddToCart}
+                className="p-2.5 rounded-xl bg-slate-800 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/40 text-gray-200 hover:text-galaxy-cyan transition-all"
+                title="Add to Cart"
+                aria-label="Add to Cart"
+              >
+                <ShoppingBag className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleOpenQuickView}
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-1 shadow-sm"
+              >
+                Detail <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <ProductQuickViewModal
+        product={product}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+      />
+    </>
   );
 }
+

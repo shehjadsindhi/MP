@@ -82,6 +82,7 @@ export async function safeGetProducts(options?: {
 }
 
 export async function safeGetProductByIdOrSlug(idOrSlug: string) {
+  if (!idOrSlug) return null;
   try {
     const product = await prisma.product.findFirst({
       where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
@@ -93,7 +94,7 @@ export async function safeGetProductByIdOrSlug(idOrSlug: string) {
 
   return (
     FALLBACK_PRODUCTS.find((p) => p.id === idOrSlug || p.slug === idOrSlug) ||
-    FALLBACK_PRODUCTS[0]
+    null
   );
 }
 
@@ -114,12 +115,15 @@ export async function safeGetAIFeatures(category?: string) {
 
   let filtered = [...FALLBACK_AI_FEATURES];
   if (category && category !== "All") {
-    filtered = filtered.filter((f) => f.category.toLowerCase() === category.toLowerCase());
+    filtered = filtered.filter(
+      (f) => f.category && f.category.toLowerCase() === category.toLowerCase()
+    );
   }
   return filtered;
 }
 
 export async function safeGetAIFeatureByIdOrSlug(idOrSlug: string) {
+  if (!idOrSlug) return null;
   try {
     const feature = await prisma.aIFeature.findFirst({
       where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
@@ -131,7 +135,7 @@ export async function safeGetAIFeatureByIdOrSlug(idOrSlug: string) {
 
   return (
     FALLBACK_AI_FEATURES.find((f) => f.id === idOrSlug || f.slug === idOrSlug) ||
-    FALLBACK_AI_FEATURES[0]
+    null
   );
 }
 
@@ -152,12 +156,15 @@ export async function safeGetArticles(category?: string) {
 
   let filtered = [...FALLBACK_ARTICLES];
   if (category && category !== "All") {
-    filtered = filtered.filter((a) => a.category.toLowerCase() === category.toLowerCase());
+    filtered = filtered.filter(
+      (a) => a.category && a.category.toLowerCase() === category.toLowerCase()
+    );
   }
   return filtered;
 }
 
 export async function safeGetArticleBySlug(slug: string) {
+  if (!slug) return null;
   try {
     const article = await prisma.article.findUnique({
       where: { slug },
@@ -169,7 +176,7 @@ export async function safeGetArticleBySlug(slug: string) {
 
   return (
     FALLBACK_ARTICLES.find((a) => a.slug === slug || a.id === slug) ||
-    FALLBACK_ARTICLES[0]
+    null
   );
 }
 

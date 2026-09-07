@@ -1,9 +1,50 @@
 import { PrismaClient } from "@prisma/client";
+import path from "path";
+import fs from "fs";
 
-// Ensure DATABASE_URL fallback exists to prevent Prisma Client initialization crash on Vercel
-if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = "file:./prisma/dev.db";
+// Configure DATABASE_URL dynamically for local and Vercel serverless environments
+function configureDatabaseUrl(): string {
+  const envUrl = process.env.DATABASE_URL;
+
+  // If using PostgreSQL / Supabase or any remote database, preserve as-is
+  if (envUrl && !envUrl.startsWith("file:")) {
+    return envUrl;
+  }
+
+  // In Vercel serverless functions (AWS Lambda), filesystem is read-only except /tmp
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const tmpDbPath = "/tmp/dev.db";
+    try {
+      if (!fs.existsSync(tmpDbPath)) {
+        const candidatePaths = [
+          path.join(process.cwd(), "prisma", "dev.db"),
+          path.join(process.cwd(), "dev.db"),
+          "/var/task/prisma/dev.db",
+          "/var/task/dev.db",
+        ];
+        for (const candidate of candidatePaths) {
+          if (fs.existsSync(candidate)) {
+            fs.copyFileSync(candidate, tmpDbPath);
+            break;
+          }
+        }
+      }
+      if (fs.existsSync(tmpDbPath)) {
+        return `file:${tmpDbPath}`;
+      }
+    } catch (err) {
+      console.warn("Could not copy SQLite database to /tmp on Vercel:", err);
+    }
+  }
+
+  if (!envUrl) {
+    return "file:./prisma/dev.db";
+  }
+
+  return envUrl;
 }
+
+process.env.DATABASE_URL = configureDatabaseUrl();
 
 const globalForPrisma = global as unknown as { prisma?: PrismaClient };
 

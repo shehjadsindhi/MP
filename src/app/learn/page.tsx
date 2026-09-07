@@ -15,7 +15,8 @@ export default async function LearnPage({
   searchParams?: { category?: string };
 }) {
   const selectedCategory = searchParams?.category || "All";
-  const articles = await safeGetArticles(selectedCategory);
+  const rawArticles = await safeGetArticles(selectedCategory);
+  const articles = Array.isArray(rawArticles) ? rawArticles : [];
   const categories = ["All", "AI Guides", "AI Tips", "Device Guides", "Tutorials", "News"];
 
   return (

@@ -188,9 +188,11 @@ export default function Navbar() {
                   aria-label="User account menu"
                 >
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-galaxy-cyan to-indigo-600 flex items-center justify-center text-galaxy-950 text-xs font-bold">
-                    {user.name.charAt(0).toUpperCase()}
+                    {(user.name || "U").charAt(0).toUpperCase()}
                   </div>
-                  <span className="hidden sm:inline truncate max-w-[90px]">{user.name.split(" ")[0]}</span>
+                  <span className="hidden sm:inline truncate max-w-[90px]">
+                    {user.name ? user.name.split(" ")[0] : "Account"}
+                  </span>
                   <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
                 </button>
               ) : (

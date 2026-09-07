@@ -47,6 +47,11 @@ export default function Navbar() {
         e.preventDefault();
         setIsSearchOpen(true);
       }
+      if (e.key === "Escape") {
+        if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+        if (isUserMenuOpen) setIsUserMenuOpen(false);
+        if (isSearchOpen) setIsSearchOpen(false);
+      }
     };
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("keydown", handleKeyDown);
@@ -54,7 +59,15 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [isMobileMenuOpen, isUserMenuOpen, isSearchOpen]);
+
+  useEffect(() => {
+    const closeOnRouteChange = () => {
+      setIsMobileMenuOpen(false);
+      setIsUserMenuOpen(false);
+    };
+    closeOnRouteChange();
+  }, [pathname]);
 
   const navLinks = [
     { label: "Galaxy AI", href: "/ai" },
@@ -276,40 +289,52 @@ export default function Navbar() {
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2.5 rounded-xl bg-galaxy-900 border border-slate-800 text-gray-300 hover:text-white"
-              aria-label="Toggle mobile menu"
+              className="lg:hidden p-2.5 rounded-xl bg-galaxy-900 border border-slate-800 text-gray-300 hover:text-white hover:border-cyan-500/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              aria-label={isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
+              aria-expanded={isMobileMenuOpen}
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5 text-galaxy-cyan" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
         {/* Mobile Navigation Drawer */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-800 bg-galaxy-950 px-4 py-6 space-y-4">
-            <nav className="flex flex-col space-y-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-xl bg-galaxy-900/60 border border-slate-800 text-sm font-medium text-gray-200 hover:text-galaxy-cyan"
-                >
-                  <span>{link.label}</span>
-                  {link.badge && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 bg-cyan-500/20 text-galaxy-cyan rounded-full border border-cyan-500/30">
-                      {link.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
+        <div
+          className={`lg:hidden border-t border-slate-800 bg-galaxy-950/95 backdrop-blur-xl overflow-hidden transition-all duration-300 ease-in-out ${
+            isMobileMenuOpen ? "max-h-[30rem] pb-6 opacity-100" : "max-h-0 pb-0 opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="px-4 py-4 space-y-4">
+            <nav className="flex flex-col space-y-1.5">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center justify-between p-3 rounded-xl border text-sm font-medium transition-all ${
+                      isActive
+                        ? "bg-cyan-950/30 border-cyan-500/30 text-galaxy-cyan"
+                        : "bg-galaxy-900/60 border-slate-800 text-gray-200 hover:text-galaxy-cyan hover:bg-slate-800/50"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    {link.badge && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 bg-cyan-500/20 text-galaxy-cyan rounded-full border border-cyan-500/30">
+                        {link.badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
 
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-gray-400">
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-around text-xs text-gray-400">
               <Link
                 href="/account"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="hover:text-white"
+                className="hover:text-white transition-colors"
               >
                 User Account
               </Link>
@@ -317,7 +342,7 @@ export default function Navbar() {
               <Link
                 href="/compare"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="hover:text-white"
+                className="hover:text-white transition-colors"
               >
                 Compare Matrix
               </Link>
@@ -325,13 +350,13 @@ export default function Navbar() {
               <Link
                 href="/admin"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-indigo-400 hover:underline"
+                className="text-indigo-400 hover:underline transition-colors"
               >
                 Admin Panel
               </Link>
             </div>
           </div>
-        )}
+        </div>
       </header>
 
       {/* Search Modal */}

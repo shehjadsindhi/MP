@@ -25,14 +25,14 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <Link
             href="/"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-galaxy-cyan"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-galaxy-cyan shimmer-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             <span>Return to Galaxy Home</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <Link
             href="/devices"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-galaxy-950 hover:bg-slate-800 border border-slate-700 text-gray-300 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-galaxy-950 hover:bg-slate-800 border border-slate-700 text-gray-300 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
           >
             <Smartphone className="w-3.5 h-3.5 text-galaxy-cyan" />
             <span>Explore Devices</span>

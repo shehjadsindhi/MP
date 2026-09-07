@@ -232,14 +232,14 @@ export default function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={() => setIsCartOpen(false)}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-500 text-galaxy-950 font-bold text-sm hover:opacity-95 transition-opacity shadow-galaxy-cyan flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-500 text-galaxy-950 font-bold text-sm hover:opacity-95 shadow-galaxy-cyan transition-opacity flex items-center justify-center gap-2 shimmer-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                 >
                   Proceed to Checkout <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   href="/cart"
                   onClick={() => setIsCartOpen(false)}
-                  className="w-full py-2.5 rounded-xl bg-galaxy-900 hover:bg-slate-800 border border-slate-700 text-gray-300 font-semibold text-xs transition-colors flex items-center justify-center"
+                  className="w-full py-2.5 rounded-xl bg-galaxy-900 hover:bg-slate-800 border border-slate-700 text-gray-300 font-semibold text-xs transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
                 >
                   View Full Cart Page
                 </Link>

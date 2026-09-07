@@ -42,13 +42,13 @@ export default function Error({
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <button
             onClick={() => reset()}
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-galaxy-cyan"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-galaxy-cyan shimmer-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             <RefreshCw className="w-4 h-4" /> Try Again
           </button>
           <Link
             href="/"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-galaxy-950 hover:bg-slate-800 border border-slate-700 text-gray-300 font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-galaxy-950 hover:bg-slate-800 border border-slate-700 text-gray-300 font-semibold text-xs transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
           >
             <Home className="w-4 h-4" /> Back to Home
           </Link>

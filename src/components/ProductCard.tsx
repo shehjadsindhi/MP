@@ -34,6 +34,8 @@ export default function ProductCard({ product }: { product: ProductType }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [showSpecsPopover, setShowSpecsPopover] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const isLiked = isInWishlist(product.id);
 
@@ -114,7 +116,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
           <div className="pointer-events-auto flex items-center gap-1.5">
             <button
               onClick={handleOpenQuickView}
-              className="p-2 rounded-xl bg-galaxy-950/70 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500 backdrop-blur-md transition-all shadow-md"
+              className="p-2 rounded-xl bg-galaxy-950/70 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500 backdrop-blur-md transition-all shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
               title="Quick Detail View"
               aria-label="Quick View"
             >
@@ -122,13 +124,14 @@ export default function ProductCard({ product }: { product: ProductType }) {
             </button>
             <button
               onClick={handleToggleWish}
-              className={`p-2 rounded-xl backdrop-blur-md transition-all shadow-md ${
+              className={`p-2 rounded-xl backdrop-blur-md transition-all shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
                 isLiked
                   ? "bg-rose-500/20 border border-rose-500/40 text-rose-400"
                   : "bg-galaxy-950/70 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500"
               }`}
               title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
               aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+              aria-pressed={isLiked}
             >
               <Heart className={`w-4 h-4 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`} />
             </button>
@@ -142,11 +145,19 @@ export default function ProductCard({ product }: { product: ProductType }) {
           onMouseEnter={() => quickSpecs.length > 0 && setShowSpecsPopover(true)}
           onMouseLeave={() => setShowSpecsPopover(false)}
         >
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-t-transparent border-galaxy-cyan rounded-full animate-spin" />
+            </div>
+          )}
           <img
-            src={product.image || "/images/nova_ultra.jpg"}
+            src={imageError ? "/images/nova_ultra.jpg" : (product.image || "/images/nova_ultra.jpg")}
             alt={product.name}
-            className="w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] transform group-hover:scale-105 transition-transform duration-500"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => { setImageError(true); setImageLoaded(true); }}
+            className={`w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] transition-transform duration-500 group-hover:scale-105 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
             loading="lazy"
+            draggable={false}
           />
 
           {/* Quick Specs Popover */}
@@ -245,7 +256,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleAddToCart}
-                className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/40 text-gray-200 hover:text-galaxy-cyan transition-all"
+                className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/40 text-gray-200 hover:text-galaxy-cyan transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                 title="Add to Cart"
                 aria-label="Add to Cart"
               >
@@ -253,7 +264,8 @@ export default function ProductCard({ product }: { product: ProductType }) {
               </button>
               <button
                 onClick={handleOpenQuickView}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-600 text-galaxy-950 font-extrabold text-xs hover:opacity-95 transition-all flex items-center gap-1 shadow-sm shimmer-btn"
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-600 text-galaxy-950 font-extrabold text-xs hover:opacity-95 transition-all flex items-center gap-1 shadow-sm shimmer-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                aria-label="Product Detail"
               >
                 Detail <ArrowRight className="w-3 h-3" />
               </button>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, Lock, Mail, User, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Sparkles, Lock, Mail, User, ArrowRight, Loader2, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 
@@ -15,14 +15,24 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) return;
+    if (!name || !email || !password) {
+      setError("Please fill in all required fields.");
+      return;
+    }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -60,53 +70,109 @@ export default function RegisterPage() {
           className="rounded-3xl bg-galaxy-900/80 border border-slate-800 p-6 sm:p-8 space-y-4 shadow-2xl backdrop-blur-xl"
         >
           {error && (
-            <div className="p-3 rounded-xl bg-rose-950/50 border border-rose-500/40 text-xs text-rose-300 font-medium">
+            <div
+              role="alert"
+              className="p-3 rounded-xl bg-rose-950/50 border border-rose-500/40 text-xs text-rose-300 font-medium flex items-center gap-2 animate-in fade-in"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
               {error}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-300">Full Name</label>
+            <label htmlFor="register-name" className="text-xs font-bold text-gray-300">
+              Full Name
+            </label>
             <div className="relative">
               <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                id="register-name"
                 type="text"
                 required
+                autoComplete="name"
+                autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Alex Mercer"
-                className="w-full bg-galaxy-950 border border-slate-700 rounded-xl pl-10 pr-3.5 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-galaxy-cyan"
+                className="w-full bg-galaxy-950 border border-slate-700 rounded-xl pl-10 pr-3.5 py-3 text-xs text-white placeholder-gray-500 input-focus-glow"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-300">Email Address</label>
+            <label htmlFor="register-email" className="text-xs font-bold text-gray-300">
+              Email Address
+            </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                id="register-email"
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="alex@example.com"
-                className="w-full bg-galaxy-950 border border-slate-700 rounded-xl pl-10 pr-3.5 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-galaxy-cyan"
+                className="w-full bg-galaxy-950 border border-slate-700 rounded-xl pl-10 pr-3.5 py-3 text-xs text-white placeholder-gray-500 input-focus-glow"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-300">Password (min. 6 characters)</label>
+            <label htmlFor="register-password" className="text-xs font-bold text-gray-300">
+              Password (min. 6 characters)
+            </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="password"
+                id="register-password"
+                type={showPassword ? "text" : "password"}
                 required
+                autoComplete="new-password"
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-galaxy-950 border border-slate-700 rounded-xl pl-10 pr-3.5 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-galaxy-cyan"
+                className="w-full bg-galaxy-950 border border-slate-700 rounded-xl pl-10 pr-12 py-3 text-xs text-white placeholder-gray-500 input-focus-glow"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="register-confirm-password" className="text-xs font-bold text-gray-300">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                id="register-confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                required
+                autoComplete="new-password"
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-galaxy-950 border border-slate-700 rounded-xl pl-10 pr-12 py-3 text-xs text-white placeholder-gray-500 input-focus-glow"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                aria-pressed={showConfirmPassword}
+              >
+                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
@@ -120,7 +186,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-600 text-galaxy-950 font-extrabold text-xs hover:opacity-90 shadow-galaxy-cyan transition-opacity flex items-center justify-center gap-2 mt-2"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-600 text-galaxy-950 font-extrabold text-xs hover:opacity-90 shadow-galaxy-cyan transition-opacity flex items-center justify-center gap-2 mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>

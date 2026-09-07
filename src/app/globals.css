@@ -48,7 +48,35 @@
   background: #00f0ff;
 }
 
-/* Glassmorphism and Glowing Effects */
+/* === Focus Ring Styles (Accessibility) === */
+:focus-visible {
+  @apply outline-none;
+}
+:focus-visible > * {
+  outline: 2px solid theme("colors.galaxy.cyan");
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    @apply animation-none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* === Smooth Scroll === */
+html {
+  @apply scroll-smooth;
+}
+#__next {
+  scroll-behavior: smooth;
+}
+
+/* === Scroll Margin for Anchor Links === */
+:target {
+  @apply scroll-mt-24;
+}
+
+/* === Enhanced Glassmorphism and Glowing Effects === */
 .glass-panel {
   background: rgba(12, 19, 32, 0.75);
   backdrop-filter: blur(16px);
@@ -159,5 +187,67 @@
 }
 .shimmer-btn:hover::after {
   transform: rotate(30deg) translate(50%, 50%);
+}
+
+/* === Shimmer Animation for Skeletons === */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* === Custom Scrollbar Variants === */
+.scrollbox-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #1e293b #080c14;
+}
+.scrollbox-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbox-thin::-webkit-scrollbar-track {
+  background: #080c14;
+}
+.scrollbox-thin::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+.scrollbox-thin::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.galaxy.cyan");
+}
+
+/* === Utility: Input Focus Glow === */
+.input-focus-glow {
+  @apply focus:outline-none transition-all duration-200;
+}
+.input-focus-glow:focus {
+  border-color: theme("colors.galaxy.cyan");
+  box-shadow: 0 0 12px -2px rgba(0, 240, 255, 0.4);
+}
+
+/* === Utility: Button Ripple Effect === */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+.btn-ripple::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+.btn-ripple:hover::before {
+  width: 320px;
+  height: 320px;
 }
 

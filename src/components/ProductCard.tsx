@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Heart, ShoppingBag, Star, Sparkles, ArrowRight, Eye } from "lucide-react";
+import { Heart, ShoppingBag, Star, ArrowRight, Eye, Cpu, Camera, Battery, Layers } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -33,6 +33,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [showSpecsPopover, setShowSpecsPopover] = useState(false);
 
   const isLiked = isInWishlist(product.id);
 
@@ -40,6 +41,21 @@ export default function ProductCard({ product }: { product: ProductType }) {
   try {
     if (product.colorsJson) colors = JSON.parse(product.colorsJson);
   } catch (e) {}
+
+  let specs: Record<string, string> = {};
+  try {
+    if (product.specsJson) specs = JSON.parse(product.specsJson);
+  } catch (e) {}
+
+  // Extract a few key display specs
+  const quickSpecs = [
+    specs["Processor"] || specs["Chipset"] ? { label: "Chipset", value: specs["Processor"] || specs["Chipset"], Icon: Cpu } : null,
+    specs["Camera"] || specs["Main Camera"] ? { label: "Camera", value: specs["Camera"] || specs["Main Camera"], Icon: Camera } : null,
+    specs["Battery"] ? { label: "Battery", value: specs["Battery"], Icon: Battery } : null,
+    specs["Display"] || specs["Screen"] ? { label: "Display", value: specs["Display"] || specs["Screen"], Icon: Layers } : null,
+  ].filter(Boolean).slice(0, 4) as { label: string; value: string; Icon: any }[];
+
+  const [selectedColor, setSelectedColor] = useState(colors.length > 0 ? colors[0].name : undefined);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -52,7 +68,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
       originalPrice: product.originalPrice,
       image: product.image,
       quantity: 1,
-      selectedColor: colors.length > 0 ? colors[0].name : undefined,
+      selectedColor: selectedColor || (colors.length > 0 ? colors[0].name : undefined),
     });
   };
 
@@ -82,15 +98,15 @@ export default function ProductCard({ product }: { product: ProductType }) {
 
   return (
     <>
-      <div className="group relative rounded-2xl bg-galaxy-900/60 border border-slate-800/80 hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-950/30 transition-all duration-300 flex flex-col overflow-hidden">
+      <div className="group relative rounded-3xl bg-galaxy-900/60 border border-slate-800/80 hover:border-cyan-500/50 hover:shadow-2xl hover:shadow-cyan-950/40 transition-all duration-300 flex flex-col overflow-hidden glass-card">
         {/* Top Badges & Actions */}
         <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
           {product.badge ? (
-            <span className="pointer-events-auto px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-galaxy-cyan font-bold text-[10px] uppercase tracking-wider backdrop-blur-md">
+            <span className="pointer-events-auto px-2.5 py-1 rounded-full bg-cyan-950/90 border border-cyan-500/40 text-galaxy-cyan font-bold text-[10px] uppercase tracking-wider backdrop-blur-md shadow-galaxy-cyan">
               {product.badge}
             </span>
           ) : product.discount > 0 ? (
-            <span className="pointer-events-auto px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-400 font-bold text-[10px]">
+            <span className="pointer-events-auto px-2.5 py-0.5 rounded-full bg-rose-950/90 border border-rose-500/40 text-rose-400 font-bold text-[10px] shadow-sm">
               {product.discount}% OFF
             </span>
           ) : <div />}
@@ -98,7 +114,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
           <div className="pointer-events-auto flex items-center gap-1.5">
             <button
               onClick={handleOpenQuickView}
-              className="p-2 rounded-xl bg-galaxy-950/60 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500 backdrop-blur-md transition-all"
+              className="p-2 rounded-xl bg-galaxy-950/70 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500 backdrop-blur-md transition-all shadow-md"
               title="Quick Detail View"
               aria-label="Quick View"
             >
@@ -106,10 +122,10 @@ export default function ProductCard({ product }: { product: ProductType }) {
             </button>
             <button
               onClick={handleToggleWish}
-              className={`p-2 rounded-xl backdrop-blur-md transition-all ${
+              className={`p-2 rounded-xl backdrop-blur-md transition-all shadow-md ${
                 isLiked
                   ? "bg-rose-500/20 border border-rose-500/40 text-rose-400"
-                  : "bg-galaxy-950/60 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500"
+                  : "bg-galaxy-950/70 border border-slate-700/60 text-gray-400 hover:text-white hover:border-slate-500"
               }`}
               title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
               aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
@@ -119,17 +135,40 @@ export default function ProductCard({ product }: { product: ProductType }) {
           </div>
         </div>
 
-        {/* Image Container */}
+        {/* Image Container with Quick Specs Popover */}
         <Link
           href={`/devices/${product.slug}`}
-          className="relative h-60 w-full p-6 flex items-center justify-center bg-gradient-to-b from-galaxy-850/40 to-transparent overflow-hidden"
+          className="relative h-60 w-full p-6 flex items-center justify-center bg-gradient-to-b from-galaxy-850/40 via-galaxy-900/20 to-transparent overflow-hidden"
+          onMouseEnter={() => quickSpecs.length > 0 && setShowSpecsPopover(true)}
+          onMouseLeave={() => setShowSpecsPopover(false)}
         >
           <img
             src={product.image || "/images/nova_ultra.jpg"}
             alt={product.name}
-            className="w-full h-full object-contain filter drop-shadow-xl transform group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.6)] transform group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
+
+          {/* Quick Specs Popover */}
+          {showSpecsPopover && quickSpecs.length > 0 && (
+            <div className="absolute inset-0 bg-galaxy-950/90 backdrop-blur-sm flex flex-col justify-center px-5 py-4 space-y-2 animate-in fade-in duration-200">
+              <p className="text-[10px] font-extrabold text-galaxy-cyan uppercase tracking-widest mb-1 flex items-center gap-1">
+                <Cpu className="w-3 h-3" /> Quick Specs
+              </p>
+              {quickSpecs.map((spec, idx) => {
+                const Icon = spec.Icon;
+                return (
+                  <div key={idx} className="flex items-start gap-2 text-[11px]">
+                    <Icon className="w-3.5 h-3.5 text-galaxy-cyan flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-gray-400 font-medium">{spec.label}: </span>
+                      <span className="text-white font-semibold">{spec.value}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Link>
 
         {/* Content */}
@@ -137,7 +176,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
           <div>
             {/* Category & Rating */}
             <div className="flex items-center justify-between text-xs text-gray-400 mb-1.5">
-              <span className="text-galaxy-cyan font-medium">{product.category}</span>
+              <span className="text-galaxy-cyan font-semibold tracking-wide uppercase text-[10px]">{product.category}</span>
               <div className="flex items-center gap-1 text-amber-400 font-semibold">
                 <Star className="w-3.5 h-3.5 fill-amber-400" />
                 <span>{ratingVal.toFixed(1)}</span>
@@ -159,18 +198,33 @@ export default function ProductCard({ product }: { product: ProductType }) {
               {product.description}
             </p>
 
-            {/* Color Swatches */}
+            {/* Interactive Color Swatches */}
             {colors.length > 0 && (
-              <div className="flex items-center gap-1.5 mt-3">
-                <span className="text-[10px] text-gray-500 mr-1">Colors:</span>
-                {colors.slice(0, 4).map((c, i) => (
-                  <span
-                    key={i}
-                    className="w-3 h-3 rounded-full border border-slate-700 shadow-sm"
-                    style={{ backgroundColor: c.hex }}
-                    title={c.name}
-                  />
-                ))}
+              <div className="flex items-center gap-2 mt-3">
+                <span className="text-[10px] font-semibold text-gray-400">Color:</span>
+                <div className="flex items-center gap-1.5">
+                  {colors.slice(0, 4).map((c, i) => {
+                    const isSelected = selectedColor === c.name;
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setSelectedColor(c.name);
+                        }}
+                        className={`w-4 h-4 rounded-full border transition-all ${
+                          isSelected
+                            ? "ring-2 ring-cyan-400 ring-offset-1 ring-offset-galaxy-950 scale-110 border-white"
+                            : "border-slate-700 hover:scale-105"
+                        }`}
+                        style={{ backgroundColor: c.hex }}
+                        title={c.name}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -191,7 +245,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleAddToCart}
-                className="p-2.5 rounded-xl bg-slate-800 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/40 text-gray-200 hover:text-galaxy-cyan transition-all"
+                className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/40 text-gray-200 hover:text-galaxy-cyan transition-all"
                 title="Add to Cart"
                 aria-label="Add to Cart"
               >
@@ -199,7 +253,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
               </button>
               <button
                 onClick={handleOpenQuickView}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-1 shadow-sm"
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-600 text-galaxy-950 font-extrabold text-xs hover:opacity-95 transition-all flex items-center gap-1 shadow-sm shimmer-btn"
               >
                 Detail <ArrowRight className="w-3 h-3" />
               </button>

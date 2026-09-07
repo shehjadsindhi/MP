@@ -24,6 +24,7 @@ import {
 import { safeGetProducts, safeGetAIFeatures, safeGetArticles, safeGetOffers } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import PersonaRecommender from "@/components/PersonaRecommender";
+import HeroInteractive from "@/components/HeroInteractive";
 
 const FEATURE_ICONS: Record<string, any> = {
   "circle-to-search": Search,
@@ -50,105 +51,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-24 pb-20">
       {/* 1. HERO SECTION */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-8 pb-16">
-        {/* Background glow & radial galaxy effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-cyan-500/15 via-blue-600/10 to-indigo-600/15 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
-        <div className="absolute inset-0 galaxy-stars-bg opacity-40 pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Hero Text */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-galaxy-900/90 border border-cyan-500/30 text-galaxy-cyan text-xs font-semibold uppercase tracking-wider shadow-galaxy-cyan backdrop-blur-xl">
-                <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                <span>Next-Gen Galaxy AI 2.0 Ecosystem</span>
-              </div>
-
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1]">
-                Galaxy AI. <br />
-                <span className="gradient-text-galaxy">Intelligence that works for you.</span>
-              </h1>
-
-              {/* Description */}
-              <p className="text-base sm:text-lg text-gray-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Discover intelligent tools for productivity, creativity, communication and everyday life across Galaxy smartphones, tablets, and wearables.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                <Link
-                  href="/ai"
-                  className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-galaxy-cyan via-cyan-400 to-blue-500 text-galaxy-950 font-bold text-sm hover:opacity-95 transition-all shadow-galaxy-cyan hover:shadow-cyan-500/40 flex items-center justify-center gap-2 group"
-                >
-                  <span>Explore Galaxy AI</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-
-                <Link
-                  href="/ai/demos"
-                  className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-galaxy-900/80 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/50 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg"
-                >
-                  <Sparkles className="w-4 h-4 text-galaxy-cyan" />
-                  <span>Try Live AI Demos</span>
-                </Link>
-              </div>
-
-              {/* Hero Stats */}
-              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800/80 max-w-lg mx-auto lg:mx-0 text-left">
-                <div>
-                  <div className="text-2xl font-extrabold text-white">45 TOPS</div>
-                  <div className="text-[11px] text-gray-400">Quantum NPU Speed</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-extrabold text-galaxy-cyan">16+</div>
-                  <div className="text-[11px] text-gray-400">Live Languages</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-extrabold text-indigo-400">100%</div>
-                  <div className="text-[11px] text-gray-400">On-Device Privacy</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Hero Visual Showcase */}
-            <div className="lg:col-span-5 relative flex items-center justify-center">
-              {/* Glassmorphic device card */}
-              <div className="relative w-full max-w-md rounded-3xl bg-gradient-to-b from-galaxy-850/80 to-galaxy-950/90 border border-cyan-500/30 p-6 shadow-2xl shadow-cyan-950/60 backdrop-blur-2xl animate-float">
-                {/* Floating mini tool card */}
-                <div className="absolute -top-4 -right-4 p-3 rounded-2xl bg-galaxy-900/90 border border-cyan-500/40 shadow-xl backdrop-blur-md flex items-center gap-2.5 text-xs text-white z-20">
-                  <div className="w-7 h-7 rounded-lg bg-cyan-500/20 text-galaxy-cyan flex items-center justify-center">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-[11px]">Circle to Search</div>
-                    <div className="text-[9px] text-gray-400">Instant visual lookup</div>
-                  </div>
-                </div>
-
-                {/* Hero Image */}
-                <div className="relative h-80 w-full flex items-center justify-center p-4">
-                  <img
-                    src="/images/nova_ultra.jpg"
-                    alt="Galaxy S25 Ultra"
-                    className="max-h-full max-w-full object-contain filter drop-shadow-2xl"
-                  />
-                </div>
-
-                {/* Bottom interactive ticker */}
-                <div className="mt-2 p-3.5 rounded-2xl bg-galaxy-950/90 border border-slate-800 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-bold text-white">Galaxy S25 Ultra</span>
-                  </div>
-                  <span className="text-galaxy-cyan font-mono font-semibold">$1,299.99</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroInteractive />
 
       {/* 2. EXPLORE GALAXY AI FEATURES SECTION */}
       <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">

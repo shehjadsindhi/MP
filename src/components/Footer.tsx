@@ -219,7 +219,13 @@ export default function Footer() {
       {/* Copyright Bottom Bar */}
       <div className="border-t border-slate-800/80 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <p>© {new Date().getFullYear()} Galaxy AI Hub. Independent Educational Concept.</p>
+          <div className="flex items-center gap-3">
+            <p>© {new Date().getFullYear()} Galaxy AI Hub. Independent Educational Concept.</p>
+            <span className="px-2.5 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-galaxy-cyan text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Quantum NPU Engine: Operational
+            </span>
+          </div>
           <div className="flex items-center gap-6 text-gray-500">
             <Link href="/learn/knox-vault-ai-privacy-whitepaper" className="hover:text-gray-300 transition-colors">
               Privacy Architecture

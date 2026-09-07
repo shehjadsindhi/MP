@@ -42,8 +42,18 @@ export default function Navbar() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const navLinks = [
@@ -141,24 +151,27 @@ export default function Navbar() {
             {/* Search Trigger */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="p-2.5 rounded-xl bg-galaxy-900 hover:bg-slate-800 border border-slate-800 text-gray-300 hover:text-white transition-colors flex items-center gap-2"
+              className="p-2.5 rounded-xl bg-galaxy-900/80 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-gray-300 hover:text-white transition-all flex items-center gap-2 shadow-sm"
               title="Search Catalog & AI Features (Ctrl+K)"
               aria-label="Open Search"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 text-galaxy-cyan" />
               <span className="text-xs text-gray-400 hidden xl:inline">Search...</span>
+              <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono text-gray-400 bg-slate-800/80 border border-slate-700 rounded-md">
+                ⌘K
+              </kbd>
             </button>
 
             {/* Wishlist Link */}
             <Link
               href="/wishlist"
-              className="p-2.5 rounded-xl bg-galaxy-900 hover:bg-slate-800 border border-slate-800 text-gray-300 hover:text-white transition-colors relative"
+              className="p-2.5 rounded-xl bg-galaxy-900/80 hover:bg-slate-800 border border-slate-800 hover:border-rose-500/40 text-gray-300 hover:text-white transition-all relative"
               title="Saved Wishlist"
               aria-label="Wishlist"
             >
-              <Heart className="w-4 h-4" />
+              <Heart className="w-4 h-4 text-rose-400" />
               {wishCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center animate-bounce shadow-md">
                   {wishCount}
                 </span>
               )}
@@ -167,13 +180,13 @@ export default function Navbar() {
             {/* Cart Drawer Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="p-2.5 rounded-xl bg-galaxy-900 hover:bg-slate-800 border border-slate-800 text-gray-300 hover:text-white transition-colors relative"
+              className="p-2.5 rounded-xl bg-galaxy-900/80 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-gray-300 hover:text-white transition-all relative"
               title="Shopping Cart"
               aria-label="Shopping Cart"
             >
-              <ShoppingBag className="w-4 h-4" />
+              <ShoppingBag className="w-4 h-4 text-galaxy-cyan" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-galaxy-cyan text-galaxy-950 rounded-full text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-galaxy-cyan text-galaxy-950 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse shadow-md">
                   {itemCount}
                 </span>
               )}

@@ -50,18 +50,18 @@
 
 /* Glassmorphism and Glowing Effects */
 .glass-panel {
-  background: rgba(12, 19, 32, 0.7);
+  background: rgba(12, 19, 32, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-panel-glow {
-  background: rgba(16, 26, 44, 0.65);
+  background: rgba(16, 26, 44, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  box-shadow: 0 0 30px -10px rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 35px -10px rgba(0, 240, 255, 0.2);
 }
 
 .glass-card {
@@ -73,17 +73,17 @@
 }
 
 .glass-card:hover {
-  border-color: rgba(0, 240, 255, 0.35);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px -8px rgba(0, 240, 255, 0.15);
+  border-color: rgba(0, 240, 255, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 35px -10px rgba(0, 240, 255, 0.2);
 }
 
 .text-glow-cyan {
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
 }
 
 .text-glow-indigo {
-  text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+  text-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
 }
 
 /* Animated Gradient Text */
@@ -99,6 +99,12 @@
   -webkit-text-fill-color: transparent;
 }
 
+.gradient-text-gold {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* Sparkle Background Dots */
 .galaxy-stars-bg {
   background-image: 
@@ -110,3 +116,48 @@
   background-repeat: repeat;
   background-size: 550px 350px;
 }
+
+/* Shimmer & Glow Keyframe Animations */
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); }
+  50% { border-color: rgba(129, 140, 248, 0.6); box-shadow: 0 0 25px rgba(129, 140, 248, 0.3); }
+}
+
+.animate-border-glow {
+  animation: borderGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+.animate-pulse-slow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Shimmering Button Highlight */
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 70%
+  );
+  transform: rotate(30deg);
+  transition: transform 0.8s ease;
+}
+.shimmer-btn:hover::after {
+  transform: rotate(30deg) translate(50%, 50%);
+}
+

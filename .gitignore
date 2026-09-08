@@ -29,3 +29,7 @@ service-account.json
 *.db-journal
 coverage/
 .nyc_output/
+test-*.txt
+temp-*.txt
+*.tmp
+*.temp

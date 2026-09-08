@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
+import { adminMutationRateLimit } from "@/lib/rateLimit";
+import { z } from "zod";
 
 import { safeGetArticles, safeGetArticleBySlug } from "@/lib/db";
+
+const articleSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  slug: z.string().optional(),
+  category: z.string().optional(),
+  author: z.string().optional(),
+  readTime: z.string().optional(),
+  excerpt: z.string().optional(),
+  content: z.string().optional(),
+  image: z.string().optional(),
+  tagsJson: z.unknown().optional(),
+  isFeatured: z.boolean().optional(),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,6 +40,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = adminMutationRateLimit(req);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const user = await getSessionUser();
     if (!user || user.role !== "ADMIN") {
@@ -32,26 +50,31 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, slug, category, author, readTime, excerpt, content, image, tagsJson, isFeatured } = body;
-    const articleSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const result = articleSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
+    }
+
+    const data = result.data;
+    const articleSlug = data.slug || data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
     const article = await prisma.article.create({
       data: {
-        title,
+        title: data.title,
         slug: articleSlug,
-        category: category || "AI Guides",
-        author: author || "Galaxy AI Lab",
-        readTime: readTime || "5 min read",
-        excerpt: excerpt || "",
-        content: content || "",
-        image: image || "/images/nova_ultra.jpg",
-        tagsJson: typeof tagsJson === "string" ? tagsJson : JSON.stringify(tagsJson || []),
-        isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : false,
+        category: data.category || "AI Guides",
+        author: data.author || "Galaxy AI Lab",
+        readTime: data.readTime || "5 min read",
+        excerpt: data.excerpt || "",
+        content: data.content || "",
+        image: data.image || "/images/nova_ultra.jpg",
+        tagsJson: typeof data.tagsJson === "string" ? data.tagsJson : JSON.stringify(data.tagsJson || []),
+        isFeatured: data.isFeatured !== undefined ? Boolean(data.isFeatured) : false,
       },
     });
 
     return NextResponse.json({ success: true, article });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to create article" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to create article" }, { status: 500 });
   }
 }

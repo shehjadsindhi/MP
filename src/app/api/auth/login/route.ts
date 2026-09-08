@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { comparePassword, signToken } from "@/lib/auth";
 import { z } from "zod";
+import { authRateLimit } from "@/lib/rateLimit";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -9,6 +10,9 @@ const loginSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = authRateLimit(req);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const body = await req.json();
     const result = loginSchema.safeParse(body);
@@ -53,7 +57,7 @@ export async function POST(req: NextRequest) {
     response.cookies.set("galaxy_auth_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60,
       path: "/",
     });

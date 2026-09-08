@@ -1,8 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
+import { adminMutationRateLimit } from "@/lib/rateLimit";
+import { z } from "zod";
 
 import { safeGetProducts } from "@/lib/db";
+
+const productSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  slug: z.string().optional(),
+  category: z.string().optional(),
+  price: z.number().min(0).or(z.string().transform(val => parseFloat(val))),
+  originalPrice: z.number().min(0).optional(),
+  discount: z.number().int().min(0).max(100).optional(),
+  badge: z.string().optional().nullable(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  stock: z.number().int().min(0).optional(),
+  specsJson: z.unknown().optional(),
+  colorsJson: z.unknown().optional(),
+  storageJson: z.unknown().optional(),
+  aiFeaturesJson: z.unknown().optional(),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -31,6 +50,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = adminMutationRateLimit(req);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const user = await getSessionUser();
     if (!user || user.role !== "ADMIN") {
@@ -38,41 +60,31 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      name,
-      slug,
-      category,
-      price,
-      originalPrice,
-      discount,
-      badge,
-      description,
-      image,
-      stock,
-      specsJson,
-      colorsJson,
-      storageJson,
-      aiFeaturesJson,
-    } = body;
+    const result = productSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
+    }
 
-    const productSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const data = result.data;
+
+    const productSlug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
     const product = await prisma.product.create({
       data: {
-        name,
+        name: data.name,
         slug: productSlug,
-        category: category || "Smartphones",
-        price: parseFloat(price),
-        originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
-        discount: discount ? parseInt(discount) : 0,
-        badge: badge || null,
-        description: description || "",
-        image: image || "/images/nova_ultra.jpg",
-        stock: stock ? parseInt(stock) : 50,
-        specsJson: typeof specsJson === "string" ? specsJson : JSON.stringify(specsJson || {}),
-        colorsJson: typeof colorsJson === "string" ? colorsJson : JSON.stringify(colorsJson || []),
-        storageJson: typeof storageJson === "string" ? storageJson : JSON.stringify(storageJson || []),
-        aiFeaturesJson: typeof aiFeaturesJson === "string" ? aiFeaturesJson : JSON.stringify(aiFeaturesJson || []),
+        category: data.category || "Smartphones",
+        price: typeof data.price === "string" ? parseFloat(data.price) : data.price,
+        originalPrice: data.originalPrice ? (typeof data.originalPrice === "string" ? parseFloat(data.originalPrice) : data.originalPrice) : (typeof data.price === "string" ? parseFloat(data.price) : data.price),
+        discount: data.discount || 0,
+        badge: data.badge || null,
+        description: data.description || "",
+        image: data.image || "/images/nova_ultra.jpg",
+        stock: data.stock ?? 50,
+        specsJson: typeof data.specsJson === "string" ? data.specsJson : JSON.stringify(data.specsJson || {}),
+        colorsJson: typeof data.colorsJson === "string" ? data.colorsJson : JSON.stringify(data.colorsJson || []),
+        storageJson: typeof data.storageJson === "string" ? data.storageJson : JSON.stringify(data.storageJson || []),
+        aiFeaturesJson: typeof data.aiFeaturesJson === "string" ? data.aiFeaturesJson : JSON.stringify(data.aiFeaturesJson || []),
       },
     });
 

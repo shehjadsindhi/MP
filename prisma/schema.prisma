@@ -1,10 +1,12 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
+// For local development: provider = "sqlite" with DATABASE_URL="file:./dev.db"
+// For production PostgreSQL: change provider to "postgresql" and set DATABASE_URL="postgresql://..."
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
 }
 
 model User {
@@ -26,6 +28,8 @@ model User {
   cartItems    CartItem[]
   wishlist     WishlistItem[]
   interactions AIInteraction[]
+  reviews      Review[]
+  @@index([email])
 }
 
 model Product {
@@ -54,6 +58,9 @@ model Product {
   orderItems     OrderItem[]
   cartItems      CartItem[]
   wishlistItems  WishlistItem[]
+  reviews        Review[]
+  @@index([category])
+  @@index([isFeatured])
 }
 
 model CartItem {
@@ -69,6 +76,9 @@ model CartItem {
 
   user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, selectedColor, selectedStorage])
+  @@index([userId])
 }
 
 model WishlistItem {
@@ -82,6 +92,7 @@ model WishlistItem {
   product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+  @@index([userId])
 }
 
 model Order {
@@ -109,6 +120,10 @@ model Order {
 
   user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   items           OrderItem[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -125,6 +140,8 @@ model OrderItem {
 
   order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
 }
 
 model AIFeature {
@@ -187,4 +204,34 @@ model AIInteraction {
   createdAt  DateTime @default(now())
 
   user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([demoType])
+  @@index([createdAt])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  productId   String
+  userId      String?
+  rating      Int      @default(5) // 1-5
+  title       String?
+  comment     String
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([rating])
 }

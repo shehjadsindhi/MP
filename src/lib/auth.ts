@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
 
-const JWT_SECRET = process.env.JWT_SECRET || "galaxy-ai-hub-super-secret-jwt-key-2025-secure";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export interface TokenPayload {
   userId: string;
@@ -12,20 +12,27 @@ export interface TokenPayload {
   name: string;
 }
 
+function getJwtSecret(): string {
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is required. Application cannot sign tokens without it.");
+  }
+  return JWT_SECRET;
+}
+
 export function signToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    return jwt.verify(token, getJwtSecret()) as TokenPayload;
   } catch (error) {
     return null;
   }
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+  return bcrypt.hash(password, 12);
 }
 
 export async function comparePassword(password: string, hash: string): Promise<boolean> {

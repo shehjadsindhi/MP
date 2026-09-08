@@ -2,6 +2,7 @@ node_modules/
 .next/
 .env
 .env.local
+.env.*.local
 .vscode/
 .DS_Store
 dist/
@@ -9,3 +10,7 @@ build/
 coverage/
 npm-debug.log
 *.log
+prisma/dev.db
+prisma/dev.db-journal
+tsconfig.tsbuildinfo
+*.tsbuildinfo

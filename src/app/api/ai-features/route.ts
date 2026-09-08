@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
+import { adminMutationRateLimit } from "@/lib/rateLimit";
+import { z } from "zod";
 
 import { safeGetAIFeatures } from "@/lib/db";
+
+const aiFeatureSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  slug: z.string().optional(),
+  category: z.string().optional(),
+  icon: z.string().optional(),
+  badge: z.string().optional().nullable(),
+  shortDesc: z.string().optional(),
+  fullDesc: z.string().optional(),
+  demoTab: z.string().optional(),
+  supportedDevicesJson: z.unknown().optional(),
+  benefitsJson: z.unknown().optional(),
+  howItWorksJson: z.unknown().optional(),
+  faqsJson: z.unknown().optional(),
+  isFeatured: z.boolean().optional(),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,6 +37,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = adminMutationRateLimit(req);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const user = await getSessionUser();
     if (!user || user.role !== "ADMIN") {
@@ -26,44 +47,34 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      name,
-      slug,
-      category,
-      icon,
-      badge,
-      shortDesc,
-      fullDesc,
-      demoTab,
-      supportedDevicesJson,
-      benefitsJson,
-      howItWorksJson,
-      faqsJson,
-      isFeatured,
-    } = body;
+    const result = aiFeatureSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
+    }
 
-    const featureSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const data = result.data;
+    const featureSlug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
     const feature = await prisma.aIFeature.create({
       data: {
-        name,
+        name: data.name,
         slug: featureSlug,
-        category: category || "Productivity",
-        icon: icon || "Sparkles",
-        badge: badge || null,
-        shortDesc: shortDesc || "",
-        fullDesc: fullDesc || "",
-        demoTab: demoTab || "notes",
-        supportedDevicesJson: typeof supportedDevicesJson === "string" ? supportedDevicesJson : JSON.stringify(supportedDevicesJson || []),
-        benefitsJson: typeof benefitsJson === "string" ? benefitsJson : JSON.stringify(benefitsJson || []),
-        howItWorksJson: typeof howItWorksJson === "string" ? howItWorksJson : JSON.stringify(howItWorksJson || []),
-        faqsJson: typeof faqsJson === "string" ? faqsJson : JSON.stringify(faqsJson || []),
-        isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : true,
+        category: data.category || "Productivity",
+        icon: data.icon || "Sparkles",
+        badge: data.badge || null,
+        shortDesc: data.shortDesc || "",
+        fullDesc: data.fullDesc || "",
+        demoTab: data.demoTab || "notes",
+        supportedDevicesJson: typeof data.supportedDevicesJson === "string" ? data.supportedDevicesJson : JSON.stringify(data.supportedDevicesJson || []),
+        benefitsJson: typeof data.benefitsJson === "string" ? data.benefitsJson : JSON.stringify(data.benefitsJson || []),
+        howItWorksJson: typeof data.howItWorksJson === "string" ? data.howItWorksJson : JSON.stringify(data.howItWorksJson || []),
+        faqsJson: typeof data.faqsJson === "string" ? data.faqsJson : JSON.stringify(data.faqsJson || []),
+        isFeatured: data.isFeatured !== undefined ? Boolean(data.isFeatured) : true,
       },
     });
 
     return NextResponse.json({ success: true, feature });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to create AI feature" }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to create AI feature" }, { status: 500 });
   }
 }

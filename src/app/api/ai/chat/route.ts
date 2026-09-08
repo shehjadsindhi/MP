@@ -1,30 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAssistantResponse } from "@/lib/mockAI";
+import { aiChat } from "@/lib/aiProvider";
 import { prisma } from "@/lib/prisma";
+import { getSessionUser } from "@/lib/auth";
+import { aiApiRateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = aiApiRateLimit(req);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
-    const { message, history } = await req.json();
-    if (!message) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    const body = await req.json();
+    const message = (body.message || "").trim();
+    const history = body.history || [];
+
+    if (!message || message.length > 2000) {
+      return NextResponse.json(
+        { error: message ? "Message exceeds 2000 character limit." : "Message is required." },
+        { status: 400 }
+      );
     }
 
-    const result = await getAssistantResponse(message, history || []);
+    const sessionUser = await getSessionUser().catch(() => null);
+    const result = await aiChat(message, history);
 
-    // Record interaction in database silently
     try {
       await prisma.aIInteraction.create({
         data: {
+          userId: sessionUser?.id || null,
           demoType: "chat",
           inputData: message,
-          outputData: JSON.stringify(result),
+          outputData: JSON.stringify(result.data),
         },
       });
     } catch (dbErr) {
-      // Continue even if DB write fails
+      console.warn("Failed to log AI interaction:", dbErr);
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      reply: result.data.reply,
+      suggestedLinks: result.data.suggestedLinks,
+      engine: result.engine,
+      provider: result.provider,
+      usedFallback: result.usedFallback,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Chat error" }, { status: 500 });
   }

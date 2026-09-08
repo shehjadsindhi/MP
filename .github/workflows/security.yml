@@ -1,0 +1,51 @@
+name: Security & Validation Checks
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Security Check - No secrets in code
+        run: |
+          echo "Checking for potential secrets..."
+          if grep -ri "password\|secret\|api_key\|apikey\|token\|auth\|jwt\|private_key" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" src/ prisma/; then
+            echo "ERROR: Potential secrets found in code"
+            exit 1
+          fi
+          echo "No secrets found in code"
+      
+      - name: Security Check - No .env files
+        run: |
+          if [ -f ".env" ]; then
+            echo "ERROR: .env file should not be committed"
+            exit 1
+          fi
+          echo "No .env files found"
+      
+      - name: TypeScript Check
+        run: npx tsc --noEmit
+      
+      - name: Lint Check
+        run: npm run lint
+      
+      - name: Prisma Validate
+        run: npx prisma validate
+      
+      - name: Build Check
+        run: npm run build

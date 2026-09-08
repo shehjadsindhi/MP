@@ -4,7 +4,7 @@ node_modules/
 .env.local
 .env.*.local
 .vscode/
-.DS_Store
+.DS_Store/
 dist/
 build/
 coverage/
@@ -14,3 +14,18 @@ prisma/dev.db
 prisma/dev.db-journal
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+.htpasswd
+.secrets/
+credentials.json
+service-account.json
+*.sqlite
+*.db
+*.db-journal
+coverage/
+.nyc_output/

@@ -11,6 +11,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   suggestedLinks?: { label: string; url: string }[];
+  isStreaming?: boolean;
 }
 
 interface Conversation {
@@ -150,7 +151,14 @@ export default function AIAssistant() {
       content: text,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const assistantMessage: Message = {
+      id: `assistant-${Date.now()}`,
+      role: "assistant",
+      content: "",
+      isStreaming: true,
+    };
+
+    setMessages((prev) => [...prev, userMessage, assistantMessage]);
     setInput("");
     setLoading(true);
 
@@ -160,7 +168,7 @@ export default function AIAssistant() {
         content: m.content,
       }));
 
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch("/api/ai/chat/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -171,24 +179,45 @@ export default function AIAssistant() {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        const assistantMessage: Message = {
-          id: `assistant-${Date.now()}`,
-          role: "assistant",
-          content: data.reply,
-          suggestedLinks: data.suggestedLinks,
-        };
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullReply = "";
+        let conversationId = currentConversationId;
 
-        setMessages((prev) => [...prev, assistantMessage]);
-        if (data.conversationId && !currentConversationId) {
-          setCurrentConversationId(data.conversationId);
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            fullReply += chunk;
+
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessage.id ? { ...msg, content: fullReply } : msg
+              )
+            );
+          }
         }
+
+        const conversationIdHeader = res.headers.get("X-Conversation-Id");
+        if (conversationIdHeader && !currentConversationId) {
+          setCurrentConversationId(conversationIdHeader);
+        }
+
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessage.id ? { ...msg, isStreaming: false } : msg
+          )
+        );
       } else {
         const err = await res.json();
         showToast(err.error || "Failed to send message", "error");
+        setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessage.id));
       }
     } catch (e) {
       showToast("Network error. Please retry.", "error");
+      setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessage.id));
     } finally {
       setLoading(false);
     }
@@ -306,24 +335,30 @@ export default function AIAssistant() {
                           : "bg-galaxy-950 border border-slate-800 text-gray-200"
                       }`}
                     >
-                      <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
-                      {msg.suggestedLinks && msg.suggestedLinks.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-slate-700/50 space-y-1">
-                          {msg.suggestedLinks.map((link, idx) => (
-                            <Link
-                              key={idx}
-                              href={link.url}
-                              className="block text-[10px] text-galaxy-cyan hover:underline"
-                            >
-                              {link.label}
-                            </Link>
-                          ))}
-                        </div>
+                      {msg.role === "assistant" && msg.isStreaming && !msg.content ? (
+                        <NPUWaveform />
+                      ) : (
+                        <>
+                          <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
+                          {msg.suggestedLinks && msg.suggestedLinks.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-slate-700/50 space-y-1">
+                              {msg.suggestedLinks.map((link, idx) => (
+                                <Link
+                                  key={idx}
+                                  href={link.url}
+                                  className="block text-[10px] text-galaxy-cyan hover:underline"
+                                >
+                                  {link.label}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
                 ))}
-                {loading && (
+                {loading && !messages.some((m) => m.isStreaming) && (
                   <div className="flex justify-start">
                     <div className="bg-galaxy-950 border border-slate-800 p-3 rounded-2xl">
                       <NPUWaveform />

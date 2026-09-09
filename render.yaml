@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: galaxy-ai-hub
+    runtime: node
+    plan: starter
+    buildCommand: npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PROVIDER
+        value: postgresql
+      - key: DATABASE_URL
+        fromDatabase:
+          name: galaxy-ai-hub-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        fromService:
+          type: web
+          name: galaxy-ai-hub
+          property: host
+      - key: NEXT_PUBLIC_APP_URL
+        fromService:
+          type: web
+          name: galaxy-ai-hub
+          property: host
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: galaxy-ai-hub-redis
+          property: url
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+
+databases:
+  - name: galaxy-ai-hub-db
+    plan: starter
+    databaseName: galaxy_ai_hub
+    user: galaxy
+
+  - name: galaxy-ai-hub-redis
+    plan: free

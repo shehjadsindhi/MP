@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import { orderRateLimit } from "@/lib/rateLimit";
 import { z } from "zod";
+import { getStripeClient, createStripePaymentIntent } from "@/lib/stripe";
 
 const PAYMENT_PROVIDERS = {
   demo: { name: "Demo Payment", enabled: true },
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
 
     const order = await prisma.order.findFirst({
       where: { id: orderId, userId: user.id },
+      include: { items: true },
     });
 
     if (!order) {
@@ -72,12 +74,18 @@ export async function POST(req: NextRequest) {
     }
 
     if (provider === "stripe" && PAYMENT_PROVIDERS.stripe.enabled) {
+      const paymentIntent = await createStripePaymentIntent(order.total, "usd", {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        userId: user.id,
+      });
+
       return NextResponse.json({
         success: true,
-        message: "Stripe payment integration ready",
+        message: "Stripe payment intent created",
         orderId,
         provider: "stripe",
-        nextStep: "confirm_stripe_payment",
+        clientSecret: paymentIntent.client_secret,
       });
     }
 
@@ -92,7 +100,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: `Payment provider '${provider}' is not configured` }, { status: 400 });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Payment error:", error);
     return NextResponse.json({ error: "Failed to process payment" }, { status: 500 });
   }
 }

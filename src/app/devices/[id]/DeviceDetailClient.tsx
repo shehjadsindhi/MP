@@ -777,9 +777,6 @@ export default function DeviceDetailClient({
           </div>
         </div>
       )}
-    </div>
-  );
-}
 
       {/* Write a Review Modal */}
       {isReviewModalOpen && (

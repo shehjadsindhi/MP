@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "./ToastContext";
 import { useCart } from "./CartContext";
+import { useAuth } from "./AuthContext";
 
 export interface WishlistItemType {
   id: string;
@@ -32,6 +33,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
   const { showToast } = useToast();
   const { addItem } = useCart();
+  const { user } = useAuth();
 
   useEffect(() => {
     setIsMounted(true);

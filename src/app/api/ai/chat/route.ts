@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const message = (body.message || "").trim();
     const history = body.history || [];
+    const conversationId = body.conversationId || `conv-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     if (!message || message.length > 2000) {
       return NextResponse.json(
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: sessionUser?.id || null,
           demoType: "chat",
-          inputData: message,
+          inputData: JSON.stringify({ message, conversationId }),
           outputData: JSON.stringify(result.data),
         },
       });
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
       engine: result.engine,
       provider: result.provider,
       usedFallback: result.usedFallback,
+      conversationId,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Chat error" }, { status: 500 });

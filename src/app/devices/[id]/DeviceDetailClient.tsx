@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -24,12 +24,14 @@ import {
   ThumbsUp,
   X,
   Check,
-  Shield
+  Shield,
+  Loader2
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface ReviewItem {
   id: string;
@@ -53,6 +55,7 @@ export default function DeviceDetailClient({
   const { addItem } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   let gallery: string[] = [product.image];
   let colors: { name: string; hex: string; inStock: boolean }[] = [];
@@ -79,50 +82,13 @@ export default function DeviceDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"overview" | "specs" | "ai" | "reviews" | "box">("overview");
 
-  // Review Modal State
+  // Review State
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [newReview, setNewReview] = useState({ name: "", rating: 5, title: "", comment: "" });
+  const [newReview, setNewReview] = useState({ rating: 5, title: "", comment: "" });
+  const [reviewsData, setReviewsData] = useState<{ reviews: any[]; averageRating: number; reviewCount: number } | null>(null);
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
-  // Compare Modal State
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
-
-  // Mock Reviews List
-  const [reviewsList, setReviewsList] = useState<ReviewItem[]>([
-    {
-      id: "rev-1",
-      author: "Alex Morgan",
-      rating: 5,
-      date: "2 days ago",
-      title: "Mindblowing NPU & Circle to Search!",
-      comment:
-        "The build quality with Titanium is unreal. Live Translate during phone calls with clients overseas worked flawlessly without any delay. Highly recommended!",
-      verified: true,
-      helpfulCount: 24,
-    },
-    {
-      id: "rev-2",
-      author: "Samantha Reed",
-      rating: 5,
-      date: "1 week ago",
-      title: "Generative Edit is magic",
-      comment:
-        "I was able to erase photobombers from my vacation photos in seconds. Battery life easily lasts 1.5 days of heavy use.",
-      verified: true,
-      helpfulCount: 18,
-    },
-    {
-      id: "rev-3",
-      author: "Dr. Ryan Vance",
-      rating: 4,
-      date: "2 weeks ago",
-      title: "Outstanding performance & Knox Security",
-      comment:
-        "Display brightness of 2600 nits under direct sunlight is incredible. Note Assist makes meeting notes effortless.",
-      verified: true,
-      helpfulCount: 12,
-    },
-  ]);
-
   const isLiked = isInWishlist(product.id);
   const livePrice = product.price + (selectedStorage?.priceOffset || 0);
 
@@ -171,34 +137,74 @@ export default function DeviceDetailClient({
     }
   };
 
-  const handleAddReview = (e: React.FormEvent) => {
+  // Fetch reviews from API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`/api/reviews?productId=${encodeURIComponent(product.id)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setReviewsData(data);
+        }
+      } catch (e) {
+        console.warn("Failed to fetch reviews:", e);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+    fetchReviews();
+  }, [product.id]);
+
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReview.name || !newReview.comment) {
-      showToast("Please complete all required review fields.", "error");
+    if (!newReview.comment.trim()) {
+      showToast("Please write a review comment.", "error");
       return;
     }
 
-    const created: ReviewItem = {
-      id: `rev-${Date.now()}`,
-      author: newReview.name,
-      rating: newReview.rating,
-      date: "Just now",
-      title: newReview.title || "Great Galaxy Device!",
-      comment: newReview.comment,
-      verified: true,
-      helpfulCount: 0,
-    };
+    if (!user) {
+      showToast("Please log in to write a review", "error");
+      return;
+    }
 
-    setReviewsList([created, ...reviewsList]);
-    setIsReviewModalOpen(false);
-    setNewReview({ name: "", rating: 5, title: "", comment: "" });
-    showToast("Thank you! Your product review has been published.", "success");
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id, ...newReview }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setReviewsData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            reviews: [data.review, ...prev.reviews],
+            reviewCount: prev.reviewCount + 1,
+            averageRating: data.review.rating,
+          };
+        });
+        setIsReviewModalOpen(false);
+        setNewReview({ rating: 5, title: "", comment: "" });
+        showToast("Thank you! Your review has been published.", "success");
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Failed to submit review", "error");
+      }
+    } catch (e) {
+      showToast("Network error. Please retry.", "error");
+    }
   };
 
   const handleHelpfulClick = (reviewId: string) => {
-    setReviewsList((prev) =>
-      prev.map((r) => (r.id === reviewId ? { ...r, helpfulCount: r.helpfulCount + 1 } : r))
-    );
+    setReviewsData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        reviews: prev.reviews.map((r: any) => (r.id === reviewId ? { ...r, helpfulCount: (r.helpfulCount || 0) + 1 } : r)),
+      };
+    });
     showToast("Feedback recorded!", "info");
   };
 
@@ -488,7 +494,7 @@ export default function DeviceDetailClient({
                 : "bg-galaxy-900 text-gray-400 hover:text-white border border-slate-800"
             }`}
           >
-            <Star className="w-4 h-4" /> Reviews & Ratings ({reviewsList.length})
+            <Star className="w-4 h-4" /> Reviews & Ratings ({reviewsData?.reviews?.length || 0})
           </button>
 
           <button
@@ -651,47 +657,48 @@ export default function DeviceDetailClient({
 
             {/* Reviews List */}
             <div className="space-y-4">
-              {reviewsList.map((rev) => (
-                <div key={rev.id} className="p-6 rounded-2xl bg-galaxy-950 border border-slate-800 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-cyan-950 text-galaxy-cyan font-bold flex items-center justify-center text-xs border border-cyan-500/30">
-                        {rev.author.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold text-white flex items-center gap-2">
-                          <span>{rev.author}</span>
-                          {rev.verified && (
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
-                              Verified Purchase
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-gray-400">{rev.date}</div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-0.5 text-amber-400">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                      ))}
-                    </div>
-                  </div>
-
-                  <h4 className="text-sm font-bold text-white">{rev.title}</h4>
-                  <p className="text-xs text-gray-300 leading-relaxed">{rev.comment}</p>
-
-                  <div className="pt-2 flex items-center justify-between text-xs text-gray-400">
-                    <button
-                      onClick={() => handleHelpfulClick(rev.id)}
-                      className="flex items-center gap-1.5 hover:text-white transition-colors"
-                    >
-                      <ThumbsUp className="w-3.5 h-3.5 text-galaxy-cyan" />
-                      <span>Helpful ({rev.helpfulCount})</span>
-                    </button>
-                  </div>
+              {loadingReviews ? (
+                <div className="text-center py-8 text-gray-400">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                  <p className="text-xs">Loading reviews...</p>
                 </div>
-              ))}
+              ) : reviewsData?.reviews?.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <p className="text-xs">No reviews yet. Be the first to review this product!</p>
+                </div>
+              ) : (
+                reviewsData?.reviews?.map((rev) => (
+                  <div key={rev.id} className="p-6 rounded-2xl bg-galaxy-950 border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-cyan-950 text-galaxy-cyan font-bold flex items-center justify-center text-xs border border-cyan-500/30">
+                          {rev.user?.name?.charAt(0) || "U"}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-white flex items-center gap-2">
+                            <span>{rev.user?.name || "User"}</span>
+                            {rev.verified && (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
+                                Verified Purchase
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-gray-400">{new Date(rev.createdAt).toLocaleDateString()}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-0.5 text-amber-400">
+                        {[...Array(rev.rating)].map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+                    </div>
+
+                    {rev.title && <h4 className="text-sm font-bold text-white">{rev.title}</h4>}
+                    <p className="text-xs text-gray-300 leading-relaxed">{rev.comment}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -770,6 +777,9 @@ export default function DeviceDetailClient({
           </div>
         </div>
       )}
+    </div>
+  );
+}
 
       {/* Write a Review Modal */}
       {isReviewModalOpen && (
@@ -811,18 +821,6 @@ export default function DeviceDetailClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1">Your Name</label>
-                <input
-                  type="text"
-                  required
-                  value={newReview.name}
-                  onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                  placeholder="e.g. Alex Smith"
-                  className="w-full px-4 py-2.5 rounded-xl bg-galaxy-900 border border-slate-800 text-white text-xs focus:outline-none focus:border-galaxy-cyan"
-                />
-              </div>
-
-              <div>
                 <label className="block text-xs font-semibold text-gray-300 mb-1">Review Headline</label>
                 <input
                   type="text"
@@ -834,7 +832,7 @@ export default function DeviceDetailClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1">Comments</label>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">Review</label>
                 <textarea
                   required
                   rows={4}

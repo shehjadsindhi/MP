@@ -9,12 +9,12 @@ import { useCart } from "@/context/CartContext";
 export default function CompareClient({ allProducts }: { allProducts: any[] }) {
   const { addItem } = useCart();
 
-  // Initial selection of 3 top flagships
-  const [selectedIds, setSelectedIds] = useState<string[]>([
-    allProducts.find((p) => p.slug === "galaxy-s25-ultra")?.id || allProducts[0]?.id,
-    allProducts.find((p) => p.slug === "galaxy-z-fold-6")?.id || allProducts[1]?.id,
-    allProducts.find((p) => p.slug === "galaxy-tab-s10-ultra")?.id || allProducts[2]?.id,
-  ].filter(Boolean));
+  // Initial selection of up to 4 top flagships
+  const [selectedIds, setSelectedIds] = useState<string[]>(
+    [0, 1, 2, 3]
+      .map((i) => allProducts[i]?.id)
+      .filter(Boolean)
+  );
 
   const selectedProducts = selectedIds.map((id) => allProducts.find((p) => p.id === id)).filter(Boolean);
 
@@ -29,17 +29,13 @@ export default function CompareClient({ allProducts }: { allProducts: any[] }) {
   };
 
   const handleAddDeviceSlot = () => {
-    if (selectedIds.length >= 3) return;
+    if (selectedIds.length >= 4) return;
     const remaining = allProducts.find((p) => !selectedIds.includes(p.id));
     if (remaining) setSelectedIds([...selectedIds, remaining.id]);
   };
 
   const handleResetDefaults = () => {
-    setSelectedIds([
-      allProducts.find((p) => p.slug === "galaxy-s25-ultra")?.id || allProducts[0]?.id,
-      allProducts.find((p) => p.slug === "galaxy-z-fold-6")?.id || allProducts[1]?.id,
-      allProducts.find((p) => p.slug === "galaxy-tab-s10-ultra")?.id || allProducts[2]?.id,
-    ].filter(Boolean));
+    setSelectedIds([0, 1, 2, 3].map((i) => allProducts[i]?.id).filter(Boolean));
   };
 
   const specCategories = [
@@ -143,7 +139,7 @@ export default function CompareClient({ allProducts }: { allProducts: any[] }) {
         <div className="p-16 rounded-3xl bg-galaxy-900/60 border border-slate-800 text-center space-y-4 max-w-md mx-auto">
           <Smartphone className="w-12 h-12 text-gray-600 mx-auto" />
           <h2 className="text-lg font-bold text-white">No devices selected</h2>
-          <p className="text-xs text-gray-400">Add up to 3 devices to view side-by-side specifications.</p>
+          <p className="text-xs text-gray-400">Add up to 4 devices to view side-by-side specifications.</p>
           <button
             onClick={handleResetDefaults}
             className="px-6 py-2.5 rounded-xl bg-galaxy-cyan text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity inline-flex items-center gap-2"
@@ -155,7 +151,7 @@ export default function CompareClient({ allProducts }: { allProducts: any[] }) {
         /* Comparison Table with Horizontal Scroll Protection */
         <div className="rounded-3xl bg-galaxy-900/80 border border-slate-800 shadow-2xl overflow-hidden backdrop-blur-xl">
           <div className="overflow-x-auto">
-            <div className="min-w-[700px] md:min-w-full">
+            <div className="min-w-[900px] md:min-w-full">
               {/* Top Device Selector Columns */}
               <div className="grid grid-cols-4 divide-x divide-slate-800 border-b border-slate-800 bg-galaxy-950/90">
                 {/* Label Column Header */}
@@ -166,7 +162,7 @@ export default function CompareClient({ allProducts }: { allProducts: any[] }) {
                     </span>
                     <p className="text-xs text-gray-500 mt-1">Comparing {selectedProducts.length} devices</p>
                   </div>
-                  {selectedProducts.length < 3 && (
+                  {selectedProducts.length < 4 && (
                     <button
                       onClick={handleAddDeviceSlot}
                       className="mt-4 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-galaxy-cyan border border-slate-700 transition-colors flex items-center gap-1.5 self-start"
@@ -249,7 +245,7 @@ export default function CompareClient({ allProducts }: { allProducts: any[] }) {
                 ))}
 
                 {/* Empty Slot Placeholder */}
-                {Array.from({ length: 3 - selectedProducts.length }).map((_, i) => (
+                {Array.from({ length: 4 - selectedProducts.length }).map((_, i) => (
                   <div key={i} className="p-8 flex flex-col items-center justify-center text-center space-y-3 bg-galaxy-950/40">
                     <button
                       onClick={handleAddDeviceSlot}

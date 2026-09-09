@@ -1,52 +1,49 @@
 import { MetadataRoute } from "next";
-import { safeGetProducts, safeGetAIFeatures, safeGetArticles } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://galaxyai-five.vercel.app";
+  const baseUrl = "https://galaxyaihub.com";
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}`, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
-    { url: `${baseUrl}/ai`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/ai/demos`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/ai/features`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/devices`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/compare`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/learn`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
-    { url: `${baseUrl}/offers`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/orders`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
+  const products = await prisma.product.findMany({ select: { slug: true, updatedAt: true } });
+  const articles = await prisma.article.findMany({ select: { slug: true, updatedAt: true } });
+  const aiFeatures = await prisma.aIFeature.findMany({ select: { slug: true, updatedAt: true } });
+
+  const staticPages = [
+    { url: baseUrl, priority: 1.0, changefreq: "daily" as const },
+    { url: `${baseUrl}/devices`, priority: 0.9, changefreq: "daily" as const },
+    { url: `${baseUrl}/ai`, priority: 0.9, changefreq: "weekly" as const },
+    { url: `${baseUrl}/ai/demos`, priority: 0.8, changefreq: "weekly" as const },
+    { url: `${baseUrl}/learn`, priority: 0.8, changefreq: "weekly" as const },
+    { url: `${baseUrl}/offers`, priority: 0.7, changefreq: "weekly" as const },
+    { url: `${baseUrl}/compare`, priority: 0.7, changefreq: "weekly" as const },
+    { url: `${baseUrl}/search`, priority: 0.6, changefreq: "monthly" as const },
+    { url: `${baseUrl}/cart`, priority: 0.5, changefreq: "weekly" as const },
+    { url: `${baseUrl}/wishlist`, priority: 0.5, changefreq: "weekly" as const },
+    { url: `${baseUrl}/checkout`, priority: 0.5, changefreq: "weekly" as const },
+    { url: `${baseUrl}/login`, priority: 0.3, changefreq: "monthly" as const },
+    { url: `${baseUrl}/register`, priority: 0.3, changefreq: "monthly" as const },
   ];
 
-  try {
-    const [products, features, articles] = await Promise.all([
-      safeGetProducts(),
-      safeGetAIFeatures(),
-      safeGetArticles(),
-    ]);
+  const productUrls = products.map((p) => ({
+    url: `${baseUrl}/devices/${p.slug}`,
+    lastModified: p.updatedAt,
+    priority: 0.8,
+    changefreq: "weekly" as const,
+  }));
 
-    const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
-      url: `${baseUrl}/devices/${p.slug}`,
-      lastModified: new Date(p.updatedAt || new Date()),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
+  const articleUrls = articles.map((a) => ({
+    url: `${baseUrl}/learn/${a.slug}`,
+    lastModified: a.updatedAt,
+    priority: 0.7,
+    changefreq: "weekly" as const,
+  }));
 
-    const featureRoutes: MetadataRoute.Sitemap = features.map((f) => ({
-      url: `${baseUrl}/ai/features/${f.slug}`,
-      lastModified: new Date(f.updatedAt || new Date()),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
+  const featureUrls = aiFeatures.map((f) => ({
+    url: `${baseUrl}/ai/features/${f.slug}`,
+    lastModified: f.updatedAt,
+    priority: 0.7,
+    changefreq: "weekly" as const,
+  }));
 
-    const articleRoutes: MetadataRoute.Sitemap = articles.map((a) => ({
-      url: `${baseUrl}/learn/${a.slug}`,
-      lastModified: new Date(a.updatedAt || new Date()),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
-
-    return [...staticRoutes, ...productRoutes, ...featureRoutes, ...articleRoutes];
-  } catch {
-    return staticRoutes;
-  }
+  return [...staticPages, ...productUrls, ...articleUrls, ...featureUrls];
 }

@@ -186,6 +186,22 @@ export default function AccountDashboardPage() {
 
         <div className="p-6 rounded-3xl bg-galaxy-900/80 border border-slate-800 space-y-2 shadow-xl">
           <div className="flex items-center justify-between text-xs text-gray-400 font-semibold">
+            <span>AI Interactions</span>
+            <div className="p-2 rounded-xl bg-cyan-950/60 text-galaxy-cyan border border-cyan-800/40">
+              <Sparkles className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-extrabold text-white" id="ai-usage-count">-</div>
+          <Link
+            href="/account/ai-usage"
+            className="text-[11px] text-galaxy-cyan hover:underline font-semibold flex items-center gap-1"
+          >
+            View AI dashboard &rarr;
+          </Link>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-galaxy-900/80 border border-slate-800 space-y-2 shadow-xl">
+          <div className="flex items-center justify-between text-xs text-gray-400 font-semibold">
             <span>Configured Persona</span>
             <div className="p-2 rounded-xl bg-indigo-950/60 text-indigo-400 border border-indigo-800/40">
               <Sparkles className="w-4 h-4" />

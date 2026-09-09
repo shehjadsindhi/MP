@@ -2,13 +2,25 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, X, Send, Bot, ArrowRight, Loader2, Cpu, Camera, Languages, ShieldCheck, Gamepad2, GraduationCap } from "lucide-react";
+import { Sparkles, X, Send, Bot, ArrowRight, Loader2, Cpu, Camera, Languages, ShieldCheck, Gamepad2, GraduationCap, History, Plus } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   suggestedLinks?: { label: string; url: string }[];
+}
+
+interface Conversation {
+  id: string;
+  messages: Message[];
+  messageCount: number;
+  firstMessage: string;
+  lastMessage: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const QUICK_CHIPS = [
@@ -19,7 +31,6 @@ const QUICK_CHIPS = [
   { label: "Live Translate offline?", icon: Languages },
 ];
 
-// Animated NPU waveform bars
 function NPUWaveform() {
   return (
     <div className="flex items-end gap-0.5 h-4">
@@ -40,6 +51,7 @@ function NPUWaveform() {
 
 export default function AIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
+  const [view, setView] = useState<"chat" | "history">("chat");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -55,225 +67,301 @@ export default function AIAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const { showToast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    if (isOpen) scrollToBottom();
-  }, [messages, isOpen]);
+    scrollToBottom();
+  }, [messages]);
 
-  const handleSend = async (textToSend?: string) => {
-    const query = (textToSend || input).trim();
-    if (!query || loading) return;
+  useEffect(() => {
+    if (user && isOpen && view === "history") {
+      fetchConversations();
+    }
+  }, [user, isOpen, view]);
 
-    const userMsg: Message = {
-      id: Math.random().toString(),
+  const fetchConversations = async () => {
+    if (!user) return;
+    setLoadingHistory(true);
+    try {
+      const res = await fetch("/api/ai/chat/history");
+      if (res.ok) {
+        const data = await res.json();
+        setConversations(data.conversations || []);
+      }
+    } catch (e) {
+      showToast("Failed to load chat history", "error");
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const startNewChat = () => {
+    setMessages([
+      {
+        id: "welcome",
+        role: "assistant",
+        content:
+          "👋 Hi there! I'm your **Galaxy AI Copilot**. Ask me anything about Galaxy smartphones, Knox privacy, camera zoom, interactive AI demos, or student discounts!",
+        suggestedLinks: [
+          { label: "📸 Best for Photography", url: "/devices/galaxy-s25-ultra" },
+          { label: "🎓 Best for Students", url: "/devices/galaxy-tab-s10-ultra" },
+          { label: "✨ Try Live AI Demos", url: "/ai/demos" },
+        ],
+      },
+    ]);
+    setCurrentConversationId(null);
+    setView("chat");
+  };
+
+  const loadConversation = (conversation: Conversation) => {
+    setMessages(conversation.messages);
+    setCurrentConversationId(conversation.id);
+    setView("chat");
+  };
+
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || loading) return;
+
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
       role: "user",
-      content: query,
+      content: text,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
     try {
+      const history = messages.slice(-6).map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: query,
-          history: messages.map((m) => ({ role: m.role, content: m.content })),
+          message: text,
+          history,
+          conversationId: currentConversationId,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        const botMsg: Message = {
-          id: Math.random().toString(),
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
           role: "assistant",
           content: data.reply,
           suggestedLinks: data.suggestedLinks,
         };
-        setMessages((prev) => [...prev, botMsg]);
+
+        setMessages((prev) => [...prev, assistantMessage]);
+        if (data.conversationId && !currentConversationId) {
+          setCurrentConversationId(data.conversationId);
+        }
       } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Math.random().toString(),
-            role: "assistant",
-            content: "Sorry, I encountered a hiccup connecting to the Galaxy AI service. Please try again.",
-          },
-        ]);
+        const err = await res.json();
+        showToast(err.error || "Failed to send message", "error");
       }
     } catch (e) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          role: "assistant",
-          content: "Network issue. Please check your connection and try again.",
-        },
-      ]);
+      showToast("Network error. Please retry.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleQuickChip = (label: string) => {
+    sendMessage(label);
+  };
+
   return (
     <>
-      {/* Floating Toggle Button with Glowing Aura Ring */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <div className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 blur-md opacity-75 animate-pulse" />
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="relative p-3.5 rounded-full bg-gradient-to-tr from-galaxy-cyan via-cyan-400 to-blue-600 text-galaxy-950 font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2 group"
-          aria-label="Galaxy AI Assistant"
-        >
-          <Sparkles className="w-5 h-5 text-galaxy-950 animate-spin-slow" />
-          <span className="hidden sm:inline text-xs font-extrabold tracking-wide text-galaxy-950 pr-1">
-            Galaxy AI Copilot
-          </span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute top-1 right-1" />
-        </button>
-      </div>
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 shadow-galaxy-cyan flex items-center justify-center transition-all duration-300 hover:scale-110 ${
+          isOpen ? "rotate-90" : ""
+        }`}
+      >
+        {isOpen ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
+      </button>
 
-      {/* Chat Window */}
+      {/* Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-24 right-4 sm:right-6 z-50 w-[92vw] sm:w-96 max-h-[600px] h-[540px] rounded-3xl bg-galaxy-950/97 border border-cyan-500/40 shadow-2xl shadow-cyan-950/80 backdrop-blur-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6">
+        <div className="fixed bottom-24 right-6 z-40 w-[400px] max-h-[600px] h-[500px] bg-galaxy-900/95 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-galaxy-900 via-galaxy-850 to-galaxy-900 border-b border-slate-800/80 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 p-0.5 shadow-galaxy-cyan">
-                <div className="w-full h-full bg-galaxy-950 rounded-[14px] flex items-center justify-center text-galaxy-cyan">
-                  <Bot className="w-4 h-4" />
-                </div>
+          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center text-galaxy-cyan">
+                <Bot className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="font-bold text-white text-xs flex items-center gap-1.5">
-                  Galaxy AI Copilot <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                </h4>
-                <p className="text-[10px] text-gray-400 flex items-center gap-1">
-                  <Cpu className="w-2.5 h-2.5 text-galaxy-cyan" /> Quantum NPU Engine • Active
-                </p>
+                <h3 className="text-xs font-bold text-white">Galaxy AI Copilot</h3>
+                <div className="flex items-center gap-1 text-[10px] text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Online
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1.5 text-gray-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                {msg.role === "assistant" && (
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-950 to-blue-950 border border-cyan-500/40 flex items-center justify-center text-galaxy-cyan flex-shrink-0 mt-0.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </div>
-                )}
-
-                <div
-                  className={`max-w-[82%] rounded-2xl p-3 leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-galaxy-950 font-semibold rounded-tr-none shadow-md"
-                      : "bg-galaxy-900/90 border border-slate-800 text-gray-200 rounded-tl-none space-y-2 shadow-lg"
-                  }`}
-                >
-                  <div className="whitespace-pre-line">{msg.content}</div>
-
-                  {msg.suggestedLinks && msg.suggestedLinks.length > 0 && (
-                    <div className="pt-2 flex flex-wrap gap-1.5 border-t border-slate-800/80">
-                      {msg.suggestedLinks.map((link, idx) => (
-                        <Link
-                          key={idx}
-                          href={link.url}
-                          onClick={() => setIsOpen(false)}
-                          className="px-2.5 py-1 rounded-lg bg-galaxy-800/80 hover:bg-cyan-950 hover:border-cyan-500/40 border border-slate-700 text-cyan-300 hover:text-cyan-200 text-[10px] font-semibold transition-all flex items-center gap-1"
-                        >
-                          {link.label} <ArrowRight className="w-2.5 h-2.5" />
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {msg.role === "user" && (
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-galaxy-950 flex-shrink-0 mt-0.5 text-[10px] font-extrabold">
-                    U
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* NPU Waveform Loading Indicator */}
-            {loading && (
-              <div className="flex gap-2.5 items-center">
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-950 to-blue-950 border border-cyan-500/40 flex items-center justify-center text-galaxy-cyan flex-shrink-0">
-                  <Cpu className="w-3.5 h-3.5 animate-pulse" />
-                </div>
-                <div className="bg-galaxy-900/90 border border-slate-800 rounded-2xl rounded-tl-none p-3 flex flex-col gap-1.5 shadow-lg">
-                  <NPUWaveform />
-                  <span className="text-[10px] text-gray-400 font-medium">Synthesizing via Quantum NPU...</span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Quick action chips with icons */}
-          <div className="px-3 py-2 bg-galaxy-950/90 border-t border-slate-800/80 flex gap-1.5 overflow-x-auto no-scrollbar text-[11px]">
-            {QUICK_CHIPS.map((chip, i) => {
-              const Icon = chip.icon;
-              return (
+            <div className="flex items-center gap-1">
+              {user && (
                 <button
-                  key={i}
-                  onClick={() => handleSend(chip.label)}
-                  disabled={loading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-500/40 text-gray-300 hover:text-galaxy-cyan whitespace-nowrap transition-all flex-shrink-0 disabled:opacity-50"
+                  onClick={() => setView(view === "chat" ? "history" : "chat")}
+                  className="p-2 rounded-xl hover:bg-slate-800 text-gray-400 hover:text-white transition-colors"
+                  title={view === "chat" ? "History" : "New Chat"}
                 >
-                  <Icon className="w-3 h-3" />
-                  {chip.label}
+                  {view === "chat" ? <History className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 </button>
-              );
-            })}
+              )}
+            </div>
           </div>
 
-          {/* Input Bar */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="p-3 bg-galaxy-900/90 border-t border-slate-800 flex items-center gap-2"
-          >
-            <input
-              type="text"
-              placeholder="Ask Galaxy AI Copilot..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="flex-1 bg-galaxy-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-galaxy-cyan transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || loading}
-              className="p-2.5 rounded-xl bg-gradient-to-tr from-galaxy-cyan to-blue-500 hover:opacity-90 disabled:opacity-50 text-galaxy-950 transition-all shadow-md"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            </button>
-          </form>
+          {view === "history" ? (
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-xs font-bold text-white">Chat History</h4>
+                <button
+                  onClick={startNewChat}
+                  className="text-[10px] px-2 py-1 rounded-lg bg-cyan-500/10 text-galaxy-cyan border border-cyan-500/30 font-semibold hover:bg-cyan-500/20 transition-colors"
+                >
+                  New Chat
+                </button>
+              </div>
+              {loadingHistory ? (
+                <div className="text-center py-8 text-gray-400">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                  <p className="text-xs">Loading history...</p>
+                </div>
+              ) : conversations.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <History className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-xs">No chat history yet</p>
+                </div>
+              ) : (
+                conversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => loadConversation(conv)}
+                    className="w-full text-left p-3 rounded-2xl bg-galaxy-950/80 border border-slate-800 hover:border-cyan-500/40 transition-all space-y-1"
+                  >
+                    <div className="text-xs font-semibold text-white line-clamp-1">
+                      {conv.firstMessage || "New Conversation"}
+                    </div>
+                    <div className="text-[10px] text-gray-500 line-clamp-2">
+                      {conv.lastMessage || "No messages"}
+                    </div>
+                    <div className="text-[10px] text-gray-600">
+                      {conv.messageCount} messages • {new Date(conv.updatedAt).toLocaleDateString()}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] p-3 rounded-2xl text-xs leading-relaxed ${
+                        msg.role === "user"
+                          ? "bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950"
+                          : "bg-galaxy-950 border border-slate-800 text-gray-200"
+                      }`}
+                    >
+                      <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
+                      {msg.suggestedLinks && msg.suggestedLinks.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-slate-700/50 space-y-1">
+                          {msg.suggestedLinks.map((link, idx) => (
+                            <Link
+                              key={idx}
+                              href={link.url}
+                              className="block text-[10px] text-galaxy-cyan hover:underline"
+                            >
+                              {link.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="bg-galaxy-950 border border-slate-800 p-3 rounded-2xl">
+                      <NPUWaveform />
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Quick Chips */}
+              {messages.length <= 1 && (
+                <div className="px-4 pb-2">
+                  <div className="flex flex-wrap gap-1.5">
+                    {QUICK_CHIPS.map((chip) => {
+                      const Icon = chip.icon;
+                      return (
+                        <button
+                          key={chip.label}
+                          onClick={() => handleQuickChip(chip.label)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-galaxy-950 border border-slate-800 text-[10px] text-gray-300 hover:text-white hover:border-cyan-500/40 transition-all"
+                        >
+                          <Icon className="w-3 h-3" />
+                          {chip.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Input */}
+              <div className="p-3 border-t border-slate-800">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessage(input);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask Galaxy AI..."
+                    className="flex-1 bg-galaxy-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-cyan-500/40"
+                    disabled={loading}
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading || !input.trim()}
+                    className="p-2 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+              </div>
+            </>
+          )}
         </div>
       )}
     </>
   );
 }
-
-

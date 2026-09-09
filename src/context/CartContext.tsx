@@ -2,9 +2,10 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "./ToastContext";
+import { useAuth } from "./AuthContext";
 
 export interface CartItemType {
-  id: string; // unique key combining productId + color + storage
+  id: string;
   productId: string;
   name: string;
   slug: string;
@@ -49,6 +50,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     setIsMounted(true);
@@ -83,9 +85,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((item) => item.id === id);
       if (existing) {
-        return prev.map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity + (newItem.quantity || 1) } : item
-        );
+        return prev.map((item) => (item.id === id ? { ...item, quantity: item.quantity + (newItem.quantity || 1) } : item));
       }
       return [...prev, { ...newItem, id, quantity: newItem.quantity || 1 }];
     });

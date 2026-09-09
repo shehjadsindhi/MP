@@ -58,7 +58,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    @apply animation-none !important;
+    animation: none !important;
     scroll-behavior: auto !important;
   }
 }

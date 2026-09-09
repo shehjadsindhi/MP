@@ -71,8 +71,21 @@ export default function AIAssistant() {
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatPanelRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (isOpen && chatPanelRef.current) {
+      chatPanelRef.current.focus();
+    }
+  }, [isOpen]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -193,13 +206,22 @@ export default function AIAssistant() {
         className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 shadow-galaxy-cyan flex items-center justify-center transition-all duration-300 hover:scale-110 ${
           isOpen ? "rotate-90" : ""
         }`}
+        aria-label={isOpen ? "Close AI Assistant" : "Open AI Assistant"}
+        aria-expanded={isOpen}
       >
         {isOpen ? <X className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
       </button>
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-40 w-[400px] max-h-[600px] h-[500px] bg-galaxy-900/95 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden">
+        <div 
+          ref={chatPanelRef}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          className="fixed bottom-24 right-6 z-40 w-[400px] max-h-[600px] h-[500px] bg-galaxy-900/95 border border-slate-800 rounded-3xl shadow-2xl backdrop-blur-xl flex flex-col overflow-hidden"
+          role="dialog"
+          aria-label="Galaxy AI Assistant"
+        >
           {/* Header */}
           <div className="p-4 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">

@@ -103,6 +103,131 @@ async function callRealAI(prompt: string, temperature = 0.7): Promise<string> {
   throw new Error("No AI provider configured");
 }
 
+async function* streamGemini(prompt: string, temperature = 0.7): AsyncGenerator<string, void, unknown> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature, maxOutputTokens: 2048 },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => "Unknown error");
+    throw new Error(`Gemini API error: ${response.status} ${errText}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("No response body");
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        const jsonStr = trimmed.slice(6);
+        if (jsonStr === "[DONE]") return;
+
+        try {
+          const data = JSON.parse(jsonStr);
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) yield text;
+        } catch {
+          // skip malformed JSON
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+async function* streamOpenAI(prompt: string, temperature = 0.7): AsyncGenerator<string, void, unknown> {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature,
+      max_tokens: 2048,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text().catch(() => "Unknown error");
+    throw new Error(`OpenAI API error: ${response.status} ${errText}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("No response body");
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed === "data: [DONE]") continue;
+        if (!trimmed.startsWith("data: ")) continue;
+
+        const jsonStr = trimmed.slice(6);
+        try {
+          const data = JSON.parse(jsonStr);
+          const text = data.choices?.[0]?.delta?.content;
+          if (text) yield text;
+        } catch {
+          // skip malformed JSON
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+export async function* streamAIResponse(prompt: string, temperature = 0.7): AsyncGenerator<string, void, unknown> {
+  const config = getConfig();
+  if (config.provider === "gemini") {
+    yield* streamGemini(prompt, temperature);
+  } else if (config.provider === "openai") {
+    yield* streamOpenAI(prompt, temperature);
+  } else {
+    const mockResult = await getAssistantResponse(prompt, []);
+    yield mockResult.reply;
+  }
+}
+
 export async function aiTranslate(
   text: string,
   sourceLang: string,

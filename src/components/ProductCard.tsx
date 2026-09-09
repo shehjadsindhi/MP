@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import ProductQuickViewModal from "./ProductQuickViewModal";
+import TiltCard from "./TiltCard";
 
 export interface ProductType {
   id: string;
@@ -100,7 +101,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
 
   return (
     <>
-      <div className="group relative rounded-3xl bg-galaxy-900/60 border border-slate-800/80 hover:border-cyan-500/50 hover:shadow-2xl hover:shadow-cyan-950/40 transition-all duration-300 flex flex-col overflow-hidden glass-card">
+      <TiltCard className="group relative rounded-3xl bg-galaxy-900/60 border border-slate-800/80 hover:border-cyan-500/50 hover:shadow-2xl hover:shadow-cyan-950/40 transition-all duration-300 flex flex-col overflow-hidden glass-card">
         {/* Top Badges & Actions */}
         <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
           {product.badge ? (
@@ -272,7 +273,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
             </div>
           </div>
         </div>
-      </div>
+      </TiltCard>
 
       <ProductQuickViewModal
         product={product}

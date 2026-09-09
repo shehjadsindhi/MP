@@ -14,6 +14,8 @@ import {
   Cpu,
   CheckCircle2
 } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import ParallaxHeroBackground from "./ParallaxHeroBackground";
 
 const HERO_FEATURES = [
   {
@@ -71,14 +73,19 @@ export default function HeroInteractive() {
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-8 pb-16">
       {/* Background glow & radial galaxy effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-gradient-to-tr from-cyan-500/20 via-blue-600/15 to-indigo-600/20 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
+      <ParallaxHeroBackground className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] bg-gradient-to-tr from-cyan-500/20 via-blue-600/15 to-indigo-600/20 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
       <div className="absolute inset-0 galaxy-stars-bg opacity-50 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Left Hero Text */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <motion.div
+            className="lg:col-span-7 space-y-6 text-center lg:text-left"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-galaxy-900/90 border border-cyan-500/40 text-galaxy-cyan text-xs font-bold uppercase tracking-wider shadow-galaxy-cyan backdrop-blur-xl">
               <Sparkles className="w-4 h-4 animate-spin-slow text-galaxy-cyan" />
@@ -166,10 +173,15 @@ export default function HeroInteractive() {
                 <div className="text-[10px] text-gray-400">Knox On-Device</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Hero Visual Showcase Stage */}
-          <div className="lg:col-span-5 relative flex items-center justify-center">
+          <motion.div
+            className="lg:col-span-5 relative flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
             {/* Glassmorphic device card */}
             <div className="relative w-full max-w-md rounded-3xl bg-gradient-to-b from-galaxy-850/90 to-galaxy-950/95 border border-cyan-500/35 p-6 shadow-2xl shadow-cyan-950/80 backdrop-blur-2xl transition-all duration-300">
               
@@ -223,7 +235,7 @@ export default function HeroInteractive() {
               </div>
 
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </div>

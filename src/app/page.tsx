@@ -25,6 +25,7 @@ import { safeGetProducts, safeGetAIFeatures, safeGetArticles, safeGetOffers } fr
 import ProductCard from "@/components/ProductCard";
 import PersonaRecommender from "@/components/PersonaRecommender";
 import HeroInteractive from "@/components/HeroInteractive";
+import AnimatedSection, { itemVariants, containerVariants } from "@/components/AnimatedSection";
 
 const FEATURE_ICONS: Record<string, any> = {
   "circle-to-search": Search,
@@ -54,7 +55,7 @@ export default async function HomePage() {
       <HeroInteractive />
 
       {/* 2. EXPLORE GALAXY AI FEATURES SECTION */}
-      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12" variant="fadeInUp">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-galaxy-cyan text-xs font-semibold uppercase tracking-wider mb-2 shadow-galaxy-cyan">
@@ -130,13 +131,13 @@ export default async function HomePage() {
             );
           })}
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* 3. AI PERSONALIZATION ("Galaxy AI for You") */}
       <PersonaRecommender />
 
       {/* 4. FEATURED GALAXY HARDWARE MARKETPLACE */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10" variant="fadeInUp">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-galaxy-cyan text-xs font-semibold uppercase tracking-wider mb-2 shadow-galaxy-cyan">
@@ -159,16 +160,16 @@ export default async function HomePage() {
         </div>
 
         {/* 4 Product Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <AnimatedSection className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" variant="stagger" staggerChildren={0.1} as="div">
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product as any} />
           ))}
-        </div>
-      </section>
+        </AnimatedSection>
+      </AnimatedSection>
 
       {/* 5. ACTIVE PROMOTIONS TEASER */}
       {activeOffers.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" variant="fadeInUp">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {activeOffers.map((offer) => (
               <div
@@ -206,11 +207,11 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
-        </section>
+        </AnimatedSection>
       )}
 
       {/* 6. PRIVACY & KNOX SECURITY SECTION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" variant="scaleIn">
         <div className="rounded-3xl bg-gradient-to-br from-galaxy-900 via-galaxy-850 to-galaxy-950 border border-cyan-500/30 p-8 sm:p-14 shadow-2xl relative overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
             <div className="lg:col-span-7 space-y-4">
@@ -258,10 +259,10 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* 7. LATEST AI GUIDES & TUTORIALS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10" variant="fadeInUp">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-galaxy-cyan text-xs font-semibold uppercase tracking-wider mb-2">
@@ -283,7 +284,7 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <AnimatedSection className="grid grid-cols-1 md:grid-cols-3 gap-6" variant="fadeInUp">
           {latestArticles.map((art) => {
             const authorDisplay = art.author ? art.author.split(",")[0] : "Galaxy AI Research";
             return (
@@ -324,9 +325,9 @@ export default async function HomePage() {
                 </div>
               </Link>
             );
-          })}
-        </div>
-      </section>
+           })}
+        </AnimatedSection>
+      </AnimatedSection>
     </div>
   );
 }

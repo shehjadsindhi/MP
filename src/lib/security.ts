@@ -1,4 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
+export function withSecurityHeaders(handler: (req: NextRequest) => Promise<NextResponse>) {
+  return async (req: NextRequest) => {
+    const response = await handler(req);
+    return addSecurityHeaders(response);
+  };
+}
 
 export function addSecurityHeaders(response: NextResponse) {
   response.headers.set("X-Frame-Options", "DENY");
@@ -44,4 +51,23 @@ export function sanitizeHtml(dirty: string): string {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
+}
+
+export function sanitizeObject<T extends Record<string, any>>(obj: T): T {
+  const sanitized: Record<string, any> = {};
+  for (const key of Object.keys(obj)) {
+    const value = (obj as any)[key];
+    if (typeof value === "string") {
+      sanitized[key] = sanitizeHtml(value);
+    } else if (Array.isArray(value)) {
+      sanitized[key] = value.map((item) =>
+        typeof item === "string" ? sanitizeHtml(item) : item
+      );
+    } else if (value && typeof value === "object") {
+      sanitized[key] = sanitizeObject(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized as T;
 }

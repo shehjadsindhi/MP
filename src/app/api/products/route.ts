@@ -5,6 +5,7 @@ import { adminMutationRateLimit } from "@/lib/rateLimit";
 import { z } from "zod";
 
 import { safeGetProducts } from "@/lib/db";
+import { getCached, setCached, invalidatePattern } from "@/lib/cache";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -33,6 +34,13 @@ export async function GET(req: NextRequest) {
     const maxPrice = searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined;
     const featured = searchParams.get("featured") === "true";
 
+    const cacheKey = `products:${category || "all"}:${search || "none"}:${sort || "none"}:${minPrice || "none"}:${maxPrice || "none"}:${featured}`;
+    
+    const cached = await getCached<{ products: any[] }>(cacheKey, 300);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const products = await safeGetProducts({
       category,
       search,
@@ -42,7 +50,10 @@ export async function GET(req: NextRequest) {
       featured,
     });
 
-    return NextResponse.json({ products });
+    const result = { products };
+    await setCached(cacheKey, result, 300);
+
+    return NextResponse.json(result);
   } catch (error) {
     const products = await safeGetProducts();
     return NextResponse.json({ products });
@@ -87,6 +98,8 @@ export async function POST(req: NextRequest) {
         aiFeaturesJson: typeof data.aiFeaturesJson === "string" ? data.aiFeaturesJson : JSON.stringify(data.aiFeaturesJson || []),
       },
     });
+
+    invalidatePattern("products:*").catch(() => {});
 
     return NextResponse.json({ success: true, product });
   } catch (error: any) {

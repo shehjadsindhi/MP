@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, signToken } from "@/lib/auth";
 import { z } from "zod";
 import { authRateLimit } from "@/lib/rateLimit";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -44,6 +45,8 @@ export async function POST(req: NextRequest) {
       role: user.role,
       name: user.name,
     });
+
+    sendWelcomeEmail(user.email, user.name).catch(() => {});
 
     const response = NextResponse.json({
       success: true,

@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/auth";
 import { orderRateLimit } from "@/lib/rateLimit";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
 const TAX_RATE = 0.08;
 const SHIPPING_THRESHOLD = 150;
@@ -205,6 +206,8 @@ export async function POST(req: NextRequest) {
 
       return createdOrder;
     });
+
+    sendOrderConfirmationEmail(customerEmail, orderNumber, total).catch(() => {});
 
     return NextResponse.json({ success: true, order });
   } catch (error: any) {

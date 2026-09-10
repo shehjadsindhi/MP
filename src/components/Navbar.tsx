@@ -25,6 +25,8 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
 import SearchModal from "./SearchModal";
 import CartDrawer from "./CartDrawer";
+import ThemeToggle from "./ThemeToggle";
+import useSwipeGesture from "@/lib/useSwipeGesture";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -37,6 +39,12 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  useSwipeGesture({
+    onSwipeLeft: () => setIsMobileMenuOpen(false),
+    onSwipeRight: () => setIsMobileMenuOpen(true),
+    threshold: 60,
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -161,6 +169,8 @@ export default function Navbar() {
 
           {/* Right Action Icons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
+
             {/* Search Trigger */}
             <button
               onClick={() => setIsSearchOpen(true)}

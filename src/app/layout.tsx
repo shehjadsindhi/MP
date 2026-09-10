@@ -4,10 +4,17 @@ import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { FeatureFlagsProvider } from "@/context/FeatureFlagsContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIAssistant from "@/components/AIAssistant";
 import { registerServiceWorker } from "@/lib/serviceWorker";
+import AccessibilityImprovements from "@/components/AccessibilityImprovements";
+import Analytics from "@/components/Analytics";
+import PushNotificationRegistrar from "@/components/PushNotificationRegistrar";
+import RealtimeNotifications from "@/components/RealtimeNotifications";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 export const metadata: Metadata = {
   title: "Galaxy AI Hub — Intelligence That Works For You",
@@ -71,18 +78,27 @@ export default function RootLayout({
       </head>
       <body className="bg-galaxy-950 text-gray-100 min-h-screen flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
         <ToastProvider>
-          <AuthProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <Navbar />
-                <main className="flex-1">{children}</main>
-                <Footer />
-                <AIAssistant />
-              </WishlistProvider>
-            </CartProvider>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <FeatureFlagsProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <Navbar />
+                    <main id="main-content" className="flex-1">{children}</main>
+                    <Footer />
+                    <AIAssistant />
+                  </WishlistProvider>
+                </CartProvider>
+              </FeatureFlagsProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </ToastProvider>
         <ServiceWorkerRegistrar />
+        <AccessibilityImprovements />
+        <Analytics />
+        <PushNotificationRegistrar />
+        <RealtimeNotifications />
+        <MobileBottomNav />
       </body>
     </html>
   );

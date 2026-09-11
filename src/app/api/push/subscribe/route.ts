@@ -18,11 +18,11 @@ export async function POST(req: NextRequest) {
 
     await prisma.pushSubscription.upsert({
       where: { endpoint: subscription.endpoint },
-      update: { userId: user.id },
+      update: { userId: user.id, keys: JSON.stringify(subscription.keys) },
       create: {
         userId: user.id,
         endpoint: subscription.endpoint,
-        keys: subscription.keys,
+        keys: JSON.stringify(subscription.keys),
       },
     });
 

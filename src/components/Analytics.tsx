@@ -18,9 +18,9 @@ export default function Analytics() {
     script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
     document.head.appendChild(script);
 
-    window.dataLayer = window.dataLayer || [];
+    (window as any).dataLayer = (window as any).dataLayer || [];
     function gtag(...args: any[]) {
-      window.dataLayer.push(args);
+      (window as any).dataLayer.push(args);
     }
     (window as any).gtag = gtag;
 

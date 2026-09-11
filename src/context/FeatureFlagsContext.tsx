@@ -44,7 +44,7 @@ export default function FeatureFlagsProvider({ children }: { children: React.Rea
 
   useEffect(() => {
     const userId = "anonymous";
-    const assigned = Object.entries(DEFAULT_EXPERIMENTS).map(([name, defaultVariant]) => {
+    const assigned = Object.entries(DEFAULT_EXPERIMENTS).map(([name]) => {
       const isVariant = hashString(`${userId}:${name}`) % 2 === 0;
       return { name, variant: isVariant ? "variant" : "control" } as Experiment;
     });
@@ -66,6 +66,8 @@ export default function FeatureFlagsProvider({ children }: { children: React.Rea
 
   return <FeatureFlagsContext.Provider value={value}>{children}</FeatureFlagsContext.Provider>;
 }
+
+export { FeatureFlagsProvider };
 
 export function useFeatureFlags() {
   const context = useContext(FeatureFlagsContext);

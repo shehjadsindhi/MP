@@ -29,6 +29,7 @@ model User {
   wishlist     WishlistItem[]
   interactions AIInteraction[]
   reviews      Review[]
+  pushSubscriptions PushSubscription[]
   @@index([email])
 }
 
@@ -216,6 +217,20 @@ model NewsletterSubscriber {
   createdAt DateTime @default(now())
 
   @@index([email])
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String?
+  endpoint  String   @unique
+  keys      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([endpoint])
 }
 
 model Review {

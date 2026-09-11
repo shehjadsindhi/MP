@@ -22,7 +22,7 @@ export async function createDatabaseBackup() {
   try {
     const tables = [
       "User", "Product", "Order", "OrderItem", "CartItem", "WishlistItem",
-      "AIFeature", "Article", "AIInteraction", "NewsletterSubscriber", "Review", "Offer"
+      "AIFeature", "Article", "AIInteraction", "NewsletterSubscriber", "Review", "Offer", "PushSubscription"
     ];
 
     let sql = `-- Galaxy AI Hub Database Backup\n-- Generated: ${new Date().toISOString()}\n\n`;

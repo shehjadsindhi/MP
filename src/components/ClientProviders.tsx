@@ -26,15 +26,15 @@ export default function ClientProviders({ children }: { children: React.ReactNod
                 <main id="main-content" className="flex-1">{children}</main>
                 <Footer />
                 <AIAssistant />
+                <AccessibilityImprovements />
+                <PushNotificationRegistrar />
+                <RealtimeNotifications />
+                <MobileBottomNav />
               </WishlistProvider>
             </CartProvider>
           </FeatureFlagsProvider>
         </AuthProvider>
       </ToastProvider>
-      <AccessibilityImprovements />
-      <PushNotificationRegistrar />
-      <RealtimeNotifications />
-      <MobileBottomNav />
     </ThemeProvider>
   );
 }

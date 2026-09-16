@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Sparkles, X, Send, Bot, ArrowRight, Loader2, Cpu, Camera, Languages, ShieldCheck, Gamepad2, GraduationCap, History, Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -96,13 +96,7 @@ export default function AIAssistant() {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    if (user && isOpen && view === "history") {
-      fetchConversations();
-    }
-  }, [user, isOpen, view]);
-
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     if (!user) return;
     setLoadingHistory(true);
     try {
@@ -116,7 +110,13 @@ export default function AIAssistant() {
     } finally {
       setLoadingHistory(false);
     }
-  };
+  }, [user, showToast]);
+
+  useEffect(() => {
+    if (user && isOpen && view === "history") {
+      fetchConversations();
+    }
+  }, [user, isOpen, view, fetchConversations]);
 
   const startNewChat = () => {
     setMessages([

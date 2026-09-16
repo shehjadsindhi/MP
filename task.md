@@ -53,5 +53,10 @@
 - [x] Verified `PUT /api/admin/users/[id]` exists
 - [x] Checked `offers` page `OffersClient` — `applyPromo()` return type used correctly
 - [x] Verified prisma seed has `tagsJson` field set on articles
-- [x] Executed production build (`npm run build`) — 45 routes compiled clean with exit code 0
+- [x] Enabled `output: 'standalone'` in `next.config.mjs` for Docker container build compatibility ✓
+- [x] Fixed React hook dependency warnings in `AIAssistant.tsx` and `ProductReviews.tsx` using `useCallback` ✓
+- [x] Added `"use client";` to `src/app/offline/page.tsx` for client interactivity ✓
+- [x] Fixed provider nesting in `ClientProviders.tsx` (nested `MobileBottomNav` inside `CartProvider` and `WishlistProvider`) ✓
+- [x] Added comprehensive test suites: `auth.test.ts`, `dbFallback.test.ts`, `mockAI.test.ts` (8 suites, 34 tests all passing) ✓
+- [x] Executed clean production build (`npm run build`) with exit code 0 and `.next/standalone` generation verified ✓
 

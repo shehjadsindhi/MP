@@ -51,8 +51,12 @@ export async function middleware(req: NextRequest) {
   }
 
   if (isAdminRoute(pathname)) {
+    if (pathname === "/admin/login") {
+      return NextResponse.next();
+    }
+
     if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/admin/login", req.url));
     }
 
     const adminRes = await fetch(`${process.env.NEXTAUTH_URL || req.nextUrl.origin}/api/auth/me`, {
@@ -63,14 +67,14 @@ export async function middleware(req: NextRequest) {
     });
 
     if (!adminRes.ok) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/admin/login", req.url));
     }
 
     const data = await adminRes.json().catch(() => ({ user: null }));
     const user = data?.user;
 
     if (!user || user.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/admin/login?error=unauthorized", req.url));
     }
   }
 

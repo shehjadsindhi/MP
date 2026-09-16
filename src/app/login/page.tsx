@@ -201,6 +201,15 @@ export default function LoginPage() {
             Create an Account
           </Link>
         </p>
+
+        <div className="pt-1 text-center">
+          <Link
+            href="/admin/login"
+            className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" /> Administrator Gateway &rarr;
+          </Link>
+        </div>
       </div>
     </div>
   );

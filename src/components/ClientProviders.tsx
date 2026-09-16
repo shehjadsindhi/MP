@@ -6,6 +6,7 @@ import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { FeatureFlagsProvider } from "@/context/FeatureFlagsContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AIAssistant from "@/components/AIAssistant";
@@ -15,6 +16,9 @@ import RealtimeNotifications from "@/components/RealtimeNotifications";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin");
+
   return (
     <ThemeProvider>
       <ToastProvider>
@@ -22,14 +26,24 @@ export default function ClientProviders({ children }: { children: React.ReactNod
           <FeatureFlagsProvider>
             <CartProvider>
               <WishlistProvider>
-                <Navbar />
-                <main id="main-content" className="flex-1">{children}</main>
-                <Footer />
-                <AIAssistant />
-                <AccessibilityImprovements />
-                <PushNotificationRegistrar />
-                <RealtimeNotifications />
-                <MobileBottomNav />
+                {isAdmin ? (
+                  <main id="admin-main-content" className="flex-1 w-full min-h-screen bg-galaxy-950 text-gray-100">
+                    {children}
+                  </main>
+                ) : (
+                  <>
+                    <Navbar />
+                    <main id="main-content" className="flex-1">
+                      {children}
+                    </main>
+                    <Footer />
+                    <AIAssistant />
+                    <AccessibilityImprovements />
+                    <PushNotificationRegistrar />
+                    <RealtimeNotifications />
+                    <MobileBottomNav />
+                  </>
+                )}
               </WishlistProvider>
             </CartProvider>
           </FeatureFlagsProvider>

@@ -40,18 +40,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleFillDemoAdmin = () => {
-    setEmail("admin@galaxyai.hub");
-    setPassword("Admin@123456");
-    showToast("Filled Admin demo credentials!", "info");
-  };
-
-  const handleFillDemoUser = () => {
-    setEmail("user@galaxyai.hub");
-    setPassword("User@123456");
-    showToast("Filled Customer demo credentials!", "info");
-  };
-
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 py-16">
       <div className="w-full max-w-md space-y-8">
@@ -66,31 +54,6 @@ export default function LoginPage() {
           <p className="text-xs text-gray-400">
             Access your personalized AI recommendations, orders, and hardware ecosystem.
           </p>
-        </div>
-
-        {/* Demo Credentials Quick-Fill Card */}
-        <div className="rounded-2xl bg-cyan-950/30 border border-cyan-500/30 p-4 space-y-2 text-xs">
-          <span className="text-[11px] font-bold text-galaxy-cyan uppercase tracking-wider flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4" /> Quick Demo Credentials:
-          </span>
-          <div className="grid grid-cols-2 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={handleFillDemoAdmin}
-              className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-indigo-300 font-bold text-left transition-colors flex items-center justify-between"
-            >
-              <span>👑 Demo Admin</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={handleFillDemoUser}
-              className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-bold text-left transition-colors flex items-center justify-between"
-            >
-              <span>👤 Demo User</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
 
         {/* Main Login Form */}

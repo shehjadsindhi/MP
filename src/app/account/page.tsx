@@ -89,54 +89,7 @@ export default function AccountDashboardPage() {
   const totalSpent = orders.reduce((sum, o) => (o.orderStatus !== "Cancelled" ? sum + o.total : sum), 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 pb-24">
-      {/* User Header Profile Banner */}
-      <div className="rounded-3xl bg-gradient-to-r from-galaxy-900 via-galaxy-850 to-galaxy-900 border border-slate-800 p-8 sm:p-10 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 backdrop-blur-xl">
-        <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-galaxy-cyan to-indigo-600 p-0.5 shadow-galaxy-cyan flex-shrink-0">
-            <div className="w-full h-full bg-galaxy-950 rounded-[14px] flex items-center justify-center text-galaxy-cyan font-bold text-2xl">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{user.name}</h1>
-              {user.role === "ADMIN" && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                  ADMINISTRATOR
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-400 mt-0.5">{user.email}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <Link
-            href="/account/profile"
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-gray-200 border border-slate-700 transition-colors flex items-center gap-1.5"
-          >
-            <Settings className="w-3.5 h-3.5" /> Edit Profile
-          </Link>
-
-          {user.role === "ADMIN" && (
-            <Link
-              href="/admin"
-              className="px-4 py-2 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/80 text-xs font-semibold text-indigo-300 border border-indigo-700/50 transition-colors flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" /> Admin Panel
-            </Link>
-          )}
-
-          <button
-            onClick={logout}
-            className="px-4 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-xs font-semibold text-rose-300 border border-rose-800/40 transition-colors flex items-center gap-1.5"
-          >
-            <LogOut className="w-3.5 h-3.5" /> Sign Out
-          </button>
-        </div>
-      </div>
-
+    <div className="space-y-10">
       {/* Account Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="p-6 rounded-3xl bg-galaxy-900/80 border border-slate-800 space-y-2 shadow-xl">

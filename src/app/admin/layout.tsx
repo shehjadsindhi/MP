@@ -21,7 +21,8 @@ import {
   X,
   ExternalLink,
   Cpu,
-  Bell
+  Bell,
+  Settings
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -140,6 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: "AI Feature Studio", href: "/admin/ai-features", icon: Sparkles },
     { label: "Content & Guides", href: "/admin/content", icon: BookOpen },
     { label: "Analytics & Revenue", href: "/admin/analytics", icon: BarChart3 },
+    { label: "System Settings", href: "/admin/settings", icon: Settings },
   ];
 
   return (

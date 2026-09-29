@@ -1,7 +1,7 @@
 // For local development: provider = "sqlite" with DATABASE_URL="file:./dev.db"
-// For production PostgreSQL: change provider to "postgresql" and set DATABASE_URL="postgresql://..."
+// For production PostgreSQL (Neon, Supabase, Vercel Postgres, etc.): provider = "postgresql"
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

@@ -41,6 +41,7 @@ function getConfig(): AIServiceConfig {
 }
 
 async function callGemini(prompt: string, temperature = 0.7): Promise<string> {
+  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not set.");
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
     {
@@ -50,12 +51,13 @@ async function callGemini(prompt: string, temperature = 0.7): Promise<string> {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature, maxOutputTokens: 2048 },
       }),
+      signal: AbortSignal.timeout(15000),
     }
   );
 
   if (!response.ok) {
     const errText = await response.text().catch(() => "Unknown error");
-    throw new Error(`Gemini API error: ${response.status} ${errText}`);
+    throw new Error(`Gemini API error (${response.status}): ${errText}`);
   }
 
   const data = await response.json();
@@ -66,6 +68,7 @@ async function callGemini(prompt: string, temperature = 0.7): Promise<string> {
 }
 
 async function callOpenAI(prompt: string, temperature = 0.7): Promise<string> {
+  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not set.");
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -78,11 +81,12 @@ async function callOpenAI(prompt: string, temperature = 0.7): Promise<string> {
       temperature,
       max_tokens: 2048,
     }),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!response.ok) {
     const errText = await response.text().catch(() => "Unknown error");
-    throw new Error(`OpenAI API error: ${response.status} ${errText}`);
+    throw new Error(`OpenAI API error (${response.status}): ${errText}`);
   }
 
   const data = await response.json();
@@ -428,6 +432,108 @@ Provide a concise AI overview (2-3 sentences), 3-5 key insights as bullet points
     return { data: result, engine: config.provider === "gemini" ? "Gemini 2.0 Flash" : "OpenAI GPT-4o", provider: config.provider, usedFallback: false };
   } catch (error) {
     return { data: mockResult, engine: "Galaxy AI Neural Simulator v2.1", provider: "mock", usedFallback: true };
+  }
+}
+
+export interface StudyAssistResult {
+  mode: string;
+  topic: string;
+  difficulty?: string;
+  title: string;
+  content: string;
+  keyPoints?: string[];
+  questions?: { question: string; options?: string[]; answer: string; explanation?: string }[];
+  engine: string;
+}
+
+function generateFallbackStudy(text: string, mode: string, difficulty: string): StudyAssistResult {
+  const clean = text.trim();
+  const title = clean.length > 50 ? clean.slice(0, 50) + "..." : clean;
+
+  if (mode === "mcq" || mode === "quiz") {
+    return {
+      mode,
+      topic: clean,
+      difficulty,
+      title: `Practice Questions: ${title}`,
+      content: `### 🎯 Practice Assessment: ${title}\n\n**Difficulty:** ${difficulty.toUpperCase()}\n\n1. **What is the foundational principle underlying "${title}"?**\n   - A) High-latency sequential batching\n   - B) Optimized parallel architecture with local hardware acceleration (Correct)\n   - C) Unencrypted remote broadcast\n   - D) Single-core synchronous parsing\n   *Explanation: Modern architectural standards prioritize local hardware execution for minimal latency and elevated security.*\n\n2. **Which constraint is most critical when optimizing performance in this domain?**\n   - A) Ambient temperature and memory throughput (Correct)\n   - B) Font smoothing algorithms\n   - C) Screen refresh rate alone\n   - D) Peripheral color accuracy\n   *Explanation: Real-world operational throughput depends fundamentally on thermal dissipation and memory bus bandwidth.*\n\n3. **How does edge intelligence improve privacy?**\n   - A) All inputs are sent to public servers\n   - B) Telemetry is sold to advertisers\n   - C) Sensitive computation executes in an isolated hardware enclave on-device (Correct)\n   - D) Passwords are stored in plaintext\n   *Explanation: On-device processing ensures raw tokens and biometric data never traverse external networks.*`,
+      engine: "Galaxy AI Study Engine v2.1",
+    };
+  }
+
+  if (mode === "flashcards") {
+    return {
+      mode,
+      topic: clean,
+      difficulty,
+      title: `Flashcards: ${title}`,
+      content: `### 🗂️ Active Recall Flashcards: ${title}\n\n**Card 1:**\n- **Front (Prompt):** What is the core definition of ${title}?\n- **Back (Answer):** A structured framework designed to achieve rapid, reproducible, and verifiable operational outcomes.\n\n**Card 2:**\n- **Front (Prompt):** What is the primary efficiency bottleneck?\n- **Back (Answer):** Memory-to-compute bus serialization and thermal throttling under sustained load.\n\n**Card 3:**\n- **Front (Prompt):** What security standard is recommended for protection?\n- **Back (Answer):** Hardware-isolated enclaves (e.g., EAL5+ certified Knox Vault) with cryptographic key partitioning.`,
+      engine: "Galaxy AI Study Engine v2.1",
+    };
+  }
+
+  return {
+    mode,
+    topic: clean,
+    difficulty,
+    title: `Conceptual Breakdown: ${title}`,
+    content: `### 📚 Study Guide: ${title}\n\n**Target Level:** ${difficulty.toUpperCase()}  \n**Domain Focus:** Technical Architecture & Mastery\n\n#### 1. Core Overview\n${title} represents an essential concept in modern technology and computational systems. By decomposing the subject into foundational axioms, we gain intuitive mastery over its behavioral mechanisms.\n\n#### 2. Key Principles\n- **Modular Separation:** Components function independently with clean abstraction boundaries, minimizing regression risk.\n- **Low Latency & High Throughput:** Operations execute close to the hardware execution layer, avoiding unnecessary network overhead.\n- **Resilience & Fault Tolerance:** In the presence of intermittent failures, graceful fallback routines guarantee service continuity.\n\n#### 3. Real-World Analogy\nThink of this system like an elite Formula 1 pit crew: every tool and specialist is positioned directly trackside (on-device) rather than calling the remote engineering factory for routine tire changes, ensuring near-instant response times.\n\n#### 4. Summary & Takeaway\nMastery of ${title} hinges on understanding how state, computation, and security interact. Review the principles above and test your recall with practice questions!`,
+    engine: "Galaxy AI Study Engine v2.1",
+  };
+}
+
+export async function aiStudy(
+  text: string,
+  mode: string,
+  difficulty: "easy" | "medium" | "advanced" = "medium"
+): Promise<AIServiceResponse<StudyAssistResult>> {
+  const config = getConfig();
+  const fallback = generateFallbackStudy(text, mode, difficulty);
+
+  if (config.provider === "mock") {
+    return { data: fallback, engine: fallback.engine, provider: "mock", usedFallback: false };
+  }
+
+  try {
+    const prompt = `You are the Galaxy AI Study Assistant.
+Task: Provide high-quality academic and conceptual study assistance for the user's topic at the "${difficulty}" level.
+Mode: "${mode}" (options: explain, notes, mcq, flashcards, quiz).
+
+Topic / Study Material:
+${text}
+
+Guidelines:
+- If mode is "explain": Provide an intuitive explanation with real-world analogies, formatted with markdown headings and bullet points.
+- If mode is "notes": Provide structured study notes with key terms, formulas/axioms, and summary.
+- If mode is "mcq": Provide 4 multiple-choice questions with 4 options each, indicating the correct answer and a brief explanation.
+- If mode is "flashcards": Provide 5 flashcard Q&A pairs.
+- If mode is "quiz": Provide a short 5-question test with answer key.
+
+Format your response in clean, beautiful Markdown.`;
+
+    const raw = await callRealAI(prompt, 0.6);
+    const result: StudyAssistResult = {
+      mode,
+      topic: text.slice(0, 100),
+      difficulty,
+      title: `${mode.toUpperCase()}: ${text.slice(0, 40)}`,
+      content: raw,
+      engine: config.provider === "gemini" ? "Gemini 2.0 Flash" : "OpenAI GPT-4o",
+    };
+
+    return {
+      data: result,
+      engine: result.engine,
+      provider: config.provider,
+      usedFallback: false,
+    };
+  } catch (error) {
+    return {
+      data: fallback,
+      engine: "Galaxy AI Study Engine (Offline Simulator)",
+      provider: "mock",
+      usedFallback: true,
+    };
   }
 }
 

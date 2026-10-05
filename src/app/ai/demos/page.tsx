@@ -2,18 +2,20 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, Wand2, Languages, PenTool, FileCheck, Search, Info, Loader2, Smartphone, Tablet, Monitor } from "lucide-react";
+import { Sparkles, Wand2, Languages, PenTool, FileCheck, Search, Info, Loader2, Smartphone, Tablet, Monitor, GraduationCap } from "lucide-react";
 import AIDemoPhoto from "@/components/AIDemoPhoto";
 import AIDemoTranslate from "@/components/AIDemoTranslate";
 import AIDemoWriting from "@/components/AIDemoWriting";
 import AIDemoNotes from "@/components/AIDemoNotes";
 import AIDemoSearch from "@/components/AIDemoSearch";
+import AIDemoStudy from "@/components/AIDemoStudy";
 
 const DEMO_TABS = [
   { id: "photo", label: "Photo Edit", icon: Wand2, badge: "Generative Studio" },
   { id: "translation", label: "Live Translation", icon: Languages, badge: "On-Device NPU" },
   { id: "writing", label: "Writing Assist", icon: PenTool, badge: "Tone Changer" },
   { id: "notes", label: "Note Assist", icon: FileCheck, badge: "Tasks & OCR" },
+  { id: "study", label: "Study Assistant", icon: GraduationCap, badge: "Academic AI" },
   { id: "search", label: "Circle to Search", icon: Search, badge: "Google AI" },
 ];
 
@@ -158,6 +160,7 @@ function AIDemosInner() {
         {activeTab === "translation" && <AIDemoTranslate />}
         {activeTab === "writing" && <AIDemoWriting />}
         {activeTab === "notes" && <AIDemoNotes />}
+        {activeTab === "study" && <AIDemoStudy />}
         {activeTab === "search" && <AIDemoSearch />}
       </div>
     </div>

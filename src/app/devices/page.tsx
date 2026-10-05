@@ -56,6 +56,15 @@ export default async function DevicesPage({
         <p className="text-sm sm:text-base text-gray-400">
           Supercharged with dedicated Neural Processing Units (NPUs), Titanium craftsmanship, and Knox Vault protection.
         </p>
+        <div className="pt-2">
+          <Link
+            href="/ai/device-finder"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border border-cyan-500/40 text-galaxy-cyan text-xs font-bold hover:bg-cyan-500/30 transition-all shadow-galaxy-cyan"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            Unsure which device fits your workflow? Launch AI Device Finder &rarr;
+          </Link>
+        </div>
       </div>
 
       {/* Main Flagship Product Spotlight Banner */}

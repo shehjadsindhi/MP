@@ -5,7 +5,12 @@ import { aiApiRateLimit } from "@/lib/rateLimit";
 import { z } from "zod";
 
 const deviceFinderSchema = z.object({
-  query: z.string().min(3, "Please describe your requirements in at least 3 characters"),
+  query: z.string().optional(),
+  purpose: z.string().optional(),
+  budget: z.number().optional(),
+  category: z.string().optional(),
+  features: z.array(z.string()).optional(),
+  usageStyle: z.string().optional(),
 });
 
 function extractBudget(text: string): number | undefined {
@@ -56,19 +61,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error.errors[0].message }, { status: 400 });
     }
 
-    const query = result.data.query.trim();
-    const budget = extractBudget(query);
+    const {
+      query: rawQuery,
+      purpose,
+      budget: directBudget,
+      category,
+      features,
+      usageStyle,
+    } = result.data;
+
+    const parts = [rawQuery, purpose, usageStyle, ...(features || [])].filter(Boolean);
+    const query = parts.length > 0 ? parts.join(" ") : "Galaxy Flagship Device";
+
+    const budget = directBudget || extractBudget(query);
     const useCases = extractUseCase(query);
+    if (purpose && !useCases.includes(purpose)) useCases.push(purpose);
 
     let where: any = {};
     if (budget) {
       where.price = { lte: budget };
     }
+    if (category && category !== "All") {
+      where.category = category;
+    }
 
     const products = await prisma.product.findMany({
       where,
       orderBy: budget ? { price: "asc" } : { rating: "desc" },
-      take: 6,
+      take: 8,
     });
 
     const ranked = products.map((product) => {

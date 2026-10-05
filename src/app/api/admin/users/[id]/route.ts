@@ -50,6 +50,19 @@ export async function PUT(
     const { id } = params;
     const body = await req.json();
 
+    if (body.role && body.role !== "ADMIN") {
+      const targetUser = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+      if (targetUser?.role === "ADMIN") {
+        const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+        if (adminCount <= 1) {
+          return NextResponse.json(
+            { error: "Cannot demote the last remaining administrator in the system." },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
@@ -95,6 +108,21 @@ export async function DELETE(
     // Prevent admin from deleting their own active account
     if (admin.id === id) {
       return NextResponse.json({ error: "Cannot delete your own active administrator account." }, { status: 400 });
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (!targetUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (targetUser.role === "ADMIN") {
+      const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+      if (adminCount <= 1) {
+        return NextResponse.json(
+          { error: "Cannot delete the last remaining administrator in the system." },
+          { status: 400 }
+        );
+      }
     }
 
     await prisma.user.delete({

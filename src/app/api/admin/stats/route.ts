@@ -9,88 +9,101 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized. Admin required." }, { status: 403 });
     }
 
-    const [userCount, orderCount, productCount, featureCount, articleCount, orders] = await Promise.all([
+    const [
+      userCount,
+      orderCount,
+      productCount,
+      featureCount,
+      articleCount,
+      offerCount,
+      reviewCount,
+      subscriberCount,
+      aiInteractionCount,
+      lowStockProducts,
+      recentOrders,
+      allOrders,
+    ] = await Promise.all([
       prisma.user.count(),
       prisma.order.count(),
       prisma.product.count(),
       prisma.aIFeature.count(),
       prisma.article.count(),
+      prisma.offer.count(),
+      prisma.review.count(),
+      prisma.newsletterSubscriber.count(),
+      prisma.aIInteraction.count(),
+      prisma.product.findMany({
+        where: { stock: { lte: 10 } },
+        select: { id: true, name: true, stock: true, price: true, category: true },
+        take: 10,
+      }),
       prisma.order.findMany({
         orderBy: { createdAt: "desc" },
         take: 10,
         include: { items: true },
       }),
+      prisma.order.findMany({
+        select: { total: true, orderStatus: true, createdAt: true },
+      }),
     ]);
 
-    const allOrders = await prisma.order.findMany({
-      select: { total: true, orderStatus: true, createdAt: true },
-    });
+    const totalRevenue = allOrders.reduce(
+      (sum, o) => (o.orderStatus !== "Cancelled" ? sum + o.total : sum),
+      0
+    );
 
-    const totalRevenue = allOrders.reduce((sum, o) => (o.orderStatus !== "Cancelled" ? sum + o.total : sum), 0);
-
-    const pendingOrders = allOrders.filter((o) => o.orderStatus === "Processing" || o.orderStatus === "Pending").length;
+    const pendingOrders = allOrders.filter(
+      (o) => o.orderStatus === "Processing" || o.orderStatus === "Pending"
+    ).length;
     const deliveredOrders = allOrders.filter((o) => o.orderStatus === "Delivered").length;
+    const cancelledOrders = allOrders.filter((o) => o.orderStatus === "Cancelled").length;
 
-    // Monthly sales simulation data
-    const monthlyStats = [
-      { month: "Jan", revenue: 14200, orders: 12 },
-      { month: "Feb", revenue: 18900, orders: 16 },
-      { month: "Mar", revenue: 23400, orders: 20 },
-      { month: "Apr", revenue: 29800, orders: 25 },
-      { month: "May", revenue: 38500, orders: 32 },
-      { month: "Jun", revenue: 42100, orders: 36 },
-      { month: "Jul", revenue: 49000, orders: 41 },
-      { month: "Aug", revenue: Math.round(totalRevenue), orders: orderCount },
-    ];
+    // Real monthly sales aggregated by actual database order createdAt dates
+    const monthsMap: Record<string, { revenue: number; orders: number }> = {};
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    for (const ord of allOrders) {
+      const d = new Date(ord.createdAt);
+      const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+      if (!monthsMap[key]) {
+        monthsMap[key] = { revenue: 0, orders: 0 };
+      }
+      monthsMap[key].orders++;
+      if (ord.orderStatus !== "Cancelled") {
+        monthsMap[key].revenue += ord.total;
+      }
+    }
+
+    const monthlyStats = Object.entries(monthsMap).map(([month, data]) => ({
+      month,
+      revenue: Math.round(data.revenue),
+      orders: data.orders,
+    }));
 
     return NextResponse.json({
       metrics: {
-        totalRevenue,
+        totalRevenue: Math.round(totalRevenue * 100) / 100,
         orderCount,
         userCount,
         productCount,
         featureCount,
         articleCount,
+        offerCount,
+        reviewCount,
+        subscriberCount,
+        aiInteractionCount,
         pendingOrders,
         deliveredOrders,
+        cancelledOrders,
       },
-      recentOrders: orders,
+      lowStockProducts,
+      recentOrders,
       monthlyStats,
     });
   } catch (error: any) {
-    // Re-verify authorization in error boundary to prevent leaking metrics to unauthenticated users
-    try {
-      const user = await getSessionUser();
-      if (!user || user.role !== "ADMIN") {
-        return NextResponse.json({ error: "Unauthorized. Admin required." }, { status: 403 });
-      }
-    } catch (authErr) {
-      return NextResponse.json({ error: "Unauthorized. Admin required." }, { status: 403 });
-    }
-
-    return NextResponse.json({
-      metrics: {
-        totalRevenue: 265900,
-        orderCount: 142,
-        userCount: 85,
-        productCount: 6,
-        featureCount: 6,
-        articleCount: 3,
-        pendingOrders: 12,
-        deliveredOrders: 120,
-      },
-      recentOrders: [],
-      monthlyStats: [
-        { month: "Jan", revenue: 14200, orders: 12 },
-        { month: "Feb", revenue: 18900, orders: 16 },
-        { month: "Mar", revenue: 23400, orders: 20 },
-        { month: "Apr", revenue: 29800, orders: 25 },
-        { month: "May", revenue: 38500, orders: 32 },
-        { month: "Jun", revenue: 42100, orders: 36 },
-        { month: "Jul", revenue: 49000, orders: 41 },
-        { month: "Aug", revenue: 70000, orders: 60 },
-      ],
-    });
+    return NextResponse.json(
+      { error: "Failed to fetch live database analytics" },
+      { status: 500 }
+    );
   }
 }
-

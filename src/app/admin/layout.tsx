@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -10,7 +10,6 @@ import {
   Users,
   Sparkles,
   BookOpen,
-  ArrowLeft,
   ShieldCheck,
   ShieldAlert,
   Loader2,
@@ -20,12 +19,40 @@ import {
   Menu,
   X,
   ExternalLink,
-  Cpu,
   Bell,
-  Settings
+  Settings,
+  ChevronRight,
+  Tag,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+
+const navItems = [
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard, color: "indigo", description: "Overview & KPIs" },
+  { label: "Products", href: "/admin/products", icon: Smartphone, color: "cyan", description: "Inventory management" },
+  { label: "Orders", href: "/admin/orders", icon: Package, color: "emerald", description: "Fulfillment center" },
+  { label: "Users", href: "/admin/users", icon: Users, color: "violet", description: "Customer accounts" },
+  { label: "AI Features", href: "/admin/ai-features", icon: Sparkles, color: "fuchsia", description: "Feature studio" },
+  { label: "Content", href: "/admin/content", icon: BookOpen, color: "amber", description: "Articles & guides" },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3, color: "sky", description: "Revenue insights" },
+  { label: "Offers", href: "/admin/offers", icon: Tag, color: "rose", description: "Promotions & deals" },
+  { label: "Settings", href: "/admin/settings", icon: Settings, color: "slate", description: "System config" },
+];
+
+type ColorKey = "indigo" | "cyan" | "emerald" | "violet" | "fuchsia" | "amber" | "sky" | "rose" | "slate";
+
+const colorMap: Record<ColorKey, { text: string; border: string; activeBg: string; dot: string }> = {
+  indigo:  { text: "text-indigo-400",  border: "border-indigo-500/30",  activeBg: "bg-indigo-500/15",  dot: "bg-indigo-400" },
+  cyan:    { text: "text-cyan-400",    border: "border-cyan-500/30",    activeBg: "bg-cyan-500/15",    dot: "bg-cyan-400" },
+  emerald: { text: "text-emerald-400", border: "border-emerald-500/30", activeBg: "bg-emerald-500/15", dot: "bg-emerald-400" },
+  violet:  { text: "text-violet-400",  border: "border-violet-500/30",  activeBg: "bg-violet-500/15",  dot: "bg-violet-400" },
+  fuchsia: { text: "text-fuchsia-400", border: "border-fuchsia-500/30", activeBg: "bg-fuchsia-500/15", dot: "bg-fuchsia-400" },
+  amber:   { text: "text-amber-400",   border: "border-amber-500/30",   activeBg: "bg-amber-500/15",   dot: "bg-amber-400" },
+  sky:     { text: "text-sky-400",     border: "border-sky-500/30",     activeBg: "bg-sky-500/15",     dot: "bg-sky-400" },
+  rose:    { text: "text-rose-400",    border: "border-rose-500/30",    activeBg: "bg-rose-500/15",    dot: "bg-rose-400" },
+  slate:   { text: "text-slate-400",   border: "border-slate-500/30",   activeBg: "bg-slate-500/15",   dot: "bg-slate-400" },
+};
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -34,90 +61,71 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { showToast } = useToast();
   const [authTimedOut, setAuthTimedOut] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAuthTimedOut(true);
-    }, 3000);
+    const timer = setTimeout(() => setAuthTimedOut(true), 3000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Close mobile sidebar on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+  useEffect(() => { setMobileMenuOpen(false); }, [pathname]);
 
-  // If on the dedicated admin login page, render children directly without admin shell
-  if (pathname === "/admin/login") {
-    return <>{children}</>;
-  }
+  useEffect(() => {
+    const update = () =>
+      setCurrentTime(new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }));
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (pathname === "/admin/login") return <>{children}</>;
 
   if (isLoading && !authTimedOut) {
     return (
-      <div className="min-h-screen bg-galaxy-950 flex flex-col items-center justify-center text-gray-400 gap-3">
-        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
-        <p className="text-xs">Verifying Administrator Privileges...</p>
-      </div>
-    );
-  }
-
-  // Guest / Unauthenticated State
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-galaxy-950 flex items-center justify-center px-4 py-20">
-        <div className="max-w-md w-full text-center space-y-6 rounded-3xl bg-galaxy-900/90 border border-indigo-500/30 p-8 shadow-2xl backdrop-blur-xl">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-950/60 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-950">
-            <ShieldAlert className="w-8 h-8" />
+      <div className="min-h-screen bg-[#080c14] flex flex-col items-center justify-center gap-4">
+        <div className="relative w-16 h-16">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
+            <ShieldCheck className="w-7 h-7 text-indigo-400" />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-white">Administrator Access Required</h2>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              You must be authenticated with an authorized administrator account to access the control center.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link
-              href="/admin/login"
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-indigo-950"
-            >
-              <LogIn className="w-4 h-4" /> Go to Admin Login
-            </Link>
-            <Link
-              href="/"
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 text-gray-300 hover:text-white font-medium text-xs border border-slate-700 transition-colors"
-            >
-              Public Storefront
-            </Link>
-          </div>
+          <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#080c14] border-2 border-indigo-500/40 flex items-center justify-center">
+            <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" />
+          </span>
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-semibold text-white">Verifying Access</p>
+          <p className="text-xs text-gray-600 mt-1">Checking administrator privileges...</p>
         </div>
       </div>
     );
   }
 
-  // Authenticated Non-Admin User State
-  if (user.role !== "ADMIN") {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-galaxy-950 flex items-center justify-center px-4 py-20">
-        <div className="max-w-md w-full text-center space-y-6 rounded-3xl bg-galaxy-900/90 border border-rose-500/30 p-8 shadow-2xl backdrop-blur-xl">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-rose-950/60 border border-rose-500/40 flex items-center justify-center text-rose-400 shadow-lg shadow-rose-950">
-            <ShieldAlert className="w-8 h-8" />
+      <div className="min-h-screen bg-[#080c14] flex items-center justify-center px-4">
+        <div className="max-w-sm w-full text-center space-y-8">
+          <div className="relative mx-auto w-20 h-20">
+            <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <ShieldAlert className="w-9 h-9 text-indigo-400" />
+            </div>
+            <div className="absolute inset-0 rounded-3xl bg-indigo-500/10 blur-xl" />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-white">Access Denied</h2>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Logged in as <strong className="text-white">{user.name}</strong> ({user.email}). Current role: <span className="text-rose-400 font-bold">{user.role}</span>. Administrator privileges are required to view the control center.
+          <div>
+            <h2 className="text-2xl font-bold text-white">Admin Access Required</h2>
+            <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+              You need an authorized administrator account to access the control center.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col gap-3">
             <Link
-              href="/account"
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-slate-700"
+              href="/admin/login"
+              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
             >
-              Go to Customer Account
+              <LogIn className="w-4 h-4" /> Sign In as Admin
             </Link>
             <Link
               href="/"
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-galaxy-cyan text-galaxy-950 font-bold text-xs"
+              className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-medium text-sm border border-white/10 transition-colors"
             >
               Return to Storefront
             </Link>
@@ -127,164 +135,200 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
+  if (user.role !== "ADMIN") {
+    return (
+      <div className="min-h-screen bg-[#080c14] flex items-center justify-center px-4">
+        <div className="max-w-sm w-full text-center space-y-8">
+          <div className="relative mx-auto w-20 h-20">
+            <div className="w-20 h-20 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+              <ShieldAlert className="w-9 h-9 text-rose-400" />
+            </div>
+            <div className="absolute inset-0 rounded-3xl bg-rose-500/10 blur-xl" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Access Denied</h2>
+            <p className="text-sm text-gray-500 mt-2">
+              Signed in as <span className="text-white font-semibold">{user.name}</span>. Administrator role required.
+            </p>
+          </div>
+          <Link
+            href="/account"
+            className="block w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-medium text-sm border border-white/10 transition-colors"
+          >
+            Go to Your Account
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const handleAdminLogout = async () => {
     await logout();
-    showToast("Admin session ended successfully", "info");
+    showToast("Admin session ended", "info");
     router.push("/admin/login");
   };
 
-  const navItems = [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Products & Inventory", href: "/admin/products", icon: Smartphone },
-    { label: "Orders & Fulfillment", href: "/admin/orders", icon: Package },
-    { label: "Users & Roles", href: "/admin/users", icon: Users },
-    { label: "AI Feature Studio", href: "/admin/ai-features", icon: Sparkles },
-    { label: "Content & Guides", href: "/admin/content", icon: BookOpen },
-    { label: "Analytics & Revenue", href: "/admin/analytics", icon: BarChart3 },
-    { label: "System Settings", href: "/admin/settings", icon: Settings },
-  ];
+  const currentNav = navItems.find((n) =>
+    n.href === "/admin" ? pathname === "/admin" : pathname.startsWith(n.href)
+  );
+  const currentLabel = currentNav?.label || "Dashboard";
 
   return (
-    <div className="min-h-screen bg-galaxy-950 text-gray-100 flex flex-col md:flex-row">
-      {/* Mobile Top Header */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3.5 bg-galaxy-900 border-b border-indigo-500/20 sticky top-0 z-50">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <span className="font-extrabold text-sm text-white tracking-wide">
-            Galaxy <span className="text-indigo-400">Admin</span>
-          </span>
-        </div>
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 rounded-lg bg-slate-800 text-gray-300 hover:text-white"
-          aria-label="Toggle navigation menu"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </header>
-
-      {/* Sidebar Navigation */}
+    <div className="min-h-screen bg-[#080c14] text-gray-100 flex">
+      {/* ── Sidebar ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-950 border-r border-indigo-500/20 flex flex-col justify-between transition-transform duration-300 md:translate-x-0 md:static ${
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={[
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0b0f1a] border-r border-white/[0.06] transition-all duration-300",
+          sidebarCollapsed ? "w-[68px]" : "w-60",
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        ].join(" ")}
       >
-        {/* Top Brand Logo */}
-        <div className="p-6 border-b border-slate-800/80">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 p-0.5 shadow-lg shadow-indigo-950">
-              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-indigo-400" />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm tracking-wide text-white">GALAXY AI</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                  ADMIN
-                </span>
-              </div>
-              <p className="text-[10px] text-gray-400 font-mono">Control Center v1.0</p>
-            </div>
+        {/* Brand */}
+        <div className={["flex items-center gap-3 px-4 h-14 border-b border-white/[0.06] flex-shrink-0", sidebarCollapsed ? "justify-center" : ""].join(" ")}>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-900/50">
+            <ShieldCheck className="w-4 h-4 text-white" />
           </div>
+          {!sidebarCollapsed && (
+            <div>
+              <p className="text-[13px] font-bold text-white">Galaxy AI</p>
+              <p className="text-[10px] text-gray-600">Control Center</p>
+            </div>
+          )}
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto" aria-label="Admin Sidebar">
-          <div className="px-3 pb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-            Management Portal
-          </div>
+        {/* Nav Links */}
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+          {!sidebarCollapsed && (
+            <p className="px-3 pb-2 pt-1 text-[9px] font-bold text-gray-700 uppercase tracking-widest">Menu</p>
+          )}
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+            const c = colorMap[item.color as ColorKey];
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                  isActive
-                    ? "bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-950/60 font-bold"
-                    : "text-gray-400 hover:text-white hover:bg-slate-900/80"
-                }`}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={[
+                  "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200",
+                  isActive ? `${c.activeBg} ${c.text} border ${c.border}` : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.05]",
+                  sidebarCollapsed ? "justify-center" : "",
+                ].join(" ")}
               >
-                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-gray-400"}`} />
-                <span>{item.label}</span>
+                {isActive && (
+                  <span className={["absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full", c.dot].join(" ")} />
+                )}
+                <Icon className={["w-4 h-4 flex-shrink-0", isActive ? c.text : "text-gray-600 group-hover:text-gray-400"].join(" ")} />
+                {!sidebarCollapsed && (
+                  <div className="flex-1 min-w-0">
+                    <span className="block leading-tight">{item.label}</span>
+                    {!isActive && (
+                      <span className="block text-[10px] text-gray-700 group-hover:text-gray-600 font-normal">{item.description}</span>
+                    )}
+                  </div>
+                )}
+                {isActive && !sidebarCollapsed && <ChevronRight className={["w-3 h-3 flex-shrink-0", c.text].join(" ")} />}
               </Link>
             );
           })}
         </nav>
 
-        {/* Bottom User Card & Actions */}
-        <div className="p-4 border-t border-slate-800/80 space-y-3 bg-galaxy-950/50">
-          <Link
-            href="/"
-            className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-gray-300 hover:text-white text-xs font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <ExternalLink className="w-3.5 h-3.5 text-galaxy-cyan" />
-            <span>View Public Storefront</span>
-          </Link>
-
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300 font-bold text-xs flex-shrink-0">
-                {(user.name || "A").charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-white truncate">{user.name}</p>
-                <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleAdminLogout}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors"
-              title="Sign Out"
-              aria-label="Sign Out of Admin"
+        {/* Bottom */}
+        <div className="p-2 border-t border-white/[0.06] space-y-1.5">
+          {!sidebarCollapsed && (
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] text-gray-600 hover:text-gray-300 text-xs font-medium transition-all"
             >
-              <LogOut className="w-4 h-4" />
-            </button>
+              <ExternalLink className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" />
+              <span className="truncate">View Storefront</span>
+            </Link>
+          )}
+          <div className={["flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]", sidebarCollapsed ? "justify-center" : ""].join(" ")}>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500/40 to-violet-500/40 border border-indigo-500/20 flex items-center justify-center text-indigo-300 font-bold text-xs flex-shrink-0">
+              {(user.name || "A").charAt(0).toUpperCase()}
+            </div>
+            {!sidebarCollapsed && (
+              <>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-white truncate">{user.name}</p>
+                  <p className="text-[10px] text-gray-600 truncate">{user.email}</p>
+                </div>
+                <button
+                  onClick={handleAdminLogout}
+                  className="p-1.5 rounded-lg text-gray-700 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Collapse toggle */}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden md:flex absolute -right-3 top-[72px] w-6 h-6 rounded-full bg-[#0b0f1a] border border-white/[0.12] items-center justify-center text-gray-600 hover:text-gray-300 transition-colors shadow-lg"
+        >
+          <ChevronRight className={["w-3 h-3 transition-transform duration-300", sidebarCollapsed ? "" : "rotate-180"].join(" ")} />
+        </button>
       </aside>
 
-      {/* Main Admin Workspace */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Desktop Top Header Bar */}
-        <header className="hidden md:flex items-center justify-between px-8 py-4 bg-slate-950/60 backdrop-blur-md border-b border-indigo-500/20 sticky top-0 z-30">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Admin Portal</span>
-            <span className="text-xs text-gray-600">/</span>
-            <span className="text-xs font-bold text-indigo-400 capitalize">
-              {pathname === "/admin" ? "Dashboard" : pathname.replace("/admin/", "").replace("-", " ")}
-            </span>
-          </div>
+      {/* Mobile backdrop */}
+      {mobileMenuOpen && (
+        <div onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden" />
+      )}
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Admin Gateway: Secure</span>
+      {/* ── Main ── */}
+      <div className={["flex-1 flex flex-col min-w-0 transition-all duration-300", sidebarCollapsed ? "md:ml-[68px]" : "md:ml-60"].join(" ")}>
+        {/* Top bar */}
+        <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 md:px-6 bg-[#080c14]/80 backdrop-blur-md border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg bg-white/[0.05] text-gray-400 hover:text-white transition-colors"
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-gray-700">Admin</span>
+              <ChevronRight className="w-3 h-3 text-gray-800" />
+              <span className="font-semibold text-gray-300">{currentLabel}</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-[11px] font-semibold">
-              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Quantum NPU Online</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="hidden md:inline">Online</span>
+            </div>
+            {currentTime && (
+              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-gray-600 text-[11px] font-mono">
+                <Zap className="w-3 h-3 text-indigo-500" />
+                {currentTime}
+              </div>
+            )}
+            <button className="relative p-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-gray-500 hover:text-white hover:bg-white/[0.08] transition-colors">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            </button>
+            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-[10px]">
+                {(user.name || "A").charAt(0).toUpperCase()}
+              </div>
+              <span className="text-xs font-semibold text-indigo-300 hidden sm:inline">{user.name?.split(" ")[0]}</span>
             </div>
           </div>
         </header>
 
-        {/* Admin Content Area */}
-        <main className="flex-1 p-6 sm:p-8 lg:p-10 overflow-y-auto">
-          {children}
-        </main>
-      </div>
+        <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
 
-      {/* Mobile Backdrop */}
-      {mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
-        />
-      )}
+        <footer className="px-6 py-2.5 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-gray-800">
+          <span>Galaxy AI Hub — Control Center v2.0</span>
+          <span className="font-mono hidden sm:inline">Knox Security · Quantum NPU Active</span>
+        </footer>
+      </div>
     </div>
   );
 }

@@ -1,9 +1,13 @@
-"use client";
+﻿"use client";
 
-import React, { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Smartphone, Search, Check, X, Loader2, Sparkles } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Plus, Edit2, Trash2, Smartphone, Search, X, Loader2, Package, Star } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
+
+const CATEGORIES = ["Smartphones", "Tablets", "Watches", "Audio", "Accessories"];
+
+const INPUT = "w-full bg-[#080c14] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-700 focus:outline-none focus:border-indigo-500/60 transition-colors";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -12,204 +16,135 @@ export default function AdminProductsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [saving, setSaving] = useState(false);
-
   const { showToast } = useToast();
 
-  const [form, setForm] = useState({
-    name: "",
-    category: "Smartphones",
-    price: "",
-    originalPrice: "",
-    discount: "0",
-    stock: "50",
-    badge: "",
-    description: "",
-    image: "/images/nova_ultra.jpg",
-  });
+  const [form, setForm] = useState({ name: "", category: "Smartphones", price: "", originalPrice: "", discount: "0", stock: "50", badge: "", description: "", image: "/images/nova_ultra.jpg" });
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const res = await fetch("/api/products");
-      if (res.ok) {
-        const data = await res.json();
-        setProducts(data.products || []);
-      }
-    } catch (e) {
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
+      if (res.ok) { const d = await res.json(); setProducts(d.products || []); }
+    } catch { } finally { setLoading(false); }
   }, []);
 
-  const openCreateModal = () => {
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  const openCreate = () => {
     setEditingProduct(null);
-    setForm({
-      name: "",
-      category: "Smartphones",
-      price: "",
-      originalPrice: "",
-      discount: "0",
-      stock: "50",
-      badge: "New Flagship",
-      description: "",
-      image: "/images/nova_ultra.jpg",
-    });
+    setForm({ name: "", category: "Smartphones", price: "", originalPrice: "", discount: "0", stock: "50", badge: "", description: "", image: "/images/nova_ultra.jpg" });
     setModalOpen(true);
   };
 
-  const openEditModal = (p: any) => {
+  const openEdit = (p: any) => {
     setEditingProduct(p);
-    setForm({
-      name: p.name,
-      category: p.category,
-      price: p.price.toString(),
-      originalPrice: p.originalPrice ? p.originalPrice.toString() : p.price.toString(),
-      discount: p.discount ? p.discount.toString() : "0",
-      stock: p.stock ? p.stock.toString() : "50",
-      badge: p.badge || "",
-      description: p.description || "",
-      image: p.image || "/images/nova_ultra.jpg",
-    });
+    setForm({ name: p.name, category: p.category, price: p.price.toString(), originalPrice: (p.originalPrice || p.price).toString(), discount: (p.discount || 0).toString(), stock: (p.stock || 50).toString(), badge: p.badge || "", description: p.description || "", image: p.image || "/images/nova_ultra.jpg" });
     setModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this Galaxy product?")) return;
-    try {
-      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        showToast("Product deleted successfully", "info");
-        fetchProducts();
-      }
-    } catch (e) {
-      showToast("Failed to delete product", "error");
-    }
+    if (!confirm("Delete this product?")) return;
+    const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+    if (res.ok) { showToast("Product deleted", "info"); fetchProducts(); }
+    else showToast("Delete failed", "error");
   };
 
   const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-
+    e.preventDefault(); setSaving(true);
     try {
-      const url = editingProduct ? `/api/products/${editingProduct.id}` : "/api/products";
-      const method = editingProduct ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(editingProduct ? `/api/products/${editingProduct.id}` : "/api/products", {
+        method: editingProduct ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
-      if (res.ok) {
-        showToast(editingProduct ? "Product updated!" : "Product created!", "success");
-        setModalOpen(false);
-        fetchProducts();
-      } else {
-        const data = await res.json();
-        showToast(data.error || "Operation failed", "error");
-      }
-    } catch (e: any) {
-      showToast("Network error", "error");
-    } finally {
-      setSaving(false);
-    }
+      if (res.ok) { showToast(editingProduct ? "Product updated!" : "Product created!", "success"); setModalOpen(false); fetchProducts(); }
+      else { const d = await res.json(); showToast(d.error || "Failed", "error"); }
+    } catch { showToast("Network error", "error"); } finally { setSaving(false); }
   };
 
-  const filtered = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase())
+  const filtered = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.category.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="space-y-6">
-      {/* Action Bar */}
+    <div className="space-y-6 max-w-7xl">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search products by title or category..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-galaxy-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
-          />
+        <div>
+          <h1 className="text-xl font-bold text-white">Products</h1>
+          <p className="text-xs text-gray-600 mt-0.5">{products.length} items in catalog</p>
         </div>
-
-        <button
-          onClick={openCreateModal}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-1.5 self-start sm:self-auto shadow-lg shadow-indigo-950/50"
-        >
-          <Plus className="w-4 h-4" /> Add Galaxy Product
+        <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-indigo-900/40">
+          <Plus className="w-4 h-4" /> Add Product
         </button>
       </div>
 
-      {/* Products Table */}
-      <div className="rounded-3xl bg-galaxy-900/80 border border-slate-800 shadow-2xl overflow-hidden backdrop-blur-xl">
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-700" />
+        <input type="text" placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-white/[0.03] border border-white/[0.07] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-700 focus:outline-none focus:border-indigo-500/60 transition-colors" />
+      </div>
+
+      {/* Table */}
+      <div className="rounded-2xl bg-white/[0.03] border border-white/[0.07] overflow-hidden">
         {loading ? (
-          <div className="text-center py-16 text-gray-400 text-xs">
-            <Loader2 className="w-6 h-6 animate-spin text-indigo-400 mx-auto mb-2" />
-            Loading products...
+          <div className="py-20 flex flex-col items-center gap-3 text-gray-700">
+            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+            <span className="text-xs">Loading products...</span>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 text-xs">No products match your search.</div>
+          <div className="py-20 text-center">
+            <Package className="w-10 h-10 text-gray-800 mx-auto mb-3" />
+            <p className="text-sm text-gray-700">No products found</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800 bg-galaxy-950/80 text-gray-400 font-bold uppercase tracking-wider">
-                  <th className="p-4 pl-6">Device</th>
-                  <th className="p-4">Category</th>
-                  <th className="p-4">Price</th>
-                  <th className="p-4">Stock</th>
-                  <th className="p-4">Rating</th>
-                  <th className="p-4 pr-6 text-right">Actions</th>
+                <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+                  {["Product", "Category", "Price", "Stock", "Rating", ""].map((h) => (
+                    <th key={h} className="px-5 py-3 text-left text-[10px] font-bold text-gray-700 uppercase tracking-widest">{h}</th>
+                  ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {filtered.map((prod) => (
-                  <tr key={prod.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="p-4 pl-6 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-galaxy-950 p-1 flex items-center justify-center border border-slate-800 flex-shrink-0">
-                        <img src={prod.image} alt={prod.name} className="max-h-full max-w-full object-contain" />
-                      </div>
-                      <div>
-                        <span className="font-bold text-white block">{prod.name}</span>
-                        {prod.badge && (
-                          <span className="text-[10px] text-galaxy-cyan">{prod.badge}</span>
-                        )}
+              <tbody>
+                {filtered.map((p) => (
+                  <tr key={p.id} className="border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors group">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/[0.07] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <img src={p.image} alt={p.name} className="max-h-full max-w-full object-contain" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-white text-[13px]">{p.name}</p>
+                          {p.badge && <span className="text-[10px] text-cyan-500 font-medium">{p.badge}</span>}
+                        </div>
                       </div>
                     </td>
-                    <td className="p-4 text-gray-300">{prod.category}</td>
-                    <td className="p-4 font-mono font-bold text-white">{formatPrice(prod.price)}</td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          prod.stock > 10 ? "bg-emerald-950 text-emerald-300" : "bg-rose-950 text-rose-300"
-                        }`}
-                      >
-                        {prod.stock} in stock
+                    <td className="px-5 py-4">
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/[0.05] text-gray-400 border border-white/[0.07]">{p.category}</span>
+                    </td>
+                    <td className="px-5 py-4 font-mono font-bold text-white text-[13px]">{formatPrice(p.price)}</td>
+                    <td className="px-5 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${p.stock > 10 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20"}`}>
+                        {p.stock}
                       </span>
                     </td>
-                    <td className="p-4 text-amber-400 font-semibold">{prod.rating.toFixed(1)} ★</td>
-                    <td className="p-4 pr-6 text-right space-x-2">
-                      <button
-                        onClick={() => openEditModal(prod)}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-gray-300 hover:text-white transition-colors"
-                        title="Edit"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(prod.id)}
-                        className="p-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                    <td className="px-5 py-4">
+                      <span className="flex items-center gap-1 text-amber-400 text-[13px] font-semibold">
+                        <Star className="w-3 h-3 fill-amber-400" /> {p.rating?.toFixed(1)}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => openEdit(p)} className="p-2 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 transition-colors border border-indigo-500/20" title="Edit">
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => handleDelete(p.id)} className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors border border-rose-500/20" title="Delete">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -219,135 +154,57 @@ export default function AdminProductsPage() {
         )}
       </div>
 
-      {/* Modal Dialog for Add / Edit Product */}
+      {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto p-4 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
-          <div className="relative w-full max-w-xl rounded-3xl bg-galaxy-900 border border-slate-700 shadow-2xl p-6 sm:p-8 space-y-6 z-10">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-lg font-bold text-white">
-                {editingProduct ? "Edit Galaxy Product" : "Create New Galaxy Product"}
-              </h3>
-              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={() => setModalOpen(false)} />
+          <div className="relative w-full max-w-lg bg-[#0d1120] border border-white/[0.08] rounded-2xl shadow-2xl p-6 space-y-5 z-10 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-white">{editingProduct ? "Edit Product" : "New Product"}</h3>
+              <button onClick={() => setModalOpen(false)} className="p-1.5 rounded-lg text-gray-600 hover:text-white hover:bg-white/10 transition-colors"><X className="w-4 h-4" /></button>
             </div>
-
-            <form onSubmit={handleSave} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2 space-y-1">
-                  <label className="font-bold text-gray-300">Product Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Galaxy S25 Ultra"
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-gray-300">Category</label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value="Smartphones">Smartphones</option>
-                    <option value="Tablets">Tablets</option>
-                    <option value="Watches">Watches</option>
-                    <option value="Audio">Audio</option>
-                    <option value="Accessories">Accessories</option>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1.5">Product Name *</label>
+                <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Galaxy S25 Ultra" className={INPUT} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">Category</label>
+                  <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={INPUT}>
+                    {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-gray-300">Price (USD)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    placeholder="1299.99"
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
-                  />
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">Stock</label>
+                  <input type="number" required value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="50" className={INPUT} />
                 </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-gray-300">Original Price (MSRP)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={form.originalPrice}
-                    onChange={(e) => setForm({ ...form, originalPrice: e.target.value })}
-                    placeholder="1419.99"
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
-                  />
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">Price (USD) *</label>
+                  <input type="number" step="0.01" required value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="1299.99" className={INPUT} />
                 </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-gray-300">Inventory Stock Quantity</label>
-                  <input
-                    type="number"
-                    required
-                    value={form.stock}
-                    onChange={(e) => setForm({ ...form, stock: e.target.value })}
-                    placeholder="50"
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div className="col-span-2 space-y-1">
-                  <label className="font-bold text-gray-300">Badge Label (Optional)</label>
-                  <input
-                    type="text"
-                    value={form.badge}
-                    onChange={(e) => setForm({ ...form, badge: e.target.value })}
-                    placeholder="Flagship AI Titan"
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div className="col-span-2 space-y-1">
-                  <label className="font-bold text-gray-300">Image Asset Path</label>
-                  <input
-                    type="text"
-                    value={form.image}
-                    onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    placeholder="/images/nova_ultra.jpg"
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div className="col-span-2 space-y-1">
-                  <label className="font-bold text-gray-300">Description</label>
-                  <textarea
-                    rows={3}
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    placeholder="Describe product highlights and NPU performance..."
-                    className="w-full bg-galaxy-950 border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-indigo-500 resize-none"
-                  />
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 block mb-1.5">Original Price</label>
+                  <input type="number" step="0.01" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} placeholder="1419.99" className={INPUT} />
                 </div>
               </div>
-
-              <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-gray-300 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-colors flex items-center gap-1.5"
-                >
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1.5">Badge (optional)</label>
+                <input type="text" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} placeholder="New Flagship" className={INPUT} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1.5">Image Path</label>
+                <input type="text" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="/images/nova_ultra.jpg" className={INPUT} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1.5">Description</label>
+                <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Product highlights..." className={`${INPUT} resize-none`} />
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/[0.06]">
+                <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-white hover:bg-white/[0.06] transition-colors">Cancel</button>
+                <button type="submit" disabled={saving} className="flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors disabled:opacity-60">
                   {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{editingProduct ? "Save Changes" : "Create Product"}</span>
+                  {editingProduct ? "Save Changes" : "Create Product"}
                 </button>
               </div>
             </form>

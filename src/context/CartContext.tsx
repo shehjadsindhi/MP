@@ -80,6 +80,48 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {}
   }, [promo, isMounted]);
 
+  // Synchronize cart with database on user login
+  useEffect(() => {
+    if (!user) return;
+    const syncCart = async () => {
+      try {
+        const res = await fetch("/api/cart");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.items && Array.isArray(data.items)) {
+            setItems((prev) => {
+              const combined = [...data.items];
+              for (const localItem of prev) {
+                if (
+                  !combined.some(
+                    (c: any) =>
+                      c.productId === localItem.productId &&
+                      c.selectedColor === localItem.selectedColor &&
+                      c.selectedStorage === localItem.selectedStorage
+                  )
+                ) {
+                  combined.push(localItem);
+                  fetch("/api/cart", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      productId: localItem.productId,
+                      quantity: localItem.quantity,
+                      selectedColor: localItem.selectedColor,
+                      selectedStorage: localItem.selectedStorage,
+                    }),
+                  }).catch(() => {});
+                }
+              }
+              return combined;
+            });
+          }
+        }
+      } catch (e) {}
+    };
+    syncCart();
+  }, [user]);
+
   const addItem = (newItem: Omit<CartItemType, "id">) => {
     const id = `${newItem.productId}-${newItem.selectedColor || "default"}-${newItem.selectedStorage || "default"}`;
     setItems((prev) => {
@@ -91,12 +133,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
     showToast(`Added ${newItem.name} to cart!`, "success");
     setIsCartOpen(true);
+
+    if (user) {
+      fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: newItem.productId,
+          quantity: newItem.quantity || 1,
+          selectedColor: newItem.selectedColor,
+          selectedStorage: newItem.selectedStorage,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const removeItem = (id: string) => {
     const item = items.find((i) => i.id === id);
     setItems((prev) => prev.filter((i) => i.id !== id));
     if (item) showToast(`Removed ${item.name} from cart.`, "info");
+
+    if (user) {
+      fetch(`/api/cart?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      }).catch(() => {});
+    }
   };
 
   const updateQuantity = (id: string, delta: number) => {
@@ -111,42 +172,74 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         })
         .filter(Boolean) as CartItemType[]
     );
+
+    const targetItem = items.find((i) => i.id === id);
+    if (user && targetItem) {
+      const newQty = targetItem.quantity + delta;
+      fetch("/api/cart", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, quantity: newQty }),
+      }).catch(() => {});
+    }
   };
 
   const clearCart = () => {
     setItems([]);
     setPromo(null);
+    if (user) {
+      fetch("/api/cart?all=true", { method: "DELETE" }).catch(() => {});
+    }
   };
 
   const applyPromo = (codeStr: string) => {
     const code = codeStr.trim().toUpperCase();
-    if (code === "GALAXYAI2025") {
-      setPromo({ code, discountPercent: 15, discountAmount: 150 });
-      showToast("Promo Code GALAXYAI2025 applied! 15% discount.", "ai");
-      return { success: true, message: "15% off applied!" };
+    if (!code) {
+      showToast("Please enter a valid promo code.", "error");
+      return { success: false, message: "Code cannot be empty" };
     }
-    if (code === "FOLD6AI") {
-      setPromo({ code, discountPercent: 10, discountAmount: 190 });
-      showToast("Promo Code FOLD6AI applied! 10% discount.", "ai");
-      return { success: true, message: "10% foldable discount applied!" };
-    }
-    if (code === "STUDENTAI12") {
-      setPromo({ code, discountPercent: 12, discountAmount: 140 });
-      showToast("Promo Code STUDENTAI12 applied! 12% education discount.", "ai");
-      return { success: true, message: "12% student discount applied!" };
-    }
-    if (code === "WELCOME50") {
-      setPromo({ code, discountPercent: 0, discountAmount: 50 });
-      showToast("Promo Code WELCOME50 applied! $50 off storewide.", "ai");
-      return { success: true, message: "$50 off your order!" };
-    }
-    if (code === "ECOSYSTEM25") {
-      setPromo({ code, discountPercent: 25, discountAmount: 60 });
-      showToast("Promo Code ECOSYSTEM25 applied! 25% wearables bundle discount.", "ai");
-      return { success: true, message: "25% bundle discount applied!" };
-    }
-    showToast("Invalid or expired promo code.", "error");
-    return { success: false, message: "Invalid promo code" };
+
+    // Call server validation API
+    fetch("/api/offers/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, subtotal }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setPromo({
+            code: data.code,
+            discountPercent: data.discountPercent || 0,
+            discountAmount: data.discountAmount || 0,
+          });
+          showToast(`Promo ${data.code} applied! ${data.title}`, "ai");
+        } else {
+          showToast(data.error || "Invalid or expired promo code.", "error");
+        }
+      })
+      .catch(() => {
+        // Fallback for offline/demo codes
+        const knownFallbackCodes: Record<string, { percent?: number; amount?: number; label: string }> = {
+          GALAXYAI2025: { percent: 15, label: "15% launch discount" },
+          FOLD6AI: { percent: 10, label: "10% foldable discount" },
+          STUDENTAI12: { percent: 12, label: "12% education discount" },
+          WELCOME50: { amount: 50, label: "$50 off your order" },
+        };
+        const matched = knownFallbackCodes[code];
+        if (matched) {
+          setPromo({
+            code,
+            discountPercent: matched.percent || 0,
+            discountAmount: matched.amount || 0,
+          });
+          showToast(`Promo ${code} applied! ${matched.label}`, "ai");
+        } else {
+          showToast("Invalid promo code.", "error");
+        }
+      });
+
+    return { success: true, message: "Validating promo code..." };
   };
 
   const removePromo = () => {

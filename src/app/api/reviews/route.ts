@@ -15,9 +15,36 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const productId = searchParams.get("productId");
+    const all = searchParams.get("all");
 
-    if (!productId) {
-      return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
+    if (all === "true" || !productId) {
+      const user = await getSessionUser();
+      if (!user || user.role !== "ADMIN") {
+        return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
+      }
+
+      const reviews = await prisma.review.findMany({
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              image: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return NextResponse.json({ reviews, count: reviews.length });
     }
 
     const reviews = await prisma.review.findMany({

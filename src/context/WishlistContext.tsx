@@ -50,6 +50,38 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {}
   }, [items, isMounted]);
 
+  // Synchronize with persistent database when user logs in
+  useEffect(() => {
+    if (!user) return;
+    const syncWishlist = async () => {
+      try {
+        const res = await fetch("/api/wishlist");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.items && Array.isArray(data.items)) {
+            setItems((prev) => {
+              const combined = [...data.items];
+              for (const localItem of prev) {
+                if (!combined.some((c: any) => c.productId === localItem.productId)) {
+                  combined.push(localItem);
+                  fetch("/api/wishlist", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ productId: localItem.productId }),
+                  }).catch(() => {});
+                }
+              }
+              return combined;
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Wishlist sync error:", e);
+      }
+    };
+    syncWishlist();
+  }, [user]);
+
   const isInWishlist = (productId: string) => {
     return items.some((item) => item.productId === productId);
   };
@@ -59,10 +91,22 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     if (exists) {
       setItems((prev) => prev.filter((item) => item.productId !== newItem.productId));
       showToast(`Removed ${newItem.name} from Wishlist.`, "info");
+      if (user) {
+        fetch(`/api/wishlist?productId=${encodeURIComponent(newItem.productId)}`, {
+          method: "DELETE",
+        }).catch(() => {});
+      }
     } else {
       const id = `wish-${newItem.productId}`;
       setItems((prev) => [...prev, { ...newItem, id }]);
       showToast(`Added ${newItem.name} to Wishlist!`, "success");
+      if (user) {
+        fetch("/api/wishlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: newItem.productId }),
+        }).catch(() => {});
+      }
     }
   };
 
@@ -70,6 +114,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     const item = items.find((i) => i.productId === productId);
     setItems((prev) => prev.filter((i) => i.productId !== productId));
     if (item) showToast(`Removed ${item.name} from Wishlist.`, "info");
+    if (user) {
+      fetch(`/api/wishlist?productId=${encodeURIComponent(productId)}`, {
+        method: "DELETE",
+      }).catch(() => {});
+    }
   };
 
   const moveToCart = (item: WishlistItemType) => {

@@ -1,8 +1,12 @@
 # Galaxy AI Hub — Remaining Task Checklist
 
 ## Build Status
-- [x] `npm run build` passes with exit code 0 — 45 routes compiled clean
-- [x] Dev server running on http://localhost:3000
+- [x] `npm run build` passes with exit code 0 — 45+ routes compiled clean ✓
+- [x] Dev server running on http://localhost:3000 ✓
+- [x] Fixed syntax error in `src/lib/aiProvider.ts` (missing catch body + closing braces for `aiSearch()`) ✓
+- [x] Fixed syntax error in `src/app/api/newsletter/route.ts` (missing closing braces for POST handler) ✓
+- [x] Fixed unescaped JSX entities in `src/app/ai/device-finder/page.tsx` (line 302) ✓
+- [x] Added missing `getSessionUser` import to newsletter route ✓
 
 ---
 
@@ -47,6 +51,12 @@
 ## AI Demo Flows
 - [x] `/ai/demos` — all 5 AI interactive demos (wrapped in Suspense) ✓
 
+## API Verification
+- [x] `GET /api/products` — returns products from DB ✓
+- [x] `POST /api/auth/login` — admin@galaxyai.hub/Admin@123456 → 200 OK ✓
+- [x] `GET /api/ai-features` — returns AI features from DB ✓
+- [x] `prisma db push` — schema in sync with DB ✓
+
 ## Final Polish & Verification
 - [x] Verified `ToastContext` supports all 4 toast types used (`success`, `error`, `info`, `ai`)
 - [x] Added & verified `PUT /api/ai-features/[id]` and `DELETE /api/ai-features/[id]`
@@ -56,7 +66,8 @@
 - [x] Enabled `output: 'standalone'` in `next.config.mjs` for Docker container build compatibility ✓
 - [x] Fixed React hook dependency warnings in `AIAssistant.tsx` and `ProductReviews.tsx` using `useCallback` ✓
 - [x] Added `"use client";` to `src/app/offline/page.tsx` for client interactivity ✓
-- [x] Fixed provider nesting in `ClientProviders.tsx` (nested `MobileBottomNav` inside `CartProvider` and `WishlistProvider`) ✓
-- [x] Added comprehensive test suites: `auth.test.ts`, `dbFallback.test.ts`, `mockAI.test.ts` (8 suites, 34 tests all passing) ✓
-- [x] Executed clean production build (`npm run build`) with exit code 0 and `.next/standalone` generation verified ✓
-
+- [x] Fixed provider nesting in `ClientProviders.tsx` ✓
+- [x] Added comprehensive test suites: `auth.test.ts`, `dbFallback.test.ts`, `mockAI.test.ts` ✓
+- [x] Executed clean production build (`npm run build`) with exit code 0 ✓
+- [x] `scripts/sync-db-provider.js` auto-detects SQLite vs PostgreSQL based on `DATABASE_URL` ✓
+- [x] `NewsletterSubscriber` model present in Prisma schema + DB synced ✓

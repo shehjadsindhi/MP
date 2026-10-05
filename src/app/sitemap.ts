@@ -5,11 +5,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://galaxyaihub.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://galaxyai-five.vercel.app";
 
-  let products = [];
-  let articles = [];
-  let aiFeatures = [];
+  let products: { slug: string; updatedAt: Date }[] = [];
+  let articles: { slug: string; updatedAt: Date }[] = [];
+  let aiFeatures: { slug: string; updatedAt: Date }[] = [];
 
   try {
     products = await prisma.product.findMany({ select: { slug: true, updatedAt: true } });

@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node scripts/sync-db-provider.js && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "node scripts/sync-db-provider.js && prisma generate",
     "prisma:push": "prisma db push",
     "prisma:seed": "node prisma/seed.js"
   },

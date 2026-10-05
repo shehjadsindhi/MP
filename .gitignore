@@ -27,6 +27,8 @@ service-account.json
 *.sqlite
 *.db
 *.db-journal
+*.db.bak
+*.bak
 coverage/
 .nyc_output/
 test-*.txt

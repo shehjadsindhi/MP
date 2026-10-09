@@ -114,7 +114,7 @@ export default function SearchClient() {
         <div className="text-center py-20 bg-galaxy-900/40 rounded-3xl border border-slate-800 space-y-3">
           <p className="text-gray-300 text-base">No results found matching your search.</p>
           <p className="text-xs text-gray-500 max-w-sm mx-auto">
-            Try searching for &ldquo;S25 Ultra&rdquo;, &ldquo;Live Translate&rdquo;, &ldquo;Generative Edit&rdquo;, or &ldquo;Privacy&rdquo;.
+            Try searching for &ldquo;S26 Ultra&rdquo;, &ldquo;Live Translate&rdquo;, &ldquo;Generative Edit&rdquo;, or &ldquo;Privacy&rdquo;.
           </p>
         </div>
       )}

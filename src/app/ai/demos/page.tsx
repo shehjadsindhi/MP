@@ -21,27 +21,27 @@ const DEMO_TABS = [
 
 const DEVICE_FRAMES = [
   {
-    id: "s25ultra",
-    label: "S25 Ultra",
+    id: "s26ultra",
+    label: "S26 Ultra",
     icon: Smartphone,
-    badge: "45 TOPS NPU",
-    hint: "Titanium flagship with 200MP camera & dedicated S-Pen groove.",
+    badge: "Elite Gen 5 NPU",
+    hint: "Titanium flagship with 200 MP ProVisual camera & built-in Privacy Display.",
     accentColor: "from-cyan-500 to-blue-600",
   },
   {
-    id: "zfold6",
-    label: "Z Fold 6",
+    id: "zfold8",
+    label: "Z Fold8",
     icon: Monitor,
     badge: "Flex NPU",
-    hint: "Unfolds into a 7.6\" tablet. Dual-screen multitasking + FlexCam.",
+    hint: "Unfolds into a large immersive screen. Dual 50 MP cameras + multitasking.",
     accentColor: "from-indigo-500 to-purple-600",
   },
   {
-    id: "tabs10",
-    label: "Tab S10 Ultra",
+    id: "tabs12",
+    label: "Tab S12 Ultra",
     icon: Tablet,
     badge: "14.6\" Canvas",
-    hint: "Pro-grade AMOLED tablet with S-Pen for generative editing and note-taking.",
+    hint: "Pro-grade AMOLED tablet with S Pen for generative editing and note-taking.",
     accentColor: "from-emerald-500 to-teal-600",
   },
 ];

@@ -121,7 +121,7 @@ export default function OffersClient({ offers }: { offers: any[] }) {
             </div>
             <h3 className="text-2xl font-bold text-white">Galaxy AI Trade-In Value Estimator</h3>
             <p className="text-xs text-gray-400 mt-1">
-              Trade in your current smartphone and receive guaranteed instant credit towards the Galaxy S25 series.
+              Trade in your current smartphone and receive guaranteed instant credit towards the Galaxy S26 series.
             </p>
           </div>
 
@@ -192,10 +192,10 @@ export default function OffersClient({ offers }: { offers: any[] }) {
 
         <div className="pt-2 flex justify-end">
           <Link
-            href="/devices/galaxy-s25-ultra"
+            href="/devices/galaxy-s26-ultra"
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-galaxy-cyan to-blue-600 text-galaxy-950 font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-2"
           >
-            Apply {formatPrice(tradeValue)} Credit to Galaxy S25 Ultra <ArrowRight className="w-4 h-4" />
+            Apply {formatPrice(tradeValue)} Credit to Galaxy S26 Ultra <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

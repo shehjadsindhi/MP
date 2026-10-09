@@ -149,23 +149,23 @@ export default function Footer() {
           </h3>
           <ul className="space-y-2.5 text-xs">
             <li>
-              <Link href="/devices/galaxy-s25-ultra" className="hover:text-white transition-colors">
-                Galaxy S25 Ultra
+              <Link href="/devices/galaxy-s26-ultra" className="hover:text-white transition-colors">
+                Galaxy S26 Ultra
               </Link>
             </li>
             <li>
-              <Link href="/devices/galaxy-z-fold-6" className="hover:text-white transition-colors">
-                Galaxy Z Fold 6
+              <Link href="/devices/galaxy-z-fold8" className="hover:text-white transition-colors">
+                Galaxy Z Fold8
               </Link>
             </li>
             <li>
-              <Link href="/devices/galaxy-tab-s10-ultra" className="hover:text-white transition-colors">
-                Galaxy Tab S10 Ultra
+              <Link href="/devices/galaxy-tab-s12-ultra" className="hover:text-white transition-colors">
+                Galaxy Tab S12 Ultra
               </Link>
             </li>
             <li>
-              <Link href="/devices/galaxy-watch-ultra" className="hover:text-white transition-colors">
-                Galaxy Watch Ultra
+              <Link href="/devices/galaxy-watch-ultra2" className="hover:text-white transition-colors">
+                Galaxy Watch Ultra2
               </Link>
             </li>
             <li>
@@ -184,9 +184,14 @@ export default function Footer() {
         {/* Column 3: Platform */}
         <div>
           <h3 className="font-bold text-white text-xs uppercase tracking-wider mb-4 text-galaxy-cyan">
-            Ecosystem & Portal
+            Support & Portal
           </h3>
           <ul className="space-y-2.5 text-xs">
+            <li>
+              <Link href="/warranty" className="hover:text-white transition-colors">
+                Warranty Policy
+              </Link>
+            </li>
             <li>
               <Link href="/learn" className="hover:text-white transition-colors">
                 Learning Center & Guides
@@ -213,6 +218,42 @@ export default function Footer() {
               </Link>
             </li>
           </ul>
+        </div>
+      </div>
+
+      {/* Manufacturer / Company Info */}
+      <div className="border-t border-slate-800/60 bg-galaxy-950/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+          <div className="space-y-1.5">
+            <h4 className="font-bold text-white uppercase tracking-wider text-galaxy-cyan">
+              Manufacturer
+            </h4>
+            <p className="text-gray-400 leading-relaxed">
+              Samsung India Electronics Pvt. Ltd.<br />
+              6th Floor, DLF Centre, Sansad Marg,<br />
+              New Delhi-110001, India<br />
+              CIN: U31900DL1995PTC071387
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <h4 className="font-bold text-white uppercase tracking-wider text-galaxy-cyan">
+              Customer Care
+            </h4>
+            <p className="text-gray-400 leading-relaxed">
+              Toll-free: 1800 5 7267864<br />
+              <Link href="/warranty" className="text-galaxy-cyan hover:underline">
+                Warranty & support portal &rarr;
+              </Link>
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <h4 className="font-bold text-white uppercase tracking-wider text-galaxy-cyan">
+              Note
+            </h4>
+            <p className="text-gray-400 leading-relaxed">
+              Galaxy AI Hub is an unofficial educational demo. Samsung, Galaxy, and related marks are trademarks of Samsung Electronics Co., Ltd.
+            </p>
+          </div>
         </div>
       </div>
 

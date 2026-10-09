@@ -166,7 +166,7 @@ export default function AdminProductsPage() {
             <form onSubmit={handleSave} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-gray-500 block mb-1.5">Product Name *</label>
-                <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Galaxy S25 Ultra" className={INPUT} />
+                <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Galaxy S26 Ultra" className={INPUT} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

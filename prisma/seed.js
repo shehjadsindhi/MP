@@ -12,6 +12,7 @@ async function main() {
   await prisma.order.deleteMany();
   await prisma.cartItem.deleteMany();
   await prisma.wishlistItem.deleteMany();
+  await prisma.review.deleteMany();
   await prisma.product.deleteMany();
   await prisma.aIFeature.deleteMany();
   await prisma.article.deleteMany();
@@ -65,7 +66,7 @@ async function main() {
       shortDesc: "Simply circle, highlight, or tap any image, video, or text on your screen to instantly get Google AI search results without switching apps.",
       fullDesc: "A groundbreaking search gesture created with Google. Whether you spot a pair of boots in a social feed, iconic architecture in a travel vlog, or a complex math equation, just circle it on screen with your finger or S-Pen for instant multimodal insights, price comparisons, and location context.",
       demoTab: "search",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy S25+", "Galaxy Z Fold 6", "Galaxy Tab S10 Ultra"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Fold8", "Galaxy Tab S12 Ultra"]),
       benefitsJson: JSON.stringify([
         "Instant visual lookup without taking screenshots or switching apps",
         "Deep AI overview summaries alongside real-time web results",
@@ -94,7 +95,7 @@ async function main() {
       shortDesc: "Two-way, real-time voice and text translations during phone calls in 16+ languages with zero lag and on-device privacy.",
       fullDesc: "Break language barriers effortlessly. Speak naturally in your native language, and the person on the other end hears your words translated in real-time. Works directly inside the native Phone app without needing external apps or cloud streaming.",
       demoTab: "translation",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy S25+", "Galaxy Z Fold 6", "Galaxy Z Flip 6", "Galaxy Buds3 Pro"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Fold8", "Galaxy Z Flip8", "Galaxy Buds3 Pro"]),
       benefitsJson: JSON.stringify([
         "Live voice-to-voice translation in both directions simultaneously",
         "Real-time text transcript displayed on screen during the call",
@@ -122,7 +123,7 @@ async function main() {
       shortDesc: "Instantly adjust tone from professional to casual, generate concise message summaries, and correct grammar inside any chat app.",
       fullDesc: "Perfect your tone before hitting send. Whether crafting a polite email to a client, an engaging social post with relevant hashtags, or translating a chat message in real time, Writing Assist ensures your message conveys the exact right emotion and precision.",
       demoTab: "writing",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy S25+", "Galaxy Z Fold 6", "Galaxy Tab S10 Ultra", "Galaxy Book4 Ultra"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Fold8", "Galaxy Tab S12 Ultra", "Galaxy Book4 Ultra"]),
       benefitsJson: JSON.stringify([
         "5 tone transformations: Professional, Casual, Polite, Social, and Concise",
         "Real-time spelling, punctuation, and contextual grammar corrections",
@@ -150,7 +151,7 @@ async function main() {
       shortDesc: "Relocate subjects, resize people, remove unwanted reflections, and seamlessly fill background borders with generative AI.",
       fullDesc: "Reimagine every photograph. Straighten crooked horizons while AI generates missing background details, move a person closer to center stage, or eliminate photobombers and reflections with a single tap.",
       demoTab: "photo",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy S25+", "Galaxy Z Fold 6", "Galaxy Tab S10 Ultra"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Fold8", "Galaxy Tab S12 Ultra"]),
       benefitsJson: JSON.stringify([
         "Move, resize, or erase people and objects with smart edge detection",
         "Auto-fill background borders when rotating or expanding crop boundaries",
@@ -178,7 +179,7 @@ async function main() {
       shortDesc: "Transforms chaotic meeting notes and lectures into structured executive summaries, formatted bullet points, and actionable checklists.",
       fullDesc: "Take raw thoughts, lecture scribbles, or messy meeting notes in Samsung Notes and let Galaxy AI format them with clean headers, bulleted takeaways, grammar polish, and auto-generated cover thumbnails for effortless organization.",
       demoTab: "notes",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy Tab S10 Ultra", "Galaxy Z Fold 6"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Fold8", "Galaxy Tab S12 Ultra"]),
       benefitsJson: JSON.stringify([
         "One-tap auto-formatting with aesthetic headers, dividers, and bullet hierarchies",
         "Executive summaries highlighting key decisions and action items",
@@ -205,7 +206,7 @@ async function main() {
       shortDesc: "Records multi-speaker meetings, transcribes audio to text with speaker separation, and generates concise takeaway summaries.",
       fullDesc: "Never miss a meeting detail. Using advanced speech-to-text and on-device voice recognition, Transcript Assist labels Speaker 1, Speaker 2, translates into different languages, and creates instant executive summaries with key actionable tasks.",
       demoTab: "notes",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy S25+", "Galaxy Z Fold 6", "Galaxy Tab S10 Ultra"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Fold8", "Galaxy Tab S12 Ultra"]),
       benefitsJson: JSON.stringify([
         "Automatic speaker diarization (separates up to 10 distinct voices)",
         "Time-synced transcripts with tap-to-listen playback",
@@ -232,7 +233,7 @@ async function main() {
       shortDesc: "Intelligently analyzes photos to suggest optimal remastering: eliminate glass reflections, enhance dynamic range, and add studio lighting.",
       fullDesc: "Edit Suggestion scans each capture and offers tailored single-touch optimizations. Turn standard photos into long exposures, remove shadow glare from museum exhibits, and remaster vintage low-res photos with AI depth generation.",
       demoTab: "photo",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy S25+", "Galaxy Z Flip 6", "Galaxy Watch Ultra"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Fold8", "Galaxy Z Flip8", "Galaxy Watch Ultra2"]),
       benefitsJson: JSON.stringify([
         "Context-aware recommendations: Remaster, Erase Shadows, Erase Reflections",
         "Instant portrait background blur with 24-bit depth map simulation",
@@ -259,7 +260,7 @@ async function main() {
       shortDesc: "Split-screen dual conversation interface that translates face-to-face interactions live without requiring cellular data.",
       fullDesc: "Traveling abroad? Place your Galaxy phone between you and a local speaker. The screen splits so each person reads the translated transcript facing them, while audio plays naturally in real time.",
       demoTab: "translation",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy Z Flip 6", "Galaxy Z Fold 6", "Galaxy Buds3 Pro"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Z Flip8", "Galaxy Z Fold8", "Galaxy Buds3 Pro"]),
       benefitsJson: JSON.stringify([
         "Dual-screen view utilizing Cover Screen on foldable devices for natural eye contact",
         "Hands-free listening mode with Galaxy Buds3 Pro real-time whisper translation",
@@ -286,7 +287,7 @@ async function main() {
       shortDesc: "Doodle a quick sketch on any photo or canvas with your S-Pen, and watch Galaxy AI turn it into a photorealistic 3D element.",
       fullDesc: "Add a butterfly to a portrait, a stylish hat, sunglasses, or futuristic architecture to a landscape. Sketch to Image interprets your basic pencil outline and generates high-fidelity art that matches the lighting, shadows, and textures of the scene.",
       demoTab: "photo",
-      supportedDevicesJson: JSON.stringify(["Galaxy S25 Ultra", "Galaxy Tab S10 Ultra", "Galaxy Z Fold 6"]),
+      supportedDevicesJson: JSON.stringify(["Galaxy S26 Ultra", "Galaxy Tab S12 Ultra", "Galaxy Z Fold8"]),
       benefitsJson: JSON.stringify([
         "Transforms simple outlines into realistic 3D textures in seconds",
         "Matches background lighting, reflections, and perspective automatically",
@@ -311,20 +312,20 @@ async function main() {
   }
   console.log(`✨ Seeded ${aiFeatures.length} AI Features.`);
 
-  // 4. Create Products
+  // 4. Create Products — 2026 Galaxy lineup with factual specifications
   const products = [
     {
-      slug: "galaxy-s25-ultra",
-      name: "Galaxy S25 Ultra",
+      slug: "galaxy-s26-ultra",
+      name: "Galaxy S26 Ultra",
       category: "Smartphones",
-      price: 1299.99,
-      originalPrice: 1419.99,
+      price: 1399.99,
+      originalPrice: 1519.99,
       discount: 8,
       rating: 4.9,
-      reviewCount: 342,
+      reviewCount: 356,
       isFeatured: true,
       badge: "Flagship AI Titan",
-      description: "The definitive Galaxy AI flagship. Powered by Snapdragon 8 Elite with upgraded Neural Processing Unit, built-in Titanium S-Pen, 200MP quad-telephoto optical zoom, and groundbreaking on-device generative intelligence.",
+      description: "The definitive Galaxy AI flagship. Powered by Snapdragon 8 Elite Gen 5 for Galaxy, the world's first built-in Privacy Display on mobile, a 200 MP Wide F1.4 camera with ProVisual Engine, and a 5,000 mAh all-day battery.",
       image: "/images/nova_ultra.jpg",
       galleryJson: JSON.stringify(["/images/nova_ultra.jpg", "/images/nova_pro.jpg", "/images/flex_5.jpg"]),
       colorsJson: JSON.stringify([
@@ -339,160 +340,196 @@ async function main() {
         { size: "1TB", priceOffset: 340 }
       ]),
       specsJson: JSON.stringify({
-        "Display": "6.8\" Dynamic AMOLED 2X, QHD+, 1-120Hz LTPO, 2600 nits",
-        "Processor": "Snapdragon 8 Elite Mobile Platform for Galaxy (3nm)",
-        "NPU": "Quantum NPU with 45 TOPS AI Performance",
-        "Main Camera": "200MP Wide + 50MP Periscope (5x) + 10MP Tele (3x) + 50MP Ultra-Wide",
-        "Battery": "5,000 mAh with 45W Super Fast Charging 2.0 & Fast Wireless 2.0",
-        "Build": "Titanium Frame with Corning Gorilla Armor Glass",
-        "Security": "Samsung Knox Vault with EAL5+ Hardware Protection",
-        "OS Updates": "7 Generations of Android OS upgrades & 7 Years of Security"
+        "Display": "17.49 cm (6.9\") Dynamic AMOLED 2X with built-in Privacy Display",
+        "Processor": "Snapdragon 8 Elite Gen 5 for Galaxy",
+        "NPU": "Next-generation on-device NPU for Galaxy AI",
+        "Main Camera": "200 MP Wide F1.4 + 50 MP Ultra Wide F1.9 + 50 MP Telephoto F2.9",
+        "Battery": "5,000 mAh ultra-long lasting all-day battery",
+        "Camera Engine": "ProVisual Engine with 47% improved brightness on the 200 MP Wide camera",
+        "Cooling": "New Vapor Chamber design — 21% greater thermal performance",
+        "OS": "One UI 9 with Galaxy AI"
       }),
       aiFeaturesJson: JSON.stringify(["circle-to-search", "live-translate", "writing-assist", "generative-edit", "note-assist", "transcript-assist", "ai-photo-editor", "sketch-to-image"]),
       stock: 45,
     },
     {
-      slug: "galaxy-s25-plus",
-      name: "Galaxy S25+",
+      slug: "galaxy-z-fold8",
+      name: "Galaxy Z Fold8",
       category: "Smartphones",
-      price: 999.99,
-      originalPrice: 1099.99,
-      discount: 9,
+      price: 1999.99,
+      originalPrice: 2099.99,
+      discount: 5,
       rating: 4.8,
-      reviewCount: 218,
+      reviewCount: 212,
       isFeatured: true,
-      badge: "Sleek Powerhouse",
-      description: "Streamlined elegance with expansive 6.7-inch QHD+ display, full suite of Galaxy AI tools, lightning-fast charging, and Armor Aluminum durability.",
-      image: "/images/nova_pro.jpg",
-      galleryJson: JSON.stringify(["/images/nova_pro.jpg", "/images/nova_ultra.jpg"]),
+      badge: "World's Lightest Fold",
+      description: "At just 201 g, the world's lightest fold. Unfold a large immersive screen powered by Snapdragon 8 Elite Gen 5 for Galaxy, with a flatter Armor FlexHinge and dual 50 MP Wide and Ultra Wide cameras.",
+      image: "/images/flex_5.jpg",
+      galleryJson: JSON.stringify(["/images/flex_5.jpg", "/images/nova_ultra.jpg"]),
       colorsJson: JSON.stringify([
-        { name: "Cobalt Violet", hex: "#6366f1", inStock: true },
-        { name: "Onyx Black", hex: "#1e293b", inStock: true },
-        { name: "Marble Gray", hex: "#cbd5e1", inStock: true },
-        { name: "Amber Yellow", hex: "#fbbf24", inStock: true }
+        { name: "Silver Shadow", hex: "#b8bcbe", inStock: true },
+        { name: "Navy", hex: "#1e293b", inStock: true },
+        { name: "Crafted Black", hex: "#09090b", inStock: true },
+        { name: "Pink Gold", hex: "#f472b6", inStock: false }
+      ]),
+      storageJson: JSON.stringify([
+        { size: "256GB", priceOffset: 0 },
+        { size: "512GB", priceOffset: 140 },
+        { size: "1TB", priceOffset: 400 }
+      ]),
+      specsJson: JSON.stringify({
+        "Main Display": "Large unfoldable Dynamic AMOLED 2X, 1-120Hz, nearly invisible crease",
+        "Cover Display": "Cover display with 10 MP cover screen camera",
+        "Processor": "Snapdragon 8 Elite Gen 5 for Galaxy (next-gen CPU, GPU, NPU)",
+        "Camera": "50 MP Wide F1.8 + 50 MP Ultra Wide F1.9",
+        "Battery": "4,800 mAh (typ.) — up to 26 hours of video playback",
+        "Weight": "201 g — the world's lightest fold",
+        "Build": "Corning Gorilla Glass Ceramic 3 (front) & Gorilla Glass Victus 2 (back), durable Armor FlexHinge",
+        "Durability": "IP48 water & dust resistant",
+        "OS": "One UI 9 (optimized for fully open or fully closed; FlexMode not supported)"
+      }),
+      aiFeaturesJson: JSON.stringify(["circle-to-search", "live-translate", "writing-assist", "generative-edit", "note-assist", "transcript-assist", "interpreter", "sketch-to-image"]),
+      stock: 28,
+    },
+    {
+      slug: "galaxy-z-fold8-ultra",
+      name: "Galaxy Z Fold8 Ultra",
+      category: "Smartphones",
+      price: 2399.99,
+      originalPrice: 2499.99,
+      discount: 4,
+      rating: 4.9,
+      reviewCount: 168,
+      isFeatured: false,
+      badge: "Ultimate Fold",
+      description: "The largest and most powerful Fold yet — bigger 4,854 mAh rated battery, Snapdragon 8 Elite Gen 5 for Galaxy, and the flattest Armor FlexHinge Samsung has engineered.",
+      image: "/images/flex_5.jpg",
+      galleryJson: JSON.stringify(["/images/flex_5.jpg", "/images/nova_ultra.jpg"]),
+      colorsJson: JSON.stringify([
+        { name: "Titanium Gray", hex: "#475569", inStock: true },
+        { name: "Whiteshore", hex: "#e2e8f0", inStock: true }
+      ]),
+      storageJson: JSON.stringify([
+        { size: "512GB", priceOffset: 0 },
+        { size: "1TB", priceOffset: 220 }
+      ]),
+      specsJson: JSON.stringify({
+        "Processor": "Snapdragon 8 Elite Gen 5 for Galaxy",
+        "Battery": "4,854 mAh rated capacity — the largest in the Fold8 series",
+        "Build": "Armor FlexHinge with flatter main screen, Gorilla Glass Ceramic 3 & Victus 2",
+        "Durability": "IP48 water & dust resistant",
+        "OS": "One UI 9"
+      }),
+      aiFeaturesJson: JSON.stringify(["circle-to-search", "live-translate", "writing-assist", "generative-edit", "note-assist", "transcript-assist", "interpreter", "sketch-to-image"]),
+      stock: 18,
+    },
+    {
+      slug: "galaxy-z-flip8",
+      name: "Galaxy Z Flip8",
+      category: "Smartphones",
+      price: 1199.99,
+      originalPrice: 1299.99,
+      discount: 8,
+      rating: 4.8,
+      reviewCount: 187,
+      isFeatured: true,
+      badge: "Pocket Studio AI",
+      description: "The thinnest, lightest Flip yet. All-new larger FlexWindow with Now Brief, FlexCam powered by ProVisual Engine, Super Steady Video, and Exynos 2600 for Galaxy.",
+      image: "/images/flex_5.jpg",
+      galleryJson: JSON.stringify(["/images/flex_5.jpg"]),
+      colorsJson: JSON.stringify([
+        { name: "Silver Shadow", hex: "#94a3b8", inStock: true },
+        { name: "Mint", hex: "#a7f3d0", inStock: true },
+        { name: "Yellow", hex: "#fde047", inStock: true },
+        { name: "Blue", hex: "#93c5fd", inStock: true }
       ]),
       storageJson: JSON.stringify([
         { size: "256GB", priceOffset: 0 },
         { size: "512GB", priceOffset: 120 }
       ]),
       specsJson: JSON.stringify({
-        "Display": "6.7\" Dynamic AMOLED 2X, QHD+, 1-120Hz, 2600 nits",
-        "Processor": "Snapdragon 8 Elite / Exynos 2500 Dual Architecture",
-        "NPU": "High-Efficiency 38 TOPS Neural Engine",
-        "Main Camera": "50MP Dual Pixel Wide + 10MP Tele (3x) + 12MP Ultra-Wide",
-        "Battery": "4,900 mAh with 45W Super Fast Charging",
-        "Build": "Enhanced Armor Aluminum & Gorilla Glass Victus 2",
-        "Security": "Knox Vault Hardware Protection",
-        "OS Updates": "7 Years OS & Security Updates"
+        "Main Display": "Unfoldable Dynamic AMOLED 2X, 120Hz",
+        "Cover Display": "All-new larger FlexWindow with real-time Mirror view up to 120 fps",
+        "Processor": "Exynos 2600 for Galaxy (faster NPU, GPU, CPU)",
+        "Camera": "50 MP Wide FlexCam + 12 MP Ultra Wide, 10 MP main screen camera",
+        "Battery": "4,300 mAh (typ.) — up to 31 hours of video playback",
+        "Build": "Durable Armor FlexHinge, Corning Gorilla Glass Victus 2 (front)",
+        "Durability": "IP48 water & dust resistant",
+        "AI Highlights": "Now Brief on FlexWindow, Super Steady Video with Horizontal Lock, Gemini Notebook",
+        "OS": "One UI 9 with customizable FlexWindow home & app tray"
       }),
-      aiFeaturesJson: JSON.stringify(["circle-to-search", "live-translate", "writing-assist", "generative-edit", "note-assist", "ai-photo-editor"]),
-      stock: 60,
+      aiFeaturesJson: JSON.stringify(["interpreter", "ai-photo-editor", "generative-edit", "writing-assist", "circle-to-search"]),
+      stock: 40,
     },
     {
-      slug: "galaxy-z-fold-6",
-      name: "Galaxy Z Fold 6",
-      category: "Smartphones",
-      price: 1899.99,
-      originalPrice: 1999.99,
-      discount: 5,
-      rating: 4.9,
-      reviewCount: 184,
-      isFeatured: true,
-      badge: "Next-Gen Foldable AI",
-      description: "Unfold a tablet-sized AI workstation that fits in your pocket. Dual-screen Interpreter mode, S-Pen Sketch to Image, Side-by-Side Note Assist multitasking, and ultra-durable Dual-Rail Flex Hinge.",
-      image: "/images/flex_5.jpg",
-      galleryJson: JSON.stringify(["/images/flex_5.jpg", "/images/nova_ultra.jpg"]),
-      colorsJson: JSON.stringify([
-        { name: "Silver Shadow", hex: "#94a3b8", inStock: true },
-        { name: "Navy Blue", hex: "#1e3a8a", inStock: true },
-        { name: "Crafted Black", hex: "#09090b", inStock: true },
-        { name: "Pink Gold", hex: "#f472b6", inStock: false }
-      ]),
-      storageJson: JSON.stringify([
-        { size: "256GB", priceOffset: 0 },
-        { size: "512GB", priceOffset: 120 },
-        { size: "1TB", priceOffset: 350 }
-      ]),
-      specsJson: JSON.stringify({
-        "Main Display": "7.6\" Dynamic AMOLED 2X Infinity Flex, QXGA+, 1-120Hz, 2600 nits",
-        "Cover Display": "6.3\" Dynamic AMOLED 2X, HD+, 1-120Hz",
-        "Processor": "Snapdragon 8 Gen 3 for Galaxy (4nm)",
-        "NPU": "Dual-Core Hexagon NPU for Foldable Multitasking",
-        "Main Camera": "50MP Wide + 10MP Tele (3x) + 12MP Ultra-Wide + 4MP Under-Display Camera",
-        "Battery": "4,400 mAh with 25W Fast Charge & Wireless PowerShare",
-        "Build": "Dual-Rail Flex Hinge & Enhanced Armor Aluminum",
-        "Water Resistance": "IP48 Water & Dust Resistant"
-      }),
-      aiFeaturesJson: JSON.stringify(["circle-to-search", "live-translate", "writing-assist", "generative-edit", "note-assist", "transcript-assist", "interpreter", "sketch-to-image"]),
-      stock: 28,
-    },
-    {
-      slug: "galaxy-tab-s10-ultra",
-      name: "Galaxy Tab S10 Ultra",
+      slug: "galaxy-tab-s12-ultra",
+      name: "Galaxy Tab S12 Ultra",
       category: "Tablets",
-      price: 1199.99,
-      originalPrice: 1299.99,
-      discount: 8,
+      price: 1299.99,
+      originalPrice: 1399.99,
+      discount: 7,
       rating: 4.9,
-      reviewCount: 156,
+      reviewCount: 98,
       isFeatured: true,
-      badge: "Ultimate Creator Tablet",
-      description: "14.6-inch anti-reflective Dynamic AMOLED 2X canvas with MediaTek Dimensity 9300+ AI silicon, bundled S-Pen, PDF Overlay Translation, and multi-window Note Assist.",
+      badge: "14.6\" Creator Canvas",
+      description: "A 36.99 cm (14.6\") Dynamic AMOLED 2X WQXGA+ canvas with an 11,600 mAh battery delivering up to 23 hours of video, in-box S Pen, and Personalized Now Brief.",
       image: "/images/tab_ultra.jpg",
-      galleryJson: JSON.stringify(["/images/tab_ultra.jpg", "/images/nova_ultra.jpg"]),
+      galleryJson: JSON.stringify(["/images/tab_ultra.jpg"]),
       colorsJson: JSON.stringify([
-        { name: "Moonstone Gray", hex: "#475569", inStock: true },
-        { name: "Platinum Silver", hex: "#cbd5e1", inStock: true }
+        { name: "Memory Gray", hex: "#64748b", inStock: true },
+        { name: "Platinum Silver", hex: "#e2e8f0", inStock: true }
       ]),
       storageJson: JSON.stringify([
         { size: "256GB / 12GB RAM", priceOffset: 0 },
-        { size: "512GB / 12GB RAM", priceOffset: 130 },
-        { size: "1TB / 16GB RAM", priceOffset: 380 }
+        { size: "512GB / 12GB RAM", priceOffset: 150 },
+        { size: "1TB / 16GB RAM", priceOffset: 450 }
       ]),
       specsJson: JSON.stringify({
-        "Display": "14.6\" Dynamic AMOLED 2X, WQXGA+ (2960 x 1848), 120Hz, Anti-Reflective Coating",
-        "Processor": "MediaTek Dimensity 9300+ (4nm Octa-Core)",
-        "NPU": "APU 790 with Generative AI Acceleration",
-        "Sound": "Quad Stereo Speakers tuned by AKG with Dolby Atmos",
-        "Battery": "11,200 mAh with 45W Super Fast Charging",
-        "Included Accessory": "Low-Latency S-Pen with Air Actions in Box",
-        "Protection": "IP68 Water & Dust Resistance"
+        "Display": "36.99 cm (14.6\") Dynamic AMOLED 2X, 2960 x 1848 (WQXGA+), 16M colours",
+        "Processor": "Octa-core (4.21 GHz / 3.5 GHz / 2.7 GHz)",
+        "Camera": "13 MP + 8 MP rear with AF, 12 MP front, UHD 4K (3840 x 2160) @60fps",
+        "Battery": "11,600 mAh — up to 23 hours video playback, Super Fast Charging 2.0",
+        "Memory & Storage": "Up to 16 GB RAM and 1 TB storage, microSD expansion up to 2 TB",
+        "Included": "S Pen in box",
+        "Connectivity": "Wi-Fi 7 (802.11be), Bluetooth v6.0, USB 3.2 Gen 1",
+        "AI": "Personalized Now Brief with customizable content cards",
+        "Dimensions": "208.5 x 326.3 x 5.1 mm, 692 g (Wi-Fi) / 695 g (5G)"
       }),
-      aiFeaturesJson: JSON.stringify(["circle-to-search", "writing-assist", "generative-edit", "note-assist", "sketch-to-image", "ai-photo-editor"]),
-      stock: 35,
+      aiFeaturesJson: JSON.stringify(["note-assist", "sketch-to-image", "circle-to-search", "transcript-assist", "writing-assist"]),
+      stock: 30,
     },
     {
-      slug: "galaxy-watch-ultra",
-      name: "Galaxy Watch Ultra",
+      slug: "galaxy-watch-ultra2",
+      name: "Galaxy Watch Ultra2",
       category: "Watches",
-      price: 649.99,
-      originalPrice: 699.99,
-      discount: 7,
-      rating: 4.8,
-      reviewCount: 260,
+      price: 749.99,
+      originalPrice: 799.99,
+      discount: 6,
+      rating: 4.9,
+      reviewCount: 312,
       isFeatured: true,
-      badge: "Rugged Health AI",
-      description: "Grade 4 Titanium cushion case, 100-hour battery life in power save mode, Dual-Frequency GPS, and BioActive sensor with Galaxy AI Energy Score and personalized fitness coaching.",
+      badge: "Dive-Ready Titanium",
+      description: "Rugged titanium body with the world's first up-to-5,000-nit display on a smartwatch, the largest 800 mAh battery on a Galaxy Watch (up to 60 hours), Snapdragon Wear Elite, and EN13319 dive certification.",
       image: "/images/watch_7_pro.jpg",
       galleryJson: JSON.stringify(["/images/watch_7_pro.jpg"]),
       colorsJson: JSON.stringify([
-        { name: "Titanium Gray with Marine Orange", hex: "#f97316", inStock: true },
-        { name: "Titanium White", hex: "#e2e8f0", inStock: true },
-        { name: "Titanium Silver", hex: "#64748b", inStock: true }
+        { name: "Titanium Silver", hex: "#cbd5e1", inStock: true },
+        { name: "Titanium Gray", hex: "#475569", inStock: true }
       ]),
-      storageJson: JSON.stringify([
-        { size: "47mm LTE", priceOffset: 0 }
-      ]),
+      storageJson: JSON.stringify([{ size: "47mm LTE", priceOffset: 0 }]),
       specsJson: JSON.stringify({
-        "Display": "1.5\" Super AMOLED (480 x 480), Sapphire Crystal, 3000 nits Peak",
-        "Processor": "Exynos W1000 (3nm Penta-Core)",
-        "Sensors": "BioActive 2.0 (Heart Rate, ECG, BIA Body Composition), Dual GPS",
-        "AI Features": "Galaxy AI Energy Score, Sleep Apnea Detection, Personalized HR Zones",
-        "Battery": "590 mAh (Up to 100 Hours in Power Saving Mode)",
-        "Durability": "10ATM / IP68 / MIL-STD-810H Grade 4 Titanium"
+        "Display": "3.85 cm, 498 x 498, up to 5,000 nits — the brightest ever on a Galaxy Watch",
+        "Processor": "Snapdragon Wear Elite Platform (2.1 GHz / 1.95 GHz, penta-core)",
+        "Battery": "800 mAh — up to 60 hrs with AOD on / 80 hrs AOD off; Fast Charging up to 40% in ~30 mins",
+        "Durability": "Titanium body, IP69K, 10 ATM, EN13319-certified dive-ready to 40 m",
+        "Sensors": "Accelerometer, Barometer, BIA, Electrical Heart (ECG), Gyro, Geomagnetic, Light, Optical HR, Temperature",
+        "Connectivity": "Bluetooth v6.0, NFC, GPS / Glonass / Beidou / Galileo / QZSS, Wi-Fi",
+        "OS": "Wear OS powered by Samsung",
+        "Health": "Sleep Apnea 2.0 tracking, continuous health monitoring",
+        "Size": "47.4 x 47.1 x 10.7 mm, 61.5 g — 47mm, Titanium Silver & Titanium Gray"
       }),
-      aiFeaturesJson: JSON.stringify(["writing-assist", "ai-photo-editor"]),
-      stock: 50,
+      aiFeaturesJson: JSON.stringify(["writing-assist"]),
+      stock: 35,
     },
     {
       slug: "galaxy-buds3-pro",
@@ -501,65 +538,26 @@ async function main() {
       price: 249.99,
       originalPrice: 279.99,
       discount: 11,
-      rating: 4.7,
-      reviewCount: 410,
-      isFeatured: true,
-      badge: "Real-Time Voice AI",
-      description: "Blade design with interactive LED Blade Lights, 24-bit/96kHz Hi-Fi audio, Adaptive Noise Control with Voice Detect, and hands-free real-time Interpreter integration.",
+      rating: 4.8,
+      reviewCount: 512,
+      isFeatured: false,
+      badge: "Interpreter Earbuds",
+      description: "Real-time voice translation streamed directly into your ears with Blade design LED light controls and 24-bit Hi-Fi audio output.",
       image: "/images/buds_pro.jpg",
       galleryJson: JSON.stringify(["/images/buds_pro.jpg"]),
       colorsJson: JSON.stringify([
-        { name: "Silver Titanium", hex: "#94a3b8", inStock: true },
-        { name: "White Ceramic", hex: "#f8fafc", inStock: true }
+        { name: "Silver Blade", hex: "#94a3b8", inStock: true },
+        { name: "White Blade", hex: "#ffffff", inStock: true }
       ]),
-      storageJson: JSON.stringify([
-        { size: "Standard Wireless Charging Case", priceOffset: 0 }
-      ]),
+      storageJson: JSON.stringify([{ size: "Standard", priceOffset: 0 }]),
       specsJson: JSON.stringify({
-        "Speaker": "Enhanced 2-Way with Planar Tweeter & Dynamic Woofer",
-        "Audio Codec": "Samsung Seamless Codec (SSC) Hi-Fi 24-bit / 96kHz",
-        "ANC": "Adaptive ANC with Siren / Voice Detect & Ambient Sound",
-        "Microphones": "6 Mics with VPU (Voice Pickup Unit) & Deep Neural Network Call Clarity",
-        "Battery": "Up to 30 Hours with Charging Case (ANC Off)",
-        "Water Resistance": "IP57 Sweat & Rain Resistance"
+        "Audio": "24-bit / 96kHz Hi-Fi Audio with Dual 2-Way Amplifiers",
+        "AI ANC": "Adaptive Noise Control + Siren & Voice Detect",
+        "Battery": "Up to 30 hours with charging case",
+        "Connectivity": "Bluetooth 5.4 with Auto Switch"
       }),
-      aiFeaturesJson: JSON.stringify(["live-translate", "interpreter"]),
-      stock: 80,
-    },
-    {
-      slug: "galaxy-z-flip-6",
-      name: "Galaxy Z Flip 6",
-      category: "Smartphones",
-      price: 1099.99,
-      originalPrice: 1199.99,
-      discount: 8,
-      rating: 4.8,
-      reviewCount: 195,
-      isFeatured: false,
-      badge: "Pocket Studio AI",
-      description: "Iconic compact flip form factor featuring 3.4-inch FlexWindow with AI Suggested Replies, 50MP FlexCam with Auto Zoom, and 4,000 mAh all-day battery.",
-      image: "/images/flex_5.jpg",
-      galleryJson: JSON.stringify(["/images/flex_5.jpg", "/images/nova_pro.jpg"]),
-      colorsJson: JSON.stringify([
-        { name: "Mint Green", hex: "#a7f3d0", inStock: true },
-        { name: "Silver Shadow", hex: "#94a3b8", inStock: true },
-        { name: "Yellow", hex: "#fef08a", inStock: true },
-        { name: "Blue", hex: "#93c5fd", inStock: true }
-      ]),
-      storageJson: JSON.stringify([
-        { size: "256GB", priceOffset: 0 },
-        { size: "512GB", priceOffset: 120 }
-      ]),
-      specsJson: JSON.stringify({
-        "Main Display": "6.7\" Dynamic AMOLED 2X, FHD+, 1-120Hz LTPO, 2600 nits",
-        "Cover Screen": "3.4\" Super AMOLED FlexWindow (60Hz)",
-        "Processor": "Snapdragon 8 Gen 3 for Galaxy (4nm)",
-        "Main Camera": "50MP Dual Pixel Wide + 12MP Ultra-Wide with Auto Zoom AI",
-        "Battery": "4,000 mAh with Vapor Chamber Cooling System",
-        "Durability": "Armor Aluminum & Gorilla Glass Victus 2"
-      }),
-      aiFeaturesJson: JSON.stringify(["circle-to-search", "live-translate", "writing-assist", "generative-edit", "interpreter", "ai-photo-editor"]),
-      stock: 40,
+      aiFeaturesJson: JSON.stringify(["interpreter", "live-translate"]),
+      stock: 90,
     },
     {
       slug: "galaxy-book4-ultra",
@@ -568,29 +566,28 @@ async function main() {
       price: 2399.99,
       originalPrice: 2599.99,
       discount: 8,
-      rating: 4.9,
-      reviewCount: 88,
+      rating: 4.8,
+      reviewCount: 94,
       isFeatured: false,
-      badge: "AI Studio Laptop",
-      description: "Intel Core Ultra 9 with dedicated NPU, NVIDIA GeForce RTX 4070 Laptop GPU, 16-inch 3K Dynamic AMOLED 2X touchscreen with Anti-Reflective coating, and Galaxy Connected Experience.",
+      badge: "AI Laptop Workstation",
+      description: "Next-gen laptop workstation with Intel Core Ultra 9, NVIDIA RTX 4070, Dynamic AMOLED 2X touch display, and Microsoft Copilot+ Galaxy AI cross-device synergy.",
       image: "/images/tab_ultra.jpg",
       galleryJson: JSON.stringify(["/images/tab_ultra.jpg"]),
       colorsJson: JSON.stringify([
-        { name: "Moonstone Gray", hex: "#334155", inStock: true }
+        { name: "Moonstone Gray", hex: "#475569", inStock: true }
       ]),
       storageJson: JSON.stringify([
-        { size: "1TB SSD / 32GB LPDDR5X", priceOffset: 0 },
-        { size: "2TB SSD / 64GB LPDDR5X", priceOffset: 450 }
+        { size: "1TB SSD / 32GB RAM", priceOffset: 0 },
+        { size: "2TB SSD / 64GB RAM", priceOffset: 350 }
       ]),
       specsJson: JSON.stringify({
-        "Display": "16\" 3K Dynamic AMOLED 2X (2880 x 1800), 120Hz Touchscreen, Anti-Reflective",
+        "Display": "16\" Dynamic AMOLED 2X, 3K (2880x1800), 120Hz Touch",
         "Processor": "Intel Core Ultra 9 185H with Integrated NPU",
-        "Graphics": "NVIDIA GeForce RTX 4070 (8GB GDDR6)",
-        "Audio": "AKG Quad Speakers with Dolby Atmos & Studio Mics",
-        "Battery": "76 Wh with 140W USB-C Fast Charger"
+        "GPU": "NVIDIA GeForce RTX 4070 Laptop GPU (8GB GDDR6)",
+        "Battery": "76Wh with 140W USB-C Super Fast Charging"
       }),
       aiFeaturesJson: JSON.stringify(["writing-assist", "note-assist", "generative-edit"]),
-      stock: 20,
+      stock: 15,
     }
   ];
 
@@ -602,38 +599,32 @@ async function main() {
   // 5. Create Learning Articles
   const articles = [
     {
-      slug: "mastering-circle-to-search-complete-guide",
-      title: "Mastering Circle to Search: 10 Hidden Gestures & Pro Tips",
+      slug: "mastering-galaxy-ai-complete-guide",
+      title: "Mastering Galaxy AI: 10 Hidden Features & Productivity Shortcuts",
       category: "AI Guides",
       author: "Dr. Elena Vance, AI Research Lead",
       readTime: "6 min read",
-      excerpt: "Discover how to unlock the full potential of Google Circle to Search on Galaxy devices, from solving mathematical formulas to instant price matching.",
-      content: `## The Next Evolution of Visual Search
+      excerpt: "Discover advanced S-Pen shortcuts, instant PDF translations, dual-screen interpreter configurations, and custom prompt templates.",
+      content: `## The Next Evolution of On-Device Intelligence
 
-Circle to Search on Galaxy isn't just a simple image lookup — it is a multimodal reasoning pipeline directly integrated into your system UI. By leveraging deep optical character recognition and semantic image embedding, you can query anything visible on your display without switching apps.
+Galaxy AI is built directly into One UI 9, so intelligent capabilities activate exactly where you work — no switching apps, no cloud round-trips for core tasks.
 
-### 1. Instant Homework & Equation Solving
-When reading digital textbooks or PDF problem sets, draw a clean circle around complex calculus, quadratic equations, or physics problems. Circle to Search detects mathematical notation and returns step-by-step solutions, interactive graphs, and theorem explanations.
+### 1. Multimodal Circle to Search Techniques
+While most users know they can circle images, long-pressing text allows you to instant-translate entire paragraphs without taking screenshots. Furthermore, adding text queries after circling lets you perform complex research like: "Find where to buy this outfit near me".
 
-### 2. Multi-Language On-Screen Text Translation
-Instead of copying and pasting foreign captions into a translation app:
-- Activate Circle to Search.
-- Tap the **Translate** icon located on the lower right corner of the search overlay.
-- All foreign text on the screen is instantaneously replaced with clean in-place English translations.
+### 2. Custom S-Pen Sketch to Image
+Draw a quick rough sketch over any photo in Samsung Notes or Gallery. Select 'Sketch to Image' and choose between 3D Cartoon, Watercolor, Pop Art, or Illustration styles to bring your ideas to life instantly.
 
-### 3. Combining Image with Text Context (Multimodal)
-Spot a jacket you love in a social post, but want to see it in a different fabric or color? Circle the jacket, then type "in brown corduroy" in the search box. Galaxy AI synthesizes the image texture with your textual modifier to return exact matches.
-
-### 4. Background Sound & Song Recognition
-Tapping the music note icon while Circle to Search is active allows the on-device acoustic model to identify songs playing nearby or humming in background videos with zero latency.`,
+### 3. Offline On-Device Privacy Toggle
+For users handling confidential business communications or medical records, navigate to Settings -> Advanced Features -> Galaxy AI, and enable 'Process Data Only on Device'.`,
       image: "/images/nova_ultra.jpg",
-      tagsJson: JSON.stringify(["Search", "Productivity", "S-Pen", "Beginners"]),
+      tagsJson: JSON.stringify(["Galaxy AI", "Productivity", "S26 Ultra", "Tutorials"]),
       isFeatured: true,
     },
     {
       slug: "on-device-vs-cloud-ai-privacy-deep-dive",
       title: "Your AI. Your Privacy: On-Device NPU vs Cloud Processing",
-      category: "AI Guides",
+      category: "AI Tips",
       author: "Marcus Chen, Knox Security Architect",
       readTime: "8 min read",
       excerpt: "An in-depth look at how Samsung Knox Vault and Galaxy Quantum NPUs keep your sensitive conversational and biometric data protected.",
@@ -641,8 +632,8 @@ Tapping the music note icon while Circle to Search is active allows the on-devic
 
 Modern artificial intelligence requires substantial computational throughput, but your private conversations, personal notes, and intimate photos should never be compromised. Galaxy AI utilizes a hybrid architecture designed around granular user autonomy.
 
-### The Quantum NPU Engine
-On-device models run directly on the Snapdragon 8 Elite and Exynos neural processing units. Operations like **Live Translate**, **Interpreter Mode**, and **Smart Tone Correction** execute 100% within the encrypted hardware perimeter of your phone. No audio packets, transcripts, or keystrokes ever leave the device.
+### The On-Device Neural Engine
+On-device models run directly on the Snapdragon 8 Elite Gen 5 and Exynos 2600 neural processing units. Operations like **Live Translate**, **Interpreter Mode**, and **Smart Tone Correction** execute 100% within the encrypted hardware perimeter of your phone. No audio packets, transcripts, or keystrokes ever leave the device.
 
 ### Knox Vault Hardware Isolation
 Biometric keys, credentials, and cryptographic certificates for on-device AI models are isolated inside **Samsung Knox Vault**, an EAL5+ certified hardware enclave physically segregated from the primary Android processor. Even if the system OS is tampered with, your encryption keys remain inaccessible.
@@ -650,8 +641,8 @@ Biometric keys, credentials, and cryptographic certificates for on-device AI mod
 ### The Cloud AI Privacy Toggle
 For complex generative workflows (such as Generative Edit fill and 50-page document synthesis), Galaxy AI offers a master switch in Settings:
 - **Process Data Only on Device**: When toggled ON, any feature requiring cloud servers is automatically restricted or uses lightweight local models.
-- **Zero Data Retention**: When cloud processing is utilized, Samsung and partner servers immediately discard query inputs upon response delivery without training external models.`,
-      image: "/images/watch_7_pro.jpg",
+- **Zero Data Retention**: When cloud processing is utilized, partner servers immediately discard query inputs upon response delivery without training external models.`,
+      image: "/images/flex_5.jpg",
       tagsJson: JSON.stringify(["Privacy", "Knox Security", "NPU", "Architecture"]),
       isFeatured: true,
     },
@@ -661,7 +652,7 @@ For complex generative workflows (such as Generative Edit fill and 50-page docum
       category: "Tutorials",
       author: "Sarah Jenkins, Creative Director",
       readTime: "7 min read",
-      excerpt: "Learn how professional photographers use Galaxy Generative Edit and AI Remaster to rescue imperfect shots, remove photobombers, and extend horizons.",
+      excerpt: "Learn how photographers use Galaxy Generative Edit and AI Remaster to rescue imperfect shots, remove photobombers, and extend horizons.",
       content: `## Transforming Every Capture with Generative AI
 
 We have all taken a photo where the lighting was glorious, but a passing tourist stepped into the frame, or the horizon was tilted 15 degrees. In the past, this required complex desktop retouching. With Galaxy Generative Edit, it takes under 10 seconds.
@@ -730,7 +721,7 @@ Traveling internationally is exhilarating until you need to explain a food aller
 ### Face-to-Face with Interpreter Mode
 When conversing with a local resident:
 - Pull down Quick Settings and activate **Interpreter**.
-- On Galaxy Z Flip 6 or Z Fold 6, enable **Cover Screen View**. Place the phone in half-folded Flex Mode between you and the other person.
+- On the Galaxy Z Fold8 or Z Flip8, enable **Cover Screen View**. Place the phone in half-folded Flex Mode between you and the other person.
 - You see their speech translated into your language facing you; they see your speech translated into their language on the outer screen!`,
       image: "/images/flex_5.jpg",
       tagsJson: JSON.stringify(["Travel", "Translation", "Interpreter", "Offline"]),
@@ -738,7 +729,7 @@ When conversing with a local resident:
     },
     {
       slug: "galaxy-buds-and-watch-health-ai-ecosystem",
-      title: "Biometric Harmony: Galaxy Watch Ultra & Buds3 Pro AI Health Ecosystem",
+      title: "Biometric Harmony: Galaxy Watch Ultra2 & Buds3 Pro AI Health Ecosystem",
       category: "News",
       author: "Dr. Jonathan Hayes, Sports Medicine",
       readTime: "4 min read",
@@ -753,7 +744,7 @@ Every morning, Galaxy AI evaluates your previous day's physical exertion, sleep 
 - If your score indicates physiological fatigue, it suggests restorative yoga or active recovery.
 
 ### Real-Time In-Ear Audio Coaching
-While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate zones from Galaxy Watch Ultra and whispers personalized pacing cues directly into your ears, helping you stay in optimal fat-burning or endurance thresholds.`,
+While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate zones from Galaxy Watch Ultra2 and whispers personalized pacing cues directly into your ears, helping you stay in optimal fat-burning or endurance thresholds.`,
       image: "/images/buds_pro.jpg",
       tagsJson: JSON.stringify(["Health", "Wearables", "Audio", "Fitness"]),
       isFeatured: false,
@@ -769,8 +760,8 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
   const offers = [
     {
       title: "Galaxy AI Launch Special: Free Storage Upgrade",
-      description: "Get double the storage on Galaxy S25 Ultra or Galaxy S25+ for the price of the base tier plus $150 trade-in credit.",
-      code: "GALAXYAI2025",
+      description: "Get double the storage on Galaxy S26 Ultra for the price of the base tier plus $150 trade-in credit.",
+      code: "GALAXYAI2026",
       discountPercent: 15,
       discountAmount: 150,
       minSpend: 900,
@@ -781,9 +772,9 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
       isActive: true,
     },
     {
-      title: "Foldable Revolution: 10% Off Galaxy Z Fold 6",
+      title: "Foldable Revolution: 10% Off Galaxy Z Fold8",
       description: "Experience the ultimate foldable AI productivity powerhouse with free S-Pen Pro case included.",
-      code: "FOLD6AI",
+      code: "FOLD8AI",
       discountPercent: 10,
       discountAmount: 190,
       minSpend: 1500,
@@ -795,7 +786,7 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
     },
     {
       title: "Student & Educator AI Tech Bundle",
-      description: "Save 12% on Galaxy Tab S10 Ultra and Galaxy Book4 Ultra with verified student discount.",
+      description: "Save 12% on Galaxy Tab S12 Ultra and Galaxy Book4 Ultra with verified student discount.",
       code: "STUDENTAI12",
       discountPercent: 12,
       discountAmount: 140,
@@ -808,7 +799,7 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
     },
     {
       title: "Wearables & Audio Bundle Savings",
-      description: "Buy any Galaxy flagship smartphone and get Galaxy Watch Ultra or Galaxy Buds3 Pro at 25% off.",
+      description: "Buy any Galaxy flagship smartphone and get Galaxy Watch Ultra2 or Galaxy Buds3 Pro at 25% off.",
       code: "ECOSYSTEM25",
       discountPercent: 25,
       discountAmount: 60,
@@ -841,7 +832,7 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
 
   // 7. Create Demo Orders for the Demo User
   const createdProducts = await prisma.product.findMany();
-  const phone = createdProducts.find((p) => p.slug === "galaxy-s25-ultra") || createdProducts[0];
+  const phone = createdProducts.find((p) => p.slug === "galaxy-s26-ultra") || createdProducts[0];
   const buds = createdProducts.find((p) => p.slug === "galaxy-buds3-pro") || createdProducts[1];
 
   const order1 = await prisma.order.create({
@@ -858,11 +849,11 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
       paymentMethod: "Demo Card (•••• 4242)",
       paymentStatus: "Paid",
       orderStatus: "Delivered",
-      subtotal: 1549.98,
+      subtotal: 1649.98,
       discount: 150.00,
       shipping: 0.00,
-      tax: 111.99,
-      total: 1511.97,
+      tax: 119.99,
+      total: 1619.97,
       notes: "Please leave at front door ring bell.",
       createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
       items: {
@@ -873,15 +864,15 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
             productImage: phone.image,
             selectedColor: "Titanium Silver",
             selectedStorage: "512GB",
-            unitPrice: 1299.99,
+            unitPrice: 1399.99,
             quantity: 1,
-            totalPrice: 1299.99,
+            totalPrice: 1399.99,
           },
           {
             productId: buds.id,
             productName: buds.name,
             productImage: buds.image,
-            selectedColor: "Silver Titanium",
+            selectedColor: "Silver Blade",
             selectedStorage: "Standard",
             unitPrice: 249.99,
             quantity: 1,
@@ -906,24 +897,24 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
       paymentMethod: "Demo Apple Pay",
       paymentStatus: "Paid",
       orderStatus: "Processing",
-      subtotal: 649.99,
+      subtotal: 749.99,
       discount: 50.00,
       shipping: 0.00,
-      tax: 48.00,
-      total: 647.99,
+      tax: 56.25,
+      total: 756.24,
       notes: "Express signature delivery",
       createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
       items: {
         create: [
           {
-            productId: createdProducts.find((p) => p.slug === "galaxy-watch-ultra")?.id || phone.id,
-            productName: "Galaxy Watch Ultra",
+            productId: createdProducts.find((p) => p.slug === "galaxy-watch-ultra2")?.id || phone.id,
+            productName: "Galaxy Watch Ultra2",
             productImage: "/images/watch_7_pro.jpg",
-            selectedColor: "Titanium Gray with Marine Orange",
+            selectedColor: "Titanium Gray",
             selectedStorage: "47mm LTE",
-            unitPrice: 649.99,
+            unitPrice: 749.99,
             quantity: 1,
-            totalPrice: 649.99,
+            totalPrice: 749.99,
           },
         ],
       },
@@ -931,6 +922,63 @@ While running or cycling with Galaxy Buds3 Pro, the AI monitors your heart rate 
   });
 
   console.log(`📦 Seeded sample customer orders (${order1.orderNumber}, ${order2.orderNumber}).`);
+
+  // 8. Create original demo reviews for the 2026 lineup
+  const reviews = [
+    {
+      productId: phone.id,
+      userId: demoUser.id,
+      rating: 5,
+      title: "Privacy Display is a game changer",
+      comment: "The built-in Privacy Display hides the screen from side views instantly — perfect for commuting. The 200 MP Wide camera with ProVisual Engine captures incredible detail in low light, and Snapdragon 8 Elite Gen 5 keeps everything fluid. Battery easily lasts my full workday.",
+      verified: true,
+    },
+    {
+      productId: createdProducts.find((p) => p.slug === "galaxy-z-fold8")?.id || phone.id,
+      userId: demoUser.id,
+      rating: 5,
+      title: "Lightest fold I have owned",
+      comment: "At 201 g it finally feels pocketable. The flatter crease on the main screen is nearly invisible and the Armor FlexHinge opens with a satisfying snap. Dual 50 MP cameras cover all my everyday shots. Note: FlexMode is not supported on this generation, but split-screen multitasking works great.",
+      verified: true,
+    },
+    {
+      productId: createdProducts.find((p) => p.slug === "galaxy-z-flip8")?.id || phone.id,
+      rating: 4,
+      title: "FlexWindow is genuinely useful now",
+      comment: "The larger FlexWindow with Now Brief shows weather, calendar and health cards without unfolding. Mirror view at up to 120 fps is smooth. Exynos 2600 handles Galaxy AI features quickly. Wish the battery were slightly larger, but 31 hours of video playback is solid.",
+      verified: true,
+    },
+    {
+      productId: createdProducts.find((p) => p.slug === "galaxy-tab-s12-ultra")?.id || phone.id,
+      userId: demoUser.id,
+      rating: 5,
+      title: "The ultimate study canvas",
+      comment: "The 14.6-inch Dynamic AMOLED 2X WQXGA+ display is stunning for PDFs and lecture slides. S Pen in the box is a must for note-taking, and Note Assist turns my messy handwriting into clean summaries. The 11,600 mAh battery lasted an entire two-day conference.",
+      verified: true,
+    },
+    {
+      productId: createdProducts.find((p) => p.slug === "galaxy-watch-ultra2")?.id || phone.id,
+      userId: demoUser.id,
+      rating: 5,
+      title: "Brightest watch display, week-long confidence",
+      comment: "The 5,000-nit display is readable in direct sunlight and the 800 mAh battery lasts 60 hours with always-on display. Fast Charging got me 40% in 30 minutes. Sleep Apnea 2.0 tracking and the full sensor suite make it a serious health device. EN13319 dive certification is a great bonus.",
+      verified: true,
+    },
+    {
+      productId: buds.id,
+      userId: demoUser.id,
+      rating: 4,
+      title: "Great translation audio quality",
+      comment: "24-bit Hi-Fi audio is crisp and ANC handles café noise well. Interpreter mode translations stream clearly into the buds. Comfortable for long calls, and the 30-hour case battery covers my week.",
+      verified: true,
+    },
+  ];
+
+  for (const rev of reviews) {
+    await prisma.review.create({ data: rev });
+  }
+  console.log(`⭐ Seeded ${reviews.length} original demo reviews.`);
+
   console.log("✅ Galaxy AI Hub database seeding completed successfully!");
 }
 

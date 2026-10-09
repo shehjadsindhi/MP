@@ -123,9 +123,9 @@ export default async function AIPage() {
             <div className="w-12 h-12 mx-auto rounded-xl bg-slate-800 flex items-center justify-center text-galaxy-cyan">
               <Smartphone className="w-6 h-6" />
             </div>
-            <h4 className="font-bold text-white text-sm">Galaxy S25 Ultra</h4>
+            <h4 className="font-bold text-white text-sm">Galaxy S26 Ultra</h4>
             <p className="text-xs text-gray-400">
-              Complete on-device AI suite, 200MP Generative Camera, and S-Pen Sketch to Image.
+              Complete on-device AI suite, 200 MP ProVisual camera, and built-in Privacy Display.
             </p>
           </div>
 
@@ -133,9 +133,9 @@ export default async function AIPage() {
             <div className="w-12 h-12 mx-auto rounded-xl bg-slate-800 flex items-center justify-center text-indigo-400">
               <Layers className="w-6 h-6" />
             </div>
-            <h4 className="font-bold text-white text-sm">Galaxy Z Fold 6</h4>
+            <h4 className="font-bold text-white text-sm">Galaxy Z Fold8</h4>
             <p className="text-xs text-gray-400">
-              Dual-screen Interpreter mode, split-screen Note Assist, and foldable multi-window AI.
+              World&apos;s lightest fold, large-screen Interpreter mode, and split-screen Note Assist.
             </p>
           </div>
 
@@ -143,9 +143,9 @@ export default async function AIPage() {
             <div className="w-12 h-12 mx-auto rounded-xl bg-slate-800 flex items-center justify-center text-purple-400">
               <Tablet className="w-6 h-6" />
             </div>
-            <h4 className="font-bold text-white text-sm">Galaxy Tab S10 Ultra</h4>
+            <h4 className="font-bold text-white text-sm">Galaxy Tab S12 Ultra</h4>
             <p className="text-xs text-gray-400">
-              14.6&quot; Dynamic AMOLED canvas with PDF Overlay Translation and Handwriting OCR.
+              14.6&quot; Dynamic AMOLED WQXGA+ canvas with S Pen, Now Brief, and Handwriting OCR.
             </p>
           </div>
 
@@ -153,7 +153,7 @@ export default async function AIPage() {
             <div className="w-12 h-12 mx-auto rounded-xl bg-slate-800 flex items-center justify-center text-emerald-400">
               <Headphones className="w-6 h-6" />
             </div>
-            <h4 className="font-bold text-white text-sm">Galaxy Buds3 Pro & Watch</h4>
+            <h4 className="font-bold text-white text-sm">Galaxy Buds3 Pro & Watch Ultra2</h4>
             <p className="text-xs text-gray-400">
               Hands-free whisper translation, AI Energy Score, and real-time biometric wellness.
             </p>

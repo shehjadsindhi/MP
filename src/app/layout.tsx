@@ -15,8 +15,8 @@ export const metadata: Metadata = {
     "Live Translate",
     "Generative Edit",
     "Note Assist",
-    "Galaxy S25 Ultra",
-    "Galaxy Z Fold 6",
+    "Galaxy S26 Ultra",
+    "Galaxy Z Fold8",
     "Knox Vault",
   ],
   openGraph: {

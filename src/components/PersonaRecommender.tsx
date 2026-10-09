@@ -30,8 +30,8 @@ const PERSONAS: PersonaData[] = [
       { name: "Live Translate", slug: "live-translate", reason: "Translate foreign language academic literature" },
     ],
     devices: [
-      { name: "Galaxy Tab S10 Ultra", slug: "galaxy-tab-s10-ultra", badge: "Ideal Study Canvas", image: "/images/tab_ultra.jpg" },
-      { name: "Galaxy S25+", slug: "galaxy-s25-plus", badge: "All-Day Battery Flagship", image: "/images/nova_pro.jpg" },
+      { name: "Galaxy Tab S12 Ultra", slug: "galaxy-tab-s12-ultra", badge: "Ideal Study Canvas", image: "/images/tab_ultra.jpg" },
+      { name: "Galaxy S26", slug: "galaxy-s26-ultra", badge: "All-Day Battery Flagship", image: "/images/nova_pro.jpg" },
     ],
     tutorials: [
       { title: "10x Your Meeting & Lecture Productivity with Note Assist", slug: "10x-productivity-with-note-assist-and-s-pen" },
@@ -51,8 +51,8 @@ const PERSONAS: PersonaData[] = [
       { name: "Knox Security", slug: "on-device-vs-cloud-ai-privacy-deep-dive", reason: "Hardware-isolated EAL5+ encryption" },
     ],
     devices: [
-      { name: "Galaxy S25 Ultra", slug: "galaxy-s25-ultra", badge: "Titanium Executive Titan", image: "/images/nova_ultra.jpg" },
-      { name: "Galaxy Z Fold 6", slug: "galaxy-z-fold-6", badge: "Dual-Screen Workstation", image: "/images/flex_5.jpg" },
+      { name: "Galaxy S26 Ultra", slug: "galaxy-s26-ultra", badge: "Titanium Executive Titan", image: "/images/nova_ultra.jpg" },
+      { name: "Galaxy Z Fold8", slug: "galaxy-z-fold8", badge: "Dual-Screen Workstation", image: "/images/flex_5.jpg" },
     ],
     tutorials: [
       { title: "Your AI. Your Privacy: On-Device NPU vs Cloud Processing", slug: "on-device-vs-cloud-ai-privacy-deep-dive" },
@@ -72,8 +72,8 @@ const PERSONAS: PersonaData[] = [
       { name: "Circle to Search", slug: "circle-to-search", reason: "Visual inspiration matching across social reels" },
     ],
     devices: [
-      { name: "Galaxy S25 Ultra", slug: "galaxy-s25-ultra", badge: "200MP Pro AI Camera", image: "/images/nova_ultra.jpg" },
-      { name: "Galaxy Tab S10 Ultra", slug: "galaxy-tab-s10-ultra", badge: "14.6\" Dynamic AMOLED Canvas", image: "/images/tab_ultra.jpg" },
+      { name: "Galaxy S26 Ultra", slug: "galaxy-s26-ultra", badge: "200MP Pro AI Camera", image: "/images/nova_ultra.jpg" },
+      { name: "Galaxy Tab S12 Ultra", slug: "galaxy-tab-s12-ultra", badge: "14.6\" Dynamic AMOLED Canvas", image: "/images/tab_ultra.jpg" },
     ],
     tutorials: [
       { title: "Generative Photo Edit Masterclass: Transform Any Shot", slug: "generative-edit-photo-masterclass" },
@@ -93,7 +93,7 @@ const PERSONAS: PersonaData[] = [
       { name: "AI Photo Editor", slug: "ai-photo-editor", reason: "Erase tourist crowds from iconic travel photos" },
     ],
     devices: [
-      { name: "Galaxy Z Flip 6", slug: "galaxy-z-flip-6", badge: "Pocket-Sized FlexCam AI", image: "/images/flex_5.jpg" },
+      { name: "Galaxy Z Flip8", slug: "galaxy-z-flip8", badge: "Pocket-Sized FlexCam AI", image: "/images/flex_5.jpg" },
       { name: "Galaxy Buds3 Pro", slug: "galaxy-buds3-pro", badge: "In-Ear Live Translation", image: "/images/buds_pro.jpg" },
     ],
     tutorials: [
@@ -114,11 +114,11 @@ const PERSONAS: PersonaData[] = [
       { name: "Galaxy Watch AI", slug: "galaxy-buds-and-watch-health-ai-ecosystem", reason: "Energy Score and wellness coaching" },
     ],
     devices: [
-      { name: "Galaxy S25+", slug: "galaxy-s25-plus", badge: "All-Round Daily Flagship", image: "/images/nova_pro.jpg" },
-      { name: "Galaxy Watch Ultra", slug: "galaxy-watch-ultra", badge: "Health & Energy Intelligence", image: "/images/watch_7_pro.jpg" },
+      { name: "Galaxy S26", slug: "galaxy-s26-ultra", badge: "All-Round Daily Flagship", image: "/images/nova_pro.jpg" },
+      { name: "Galaxy Watch Ultra2", slug: "galaxy-watch-ultra2", badge: "Health & Energy Intelligence", image: "/images/watch_7_pro.jpg" },
     ],
     tutorials: [
-      { title: "Biometric Harmony: Galaxy Watch Ultra & Buds3 Pro AI Health", slug: "galaxy-buds-and-watch-health-ai-ecosystem" },
+      { title: "Biometric Harmony: Galaxy Watch Ultra2 & Buds3 Pro AI Health", slug: "galaxy-buds-and-watch-health-ai-ecosystem" },
       { title: "Mastering Circle to Search: 10 Hidden Gestures", slug: "mastering-circle-to-search-complete-guide" },
     ],
   },

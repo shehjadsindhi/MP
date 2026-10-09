@@ -26,7 +26,7 @@ const HERO_FEATURES = [
     color: "from-cyan-500 to-blue-600",
     badge: "Instant AI",
     previewText: "Draw any circle on your screen to identify objects, search text, or shop items instantly.",
-    sampleTag: "Galaxy S25 Ultra • NPU 45 TOPS",
+    sampleTag: "Galaxy S26 Ultra • NPU 45 TOPS",
     img: "/images/nova_ultra.jpg"
   },
   {
@@ -37,7 +37,7 @@ const HERO_FEATURES = [
     color: "from-indigo-500 to-purple-600",
     badge: "2-Way Audio",
     previewText: "Break language barriers on phone calls in real-time. Speak in English, receiver hears Korean.",
-    sampleTag: "Galaxy Z Fold6 • Zero Latency",
+    sampleTag: "Galaxy Z Fold8 • Zero Latency",
     img: "/images/fold_zenith.jpg"
   },
   {
@@ -48,7 +48,7 @@ const HERO_FEATURES = [
     color: "from-purple-500 to-pink-600",
     badge: "Canvas Magic",
     previewText: "Remove unwanted reflections, relocate subjects, and fill missing background seamlessly.",
-    sampleTag: "Galaxy Tab S10 Ultra • Pro Canvas",
+    sampleTag: "Galaxy Tab S12 Ultra • Pro Canvas",
     img: "/images/tab_aurora.jpg"
   },
   {
@@ -59,7 +59,7 @@ const HERO_FEATURES = [
     color: "from-emerald-500 to-teal-600",
     badge: "Smart Summaries",
     previewText: "Transform meeting recordings into structured bullet points with speaker timestamps.",
-    sampleTag: "Galaxy Watch Ultra • Bio NPU",
+    sampleTag: "Galaxy Watch Ultra2 • Bio NPU",
     img: "/images/watch_nexus.jpg"
   }
 ];

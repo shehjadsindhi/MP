@@ -129,11 +129,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               </span>
               <div className="flex flex-wrap gap-2">
                 {[
-                  "Galaxy S25 Ultra",
+                  "Galaxy S26 Ultra",
                   "Circle to Search",
                   "Live Translate",
                   "Generative Edit",
-                  "Galaxy Tab S10",
+                  "Galaxy Tab S12",
                   "Student AI Deals",
                   "Note Assist",
                 ].map((tag) => (

@@ -60,8 +60,8 @@ export default function AIAssistant() {
       content:
         "👋 Hi there! I'm your **Galaxy AI Copilot**. Ask me anything about Galaxy smartphones, Knox privacy, camera zoom, interactive AI demos, or student discounts!",
       suggestedLinks: [
-        { label: "📸 Best for Photography", url: "/devices/galaxy-s25-ultra" },
-        { label: "🎓 Best for Students", url: "/devices/galaxy-tab-s10-ultra" },
+        { label: "📸 Best for Photography", url: "/devices/galaxy-s26-ultra" },
+        { label: "🎓 Best for Students", url: "/devices/galaxy-tab-s12-ultra" },
         { label: "✨ Try Live AI Demos", url: "/ai/demos" },
       ],
     },

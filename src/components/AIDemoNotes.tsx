@@ -6,10 +6,10 @@ import { useToast } from "@/context/ToastContext";
 
 const SAMPLE_NOTES = `Team Meeting Notes - Galaxy AI Launch
 - Discussed Quantum NPU latency benchmarks (12ms for Live Translate)
-- Sarah to finalize S25 Ultra titanium gallery assets by Thursday 2pm
+- Sarah to finalize S26 Ultra titanium gallery assets by Thursday 2pm
 - Need to sync with Knox Vault team for hardware certification audit
 - Customer survey showed 94% satisfaction with Circle to Search
-- Mark will coordinate student discount promo rollout for Tab S10 Ultra`;
+- Mark will coordinate student discount promo rollout for Tab S12 Ultra`;
 
 export default function AIDemoNotes() {
   const [inputNotes, setInputNotes] = useState(SAMPLE_NOTES);
@@ -19,9 +19,9 @@ export default function AIDemoNotes() {
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
 
   const [tasks, setTasks] = useState<{ id: string; text: string; done: boolean; priority: string }[]>([
-    { id: "t1", text: "Finalize S25 Ultra titanium gallery assets (Sarah - Thu 2pm)", done: false, priority: "High" },
+    { id: "t1", text: "Finalize S26 Ultra titanium gallery assets (Sarah - Thu 2pm)", done: false, priority: "High" },
     { id: "t2", text: "Schedule Knox Vault hardware certification audit sync", done: true, priority: "High" },
-    { id: "t3", text: "Roll out Tab S10 Ultra student discount campaign (Mark)", done: false, priority: "Medium" },
+    { id: "t3", text: "Roll out Tab S12 Ultra student discount campaign (Mark)", done: false, priority: "Medium" },
     { id: "t4", text: "Archive Quantum NPU 12ms latency benchmark report", done: false, priority: "Low" },
   ]);
 

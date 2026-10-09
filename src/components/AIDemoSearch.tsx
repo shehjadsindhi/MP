@@ -25,20 +25,20 @@ export default function AIDemoSearch() {
   const [result, setResult] = useState<any>({
     query: PRESET_QUERIES[0],
     aiOverview:
-      "The **Galaxy S25 Ultra** is rated as the premier flagship for concert and low-light photography. It features a 200MP wide sensor, 5x periscope optical zoom with up to 100x Space Zoom, and **Generative Edit** to erase stage reflections and photobombers.",
+      "The **Galaxy S26 Ultra** is rated as the premier flagship for concert and low-light photography. It features a 200 MP Wide F1.4 sensor with ProVisual Engine, 50 MP Telephoto F2.9, and **Generative Edit** to erase stage reflections and photobombers.",
     keyInsights: [
-      "200MP Quad-Telephoto Camera System with 5x Optical Periscope zoom.",
-      "Nightography Video 2.0 with dedicated AI noise reduction ISP.",
+      "200 MP Wide F1.4 + 50 MP Telephoto F2.9 camera system.",
+      "ProVisual Engine with 47% improved brightness on the Wide camera.",
       "Generative Edit enables moving subjects and erasing reflections in seconds.",
       "S-Pen acts as a remote wireless camera shutter button.",
     ],
     matchedDevices: [
-      { name: "Galaxy S25 Ultra", slug: "galaxy-s25-ultra", price: 1299.99, reason: "Ultimate 200MP quad-camera & Generative Edit studio." },
-      { name: "Galaxy Z Fold 6", slug: "galaxy-z-fold-6", price: 1899.99, reason: "Dual-screen FlexCam with hands-free tripod mode." },
+      { name: "Galaxy S26 Ultra", slug: "galaxy-s26-ultra", price: 1399.99, reason: "Ultimate 200 MP ProVisual camera & Generative Edit studio." },
+      { name: "Galaxy Z Fold8", slug: "galaxy-z-fold8", price: 1999.99, reason: "Dual 50 MP cameras with large-screen multitasking." },
     ],
     relatedQuestions: [
       "How does Generative Edit compare to Photoshop?",
-      "What is the maximum optical zoom on Galaxy S25 Ultra?",
+      "What is the telephoto zoom on Galaxy S26 Ultra?",
       "Can Galaxy AI remove glass reflections from museum photos?",
     ],
     sources: [

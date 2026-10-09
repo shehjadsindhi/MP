@@ -5,6 +5,11 @@ import { getSessionUser } from "@/lib/auth";
 import { safeGetOffers } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
+  const user = await getSessionUser();
+  if (!user || user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
   try {
     const offers = await safeGetOffers();
     return NextResponse.json({ offers });

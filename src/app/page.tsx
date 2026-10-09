@@ -22,6 +22,7 @@ import {
   Flame
 } from "lucide-react";
 import { safeGetProducts, safeGetAIFeatures, safeGetArticles, safeGetOffers } from "@/lib/db";
+import { getSessionUser } from "@/lib/auth";
 import ProductCard from "@/components/ProductCard";
 import PersonaRecommender from "@/components/PersonaRecommender";
 import HeroInteractive from "@/components/HeroInteractive";
@@ -42,12 +43,15 @@ const FEATURE_ICONS: Record<string, any> = {
 export const revalidate = 60; // ISR cache revalidation
 
 export default async function HomePage() {
-  const [featuredProducts, aiFeatures, latestArticles, activeOffers] = await Promise.all([
+  const [featuredProducts, aiFeatures, latestArticles, allOffers, sessionUser] = await Promise.all([
     safeGetProducts({ featured: true }),
     safeGetAIFeatures(),
     safeGetArticles(),
     safeGetOffers(),
+    getSessionUser(),
   ]);
+
+  const activeOffers = sessionUser?.role === "ADMIN" ? allOffers : [];
 
   return (
     <div className="space-y-24 pb-20">

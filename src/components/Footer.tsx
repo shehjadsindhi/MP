@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Sparkles, Send, CheckCircle2, Loader2, Info } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,11 +199,13 @@ export default function Footer() {
                 Learning Center & Guides
               </Link>
             </li>
-            <li>
-              <Link href="/offers" className="hover:text-white transition-colors">
-                Promotions & Student Deals
-              </Link>
-            </li>
+            {user?.role === "ADMIN" && (
+              <li>
+                <Link href="/offers" className="hover:text-white transition-colors">
+                  Promotions & Student Deals
+                </Link>
+              </li>
+            )}
             <li>
               <Link href="/account" className="hover:text-white transition-colors">
                 User Dashboard

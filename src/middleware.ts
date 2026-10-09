@@ -13,6 +13,10 @@ const ADMIN_PREFIXES = [
   "/admin",
 ];
 
+const ADMIN_ONLY_PAGES = [
+  "/offers",
+];
+
 const PUBLIC_PREFIXES = [
   "/api/auth/login",
   "/api/auth/register",
@@ -30,6 +34,19 @@ function isAdminRoute(pathname: string): boolean {
 
 function isPublicApi(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+async function verifyAdmin(token: string, origin: string): Promise<boolean> {
+  const res = await fetch(`${process.env.NEXTAUTH_URL || origin}/api/auth/me`, {
+    headers: {
+      cookie: `galaxy_auth_token=${token}`,
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) return false;
+  const data = await res.json().catch(() => ({ user: null }));
+  const user = data?.user;
+  return !!user && user.role === "ADMIN";
 }
 
 export async function middleware(req: NextRequest) {
@@ -59,22 +76,16 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/admin/login", req.url));
     }
 
-    const adminRes = await fetch(`${process.env.NEXTAUTH_URL || req.nextUrl.origin}/api/auth/me`, {
-      headers: {
-        cookie: `galaxy_auth_token=${token}`,
-      },
-      cache: "no-store",
-    });
-
-    if (!adminRes.ok) {
-      return NextResponse.redirect(new URL("/admin/login", req.url));
-    }
-
-    const data = await adminRes.json().catch(() => ({ user: null }));
-    const user = data?.user;
-
-    if (!user || user.role !== "ADMIN") {
+    const isAdmin = await verifyAdmin(token, req.nextUrl.origin);
+    if (!isAdmin) {
       return NextResponse.redirect(new URL("/admin/login?error=unauthorized", req.url));
+    }
+  }
+
+  if (ADMIN_ONLY_PAGES.includes(pathname)) {
+    const isAdmin = token ? await verifyAdmin(token, req.nextUrl.origin) : false;
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL("/", req.url));
     }
   }
 

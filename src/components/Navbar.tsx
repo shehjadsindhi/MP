@@ -84,7 +84,9 @@ export default function Navbar() {
     { label: "Devices", href: "/devices" },
     { label: "Compare", href: "/compare" },
     { label: "Learn", href: "/learn" },
-    { label: "Offers", href: "/offers", badge: "Deals" },
+    ...(user?.role === "ADMIN"
+      ? [{ label: "Offers", href: "/offers", badge: "Deals" }]
+      : []),
   ];
 
   return (

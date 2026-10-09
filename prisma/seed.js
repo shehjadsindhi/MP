@@ -25,8 +25,8 @@ async function main() {
 
   const admin = await prisma.user.create({
     data: {
-      name: "Galaxy Admin",
-      email: process.env.ADMIN_EMAIL || "admin@galaxyai.hub",
+      name: process.env.ADMIN_NAME || "Shehjad Sindhi",
+      email: process.env.ADMIN_EMAIL || "shehjadsindhi95@gmail.com",
       password: adminPasswordHash,
       role: "ADMIN",
       phone: "+1 (555) 019-2831",
